@@ -1,0 +1,37 @@
+# Version catalog is a central place for you to declare and version dependencies
+# https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
+# https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
+
+[versions]
+
+# Project version
+komple = "0.0.1"
+
+# Jvm toolchain
+jvm-toolchain = "17"
+
+# Libs
+dokka = "2.1.0"
+gradle-pluginPublish = "2.0.0"
+kotlin = "2.3.20-RC"
+undercouch-download = "5.7.0"
+vanniktech-mavenPublish = "0.36.0"
+
+[plugins]
+
+conventions-common = { id = "conventions-common", version.ref = "komple" }
+conventions-gradle = { id = "conventions-gradle", version.ref = "komple" }
+conventions-tool = { id = "conventions-tool", version.ref = "komple" }
+
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+gradle-pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradle-pluginPublish" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-mavenPublish" }
+
+[libraries]
+
+dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+undercouch-dowload = { module = "de.undercouch.download:de.undercouch.download.gradle.plugin", version.ref = "undercouch-download" }
+vanniktech-mavenPublish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-mavenPublish" }

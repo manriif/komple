@@ -1,0 +1,18 @@
+plugins {
+    `kotlin-dsl`
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(libs.versions.jvm.toolchain.get())
+    }
+}
+
+dependencies {
+    implementation(libs.dokka.gradlePlugin)
+    implementation(libs.kotlin.gradlePlugin)
+    implementation(libs.vanniktech.mavenPublish)
+
+    // https://github.com/gradle/gradle/issues/15383#issuecomment-779893192
+    implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
+}
