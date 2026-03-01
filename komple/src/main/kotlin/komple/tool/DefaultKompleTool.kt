@@ -1,5 +1,6 @@
 package komple.tool
 
+import komple.extension.ExtensionRegistrationScope
 import org.gradle.api.tasks.Internal
 
 /**
@@ -8,7 +9,8 @@ import org.gradle.api.tasks.Internal
  */
 public abstract class DefaultKompleTool(@Internal protected val toolName: String) : KompleTool {
 
-    final override fun getName(): String {
-        return toolName
-    }
+    override val displayName: String?
+        get() = null
+
+    override fun ExtensionRegistrationScope.configureExtension() {}
 }

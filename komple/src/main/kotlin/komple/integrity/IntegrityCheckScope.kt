@@ -5,18 +5,22 @@ import komple.gradle.HasProject
 /**
  * Scope providing factories to [IntegrityCheck].
  *
- * Note that the [project] must not be captured and a [custom] checker must not violate Gradle
- * configuration-cache requirements.
+ * Note that the [project] must not be captured and a [forward] checker should be Gradle
+ * configuration-cache compliant if configuration-caching is enabled for the build.
  */
 public interface IntegrityCheckScope : HasProject {
 
     /**
-     * Validates the file integrity against [checksum] using [algorithm].
+     * Returns an [IntegrityChecker] validating the file integrity against [checksum] using
+     * [algorithm].
      */
-    public fun checksum(checksum: String, algorithm: Algorithm): IntegrityCheck
+    public fun checksum(
+        checksum: String,
+        algorithm: Algorithm
+    ): IntegrityChecker
 
     /**
-     * Validates the file integrity using custom [checker].
+     * Returns [checker].
      */
-    public fun custom(checker: IntegrityChecker): IntegrityCheck
+    public fun forward(checker: IntegrityChecker): IntegrityChecker
 }

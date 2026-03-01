@@ -1,6 +1,6 @@
 package komple.gradle
 
-import komple.gradle.extension.getExtensionByName
+import komple.extension.getExtensionByName
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 

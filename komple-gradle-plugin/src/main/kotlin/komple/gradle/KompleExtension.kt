@@ -1,13 +1,10 @@
 package komple.gradle
 
-import komple.gradle.extension.DefaultExtensiblePolymorphicDomainObjectContainer
-import komple.gradle.extension.ExtensionCreator
-import komple.gradle.extension.ExtensionCreatorImpl
+import komple.extension.ExtensionRegistrationScope
+import komple.gradle.extension.DefaultExtensionRegistrationScope
 import komple.tool.KompleTool
-import komple.tool.KompleToolConfigurator
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
-import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.polymorphicDomainObjectContainer
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -17,14 +14,17 @@ import kotlin.reflect.KClass
  */
 abstract class KompleExtension @Inject constructor(private val objects: ObjectFactory) :
     KompleBaseExtension,
-    ExtensionCreator by ExtensionCreatorImpl() {
+    ExtensionRegistrationScope by DefaultExtensionRegistrationScope() {
 
-    val tools: PolymorphicDomainObjectContainer<KompleTool>
-        field = objects.newInstance<DefaultExtensiblePolymorphicDomainObjectContainer<KompleTool>>(
-            objects.polymorphicDomainObjectContainer(KompleTool::class)
-        )
+        internal val
 
-    override fun <Tool : KompleTool> declareTool(
+    internal val tools = objects.namedDomainObjectSet(KompleTool::class.java)
+
+    override fun <Tool : KompleTool> registerTool(name: String, klass: KClass<Tool>) {
+        tools
+    }
+
+    /*override fun <Tool : KompleTool> declareTool(
         klass: KClass<Tool>,
         id: String,
         configurator: KompleToolConfigurator<Tool>
@@ -42,5 +42,5 @@ abstract class KompleExtension @Inject constructor(private val objects: ObjectFa
                 )
             }
         }
-    }
+    }*/
 }

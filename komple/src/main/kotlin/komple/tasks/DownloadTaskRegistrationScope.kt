@@ -1,18 +1,17 @@
 package komple.tasks
 
-import komple.integrity.IntegrityCheck
 import komple.integrity.IntegrityCheckScope
-import komple.platform.HasHost
+import komple.integrity.IntegrityChecker
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
-import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
 
 /**
  * Scope for download task registration.
  */
-public interface DownloadTaskRegistrationScope : HasHost {
+public interface DownloadTaskRegistrationScope : TaskRegistrationScope {
 
     /**
      * Registers a task of type [T] and [configure]s it.
@@ -25,15 +24,15 @@ public interface DownloadTaskRegistrationScope : HasHost {
     public fun <T : Task> register(
         klass: KClass<T>,
         configure: T.(outputDirectory: Directory) -> Unit
-    ): Provider<RegularFile>
+    ): TaskProvider<T>
 
     /**
      * Registers a default download task downloading a single file at [url].
      */
     public fun registerDefault(
         url: Provider<String>,
-        verify: IntegrityCheckScope.() -> IntegrityCheck
-    ): Provider<RegularFile>
+        verify: IntegrityCheckScope.() -> IntegrityChecker
+    ): TaskProvider<*>
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -50,7 +49,7 @@ public interface DownloadTaskRegistrationScope : HasHost {
  */
 public inline fun <reified T : Task> DownloadTaskRegistrationScope.register(
     noinline configure: T.(outputDirectory: Directory) -> Unit
-): Provider<RegularFile> = register(
+): TaskProvider<T> = register(
     klass = T::class,
     configure = configure
 )

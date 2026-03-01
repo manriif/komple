@@ -1,11 +1,11 @@
-package komple.gradle.extension
+package komple.extension
 
 import kotlin.reflect.KProperty1
 
 /**
  * Extends [Extension] DSL.
  */
-public interface ExtensionContext<Extension : Any> : ExtensionCreator {
+public interface ExtensionScope<Extension : Any> : ExtensionRegistrationScope {
 
     /**
      * Context extension.
@@ -19,6 +19,6 @@ public interface ExtensionContext<Extension : Any> : ExtensionCreator {
     @IgnorableReturnValue
     public fun <Child : Any> add(
         property: KProperty1<Extension, Child>,
-        configure: (ExtensionContext<Child>.() -> Unit)? = null
+        configure: (ExtensionScope<Child>.() -> Unit)? = null
     ): Child
 }

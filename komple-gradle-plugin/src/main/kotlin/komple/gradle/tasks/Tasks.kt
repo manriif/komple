@@ -1,4 +1,4 @@
-package komple.tasks
+package komple.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.Task

@@ -1,6 +1,9 @@
-package komple.integrity
+package komple.gradle.integrity
 
 import de.undercouch.gradle.tasks.download.VerifyAction
+import komple.integrity.Algorithm
+import komple.integrity.IntegrityCheckScope
+import komple.integrity.IntegrityChecker
 import org.gradle.api.Project
 
 /**
@@ -11,19 +14,19 @@ internal class DefaultIntegrityCheckScope(override val project: Project) : Integ
     override fun checksum(
         checksum: String,
         algorithm: Algorithm
-    ): IntegrityCheck {
+    ): IntegrityChecker {
         val action = VerifyAction(project.layout).apply {
             checksum(checksum)
-            algorithm(algorithm.messageDigestName)
+            algorithm(algorithm.toMessageDigestConstant())
         }
 
-        return IntegrityCheck { file ->
+        return IntegrityChecker { file ->
             action.src(file)
             action.execute()
         }
     }
 
-    override fun custom(checker: IntegrityChecker): IntegrityCheck {
-        return IntegrityCheck(checker)
+    override fun forward(checker: IntegrityChecker): IntegrityChecker {
+        return checker
     }
 }

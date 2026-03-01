@@ -1,9 +1,15 @@
 package komple.gradle.extension
 
+import komple.extension.ExtensionRegistrationScope
+import komple.extension.ExtensionScope
+import komple.extension.HasExtension
 import org.gradle.kotlin.dsl.create
 import kotlin.reflect.KClass
 
-internal class ExtensionCreatorImpl : ExtensionCreator {
+/**
+ * Default implementation of [ExtensionRegistrationScope].
+ */
+internal class DefaultExtensionRegistrationScope : ExtensionRegistrationScope {
 
     private val registeredExtensionNames = mutableSetOf<String>()
     private val extensionsInstances = mutableMapOf<KClass<*>, Any>()
@@ -12,7 +18,7 @@ internal class ExtensionCreatorImpl : ExtensionCreator {
         name: String,
         type: KClass<Extension>,
         vararg args: Any,
-        configure: (ExtensionContext<Extension>.() -> Unit)?
+        configure: (ExtensionScope<Extension>.() -> Unit)?
     ): Extension {
         check(registeredExtensionNames.add(name)) {
             "An extension with name $name is already registered under the Komple extension"

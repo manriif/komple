@@ -1,34 +1,31 @@
 package komple.platform
 
-import org.gradle.internal.os.OperatingSystem.current
-
 /**
- * Host information
+ * Host for which project is applied.
  */
-public data class Host(
-    val operatingSystem: OperatingSystem.Host,
-    val architecture: Architecture.Host
-) {
+public interface Host {
 
-    public companion object {
+    /**
+     * Operating system the host is running.
+     */
+    public val operatingSystem: OperatingSystem.Host
 
-        /**
-         * Current Host.
-         */
-        internal val Current = Host(
-            operatingSystem = current().run {
-                when {
-                    isMacOsX -> OperatingSystem.MacOS
-                    isWindows -> OperatingSystem.Windows
-                    isLinux -> OperatingSystem.Linux
-                    else -> error("Unsupported operation system: $this")
-                }
-            },
-            architecture = when (val architecture = System.getProperty("os.arch").lowercase()) {
-                "aarch64", "arm64" -> Architecture.Arm64
-                "x86_64", "amd64" -> Architecture.X64
-                else -> error("Unsupported CPU architecture: $architecture")
-            }
-        )
+    /**
+     * CPU architecture of the host.
+     */
+    public val architecture: Architecture.Host
+
+    /**
+     * Returns the [operatingSystem] when destructuring.
+     */
+    public operator fun component1(): OperatingSystem.Host {
+        return operatingSystem
+    }
+
+    /**
+     * Returns the [architecture] when destructuring.
+     */
+    public operator fun component2(): Architecture.Host {
+        return architecture
     }
 }
