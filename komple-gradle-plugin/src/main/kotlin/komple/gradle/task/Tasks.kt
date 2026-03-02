@@ -1,8 +1,10 @@
 package komple.gradle.task
 
+import komple.task.Inputs
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import java.util.Locale.getDefault
@@ -38,8 +40,9 @@ internal fun Provider<out Task>.outputFiles(): Provider<FileCollection> {
 }
 
 /**
- * Returns a provider resolving the input files of the task.
+ * Returns the outputs files as [Inputs] object.
  */
-internal fun Provider<out Task>.inputFiles(): Provider<FileCollection> {
-    return map { it.inputs.files }
-}
+internal fun Provider<out Task>.outputFiles(layout: ProjectLayout): Inputs = DefaultInputs(
+    files = outputFiles(),
+    layout = layout
+)

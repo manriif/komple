@@ -1,12 +1,11 @@
 package komple.gradle
 
-import komple.tool.KompleTool
+import komple.gradle.extension.KompleToolsConfigsExtension
+import komple.gradle.extension.KompleToolsExtension
+import komple.gradle.extension.extensions
 import komple.tool.KompleToolConfigurator
-import org.gradle.api.DomainObjectSet
-import org.gradle.api.NamedDomainObjectSet
 import org.gradle.api.model.ObjectFactory
-import org.gradle.kotlin.dsl.domainObjectSet
-import org.gradle.kotlin.dsl.namedDomainObjectSet
+import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -18,11 +17,20 @@ abstract class KompleExtension @Inject constructor(private val objects: ObjectFa
     KompleBaseExtension {
 
     /**
-     * Registered tools.
+     * Configured tools.
      */
-    val tools: NamedDomainObjectSet<KompleTool> =
-        objects.namedDomainObjectSet(KompleTool::class)
+    @get:Inject
+    abstract val tools: KompleToolsExtension
 
+    /**
+     * Registered tools configuration DSLs.
+     */
+    @get:Inject
+    abstract val toolsConfigs: KompleToolsConfigsExtension
+
+    /**
+     * Registered tools' configurators.
+     */
     internal val toolConfigurators =
         objects.polymorphicDomainObjectContainer(KompleToolConfigurator::class.java)
 
@@ -36,4 +44,25 @@ abstract class KompleExtension @Inject constructor(private val objects: ObjectFa
 
         toolConfigurators.register(name, klass.java)
     }
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Extension
+///////////////////////////////////////////////////////////////////////////
+
+/**
+ * Registers the nested extensions for `this` [KompleExtension].
+ */
+internal fun KompleExtension.registerNestedExtensions() {
+    /*extensions.run {
+        add<KompleToolsExtension>(
+            name = KompleExtension::tools.name,
+            extension = tools
+        )
+
+        add<KompleToolsConfigsExtension>(
+            name = KompleExtension::toolsConfigs.name,
+            extension = toolsConfigs
+        )
+    }*/
 }

@@ -1,6 +1,6 @@
 package komple.gradle.task
 
-import komple.gradle.Komple
+import komple.gradle.tool.KompleToolConfigContext
 import komple.task.Inputs
 import komple.task.IntegrityTaskRegistrationScope
 import org.gradle.api.Task
@@ -11,27 +11,24 @@ import kotlin.reflect.KClass
  * Default implementation of [IntegrityTaskRegistrationScope].
  */
 internal class DefaultIntegrityTaskRegistrationScope(
-    komple: Komple,
-    toolName: String,
+    context: KompleToolConfigContext,
     private val downloadInputs: Inputs
 ) : IntegrityTaskRegistrationScope,
-    DefaultTaskRegistrationScope(komple, toolName) {
+    DefaultTaskRegistrationScope(context) {
 
     override fun <T : Task> register(
         klass: KClass<T>,
         configure: T.(inputs: Inputs) -> Unit
-    ): TaskProvider<T> {
-        return komple.project.registerToolTask(toolTaskName("Integrity"), klass) {
-            description = "Check $toolName integrity"
+    ): TaskProvider<T> = project.registerToolTask(toolTaskName("Integrity"), klass) {
+        description = "Check $toolName integrity"
 
-            inputs.files(downloadInputs.files)
-            configure(this, downloadInputs)
+        inputs.files(downloadInputs.files)
+        configure(this, downloadInputs)
 
-            check(outputs.files.isEmpty) {
-                "Integrity task should not register outputs"
-            }
-
-            outputs.files(downloadInputs.files)
+        check(outputs.files.isEmpty) {
+            "Integrity task should not declare output file(s)"
         }
+
+        outputs.files(downloadInputs.files)
     }
 }

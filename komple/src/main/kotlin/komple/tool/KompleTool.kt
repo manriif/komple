@@ -2,6 +2,7 @@ package komple.tool
 
 import org.gradle.api.Named
 import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 /**
@@ -17,5 +18,5 @@ public interface KompleTool : Named {
     /**
      * Directory where the tool is installed.
      */
-    public val installDirectory: Directory
+    public val installDirectory: Provider<Directory>
 }

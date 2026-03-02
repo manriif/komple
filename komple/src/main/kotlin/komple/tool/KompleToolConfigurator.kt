@@ -4,6 +4,7 @@ import komple.extension.ExtensionConfigurationScope
 import komple.platform.Host
 import komple.task.DownloadTaskRegistrationScope
 import komple.task.ExtractTaskRegistrationScope
+import komple.task.InstallTaskRegistrationScope
 import komple.task.IntegrityTaskRegistrationScope
 import org.gradle.api.Named
 import org.gradle.api.tasks.TaskProvider
@@ -48,4 +49,15 @@ public interface KompleToolConfigurator : Named {
      * The task output is then used as the input for the task registered by [registerInstallTask].
      */
     public fun ExtractTaskRegistrationScope.registerExtractTask(): TaskProvider<*>
+
+    /**
+     * Registers the task responsible for installing the extracted tool file(s) and returns a
+     * [TaskProvider] to the registered task.
+     *
+     * The previously installed files are deleted first before the task action is executed.
+     *
+     * Note that the task must output a single directory where all the installed files are written
+     * to.
+     */
+    public fun InstallTaskRegistrationScope.registerInstallTask(): TaskProvider<*>
 }

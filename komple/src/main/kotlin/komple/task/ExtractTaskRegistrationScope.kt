@@ -127,8 +127,12 @@ public fun ExtractTaskRegistrationScope.untarGzip(enclosedContent: Boolean): Tas
  * Registers a task extracts files from a DMG with the below steps:
  *
  * 1. Mount the DMG
- * 2. Invokes [extractContent] with teh path to the mounted image.
+ * 2. Invokes [extractContent] with the path to the mounted image.
  * 3. Unmount the DMG
+ *
+ * The first argument to [extractContent] is a [File] pointing to the mount-point.
+ * The second argument to [extractContent] is the directory where the extracted files must be
+ * written.
  *
  * It is assumed that a single file has been downloaded and that downloaded file is a valid `.dmg`.
  */
@@ -150,10 +154,15 @@ public fun ExtractTaskRegistrationScope.dmg(
                 "attach",
                 dmgFile.get().asFile.absoluteFile,
                 "-nobrowse",
-                "-readonly",
                 "-plist"
             ) {
-                // TODO
+                pipe(
+                    "plutil",
+                    "-extract",
+                    "system-entities.0.mount-point",
+                    "raw",
+                    "-"
+                )
             }
         )
 

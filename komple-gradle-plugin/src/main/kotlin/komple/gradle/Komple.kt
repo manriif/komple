@@ -1,7 +1,7 @@
 package komple.gradle
 
 import komple.extension.ExtensionScope
-import komple.gradle.extension.ExtensionContextImpl
+import komple.gradle.extension.DefaultExtensionScope
 import komple.gradle.extension.extensions
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
@@ -25,9 +25,9 @@ internal class Komple(
             "An extension with name $name is already registered under the Komple extension"
         }
 
-        return extension.extensions.create(name, type, *args).also { extension ->
+        return extension.toolsConfigs.extensions.create(name, type, *args).also { extension ->
             registeredExtensions[type] = extension
-            configure?.invoke(ExtensionContextImpl(extension, project))
+            configure?.invoke(DefaultExtensionScope(extension, project))
         }
     }
 

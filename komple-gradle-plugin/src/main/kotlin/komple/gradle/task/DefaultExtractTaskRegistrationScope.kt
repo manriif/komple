@@ -1,10 +1,10 @@
 package komple.gradle.task
 
-import komple.gradle.Komple
 import komple.gradle.kompleToolsExtractsDirectory
-import komple.task.Inputs
+import komple.gradle.tool.KompleToolConfigContext
 import komple.task.ExtractContext
 import komple.task.ExtractTaskRegistrationScope
+import komple.task.Inputs
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskProvider
@@ -15,20 +15,19 @@ import kotlin.reflect.KClass
  * Default implementation of [ExtractTaskRegistrationScope].
  */
 internal class DefaultExtractTaskRegistrationScope(
-    komple: Komple,
-    toolName: String,
+    context: KompleToolConfigContext,
     private val integrityInputs: Inputs
 ) : ExtractTaskRegistrationScope,
-    DefaultTaskRegistrationScope(komple, toolName) {
+    DefaultTaskRegistrationScope(context) {
 
     override fun <T : Task> register(
         klass: KClass<T>,
         configure: T.(context: ExtractContext) -> Unit
     ): TaskProvider<T> {
-        val extractDirectory = komple.project.gradle.kompleToolsExtractsDirectory.dir(toolName)
+        val extractDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolName)
         val extractContext = DefaultExtractContext(extractDirectory, integrityInputs)
 
-        return komple.project.registerToolTask(toolTaskName("Extract"), klass) {
+        return project.registerToolTask(toolTaskName("Extract"), klass) {
             description = "Extract $toolName"
 
             inputs.files(integrityInputs.files)
