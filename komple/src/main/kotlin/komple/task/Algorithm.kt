@@ -1,4 +1,4 @@
-package komple.integrity
+package komple.task
 
 /**
  * Available message digest algorithms.

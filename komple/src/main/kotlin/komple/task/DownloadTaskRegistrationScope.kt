@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 public interface DownloadTaskRegistrationScope : TaskRegistrationScope {
 
     /**
-     * Registers a task of type [T], [configure]s it and returns it.
+     * Registers a task of type [T], [configure]s it and returns that registered task.
      * The task must output the downloaded file(s).
      */
     public fun <T : Task> register(
@@ -26,7 +26,7 @@ public interface DownloadTaskRegistrationScope : TaskRegistrationScope {
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Registers a task of type [T], [configure]s it and returns it.
+ * Registers a task of type [T], [configure]s it and returns that registered task.
  * The task must output the downloaded file(s).
  */
 public inline fun <reified T : Task> DownloadTaskRegistrationScope.register(

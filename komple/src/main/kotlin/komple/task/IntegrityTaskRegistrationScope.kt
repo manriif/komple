@@ -1,8 +1,6 @@
 package komple.task
 
 import de.undercouch.gradle.tasks.download.Verify
-import komple.integrity.Algorithm
-import komple.integrity.toMessageDigestConstant
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass

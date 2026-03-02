@@ -1,5 +1,7 @@
 package komple.task
 
+import komple.exec.bash
+import komple.exec.execOutput
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -10,6 +12,8 @@ import org.gradle.api.file.RelativePath
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
+import java.io.File
 import kotlin.reflect.KClass
 
 /**
@@ -18,7 +22,7 @@ import kotlin.reflect.KClass
 public interface ExtractTaskRegistrationScope : TaskRegistrationScope {
 
     /**
-     * Registers a task of type [T], [configure]s it and returns it.
+     * Registers a task of type [T], [configure]s it and returns that registered task.
      * The task must output the extracted file(s).
      */
     public fun <T : Task> register(
@@ -44,14 +48,14 @@ public inline fun <reified T : Task> ExtractTaskRegistrationScope.register(
 
 /**
  * Registers a task that just forwards downloaded files, in a way that they'll be available for
- * installation, and returns it.
+ * installation, and returns that registered task.
  */
-public fun ExtractTaskRegistrationScope.skip(): TaskProvider<*> = register<DefaultTask> { context ->
+public fun ExtractTaskRegistrationScope.noOp(): TaskProvider<*> = register<DefaultTask> { context ->
     outputs.files(context.inputs.files)
 }
 
 /**
- * Registers a task that copies file from [createTree] and returns it.
+ * Registers a task that copies file from [createTree] and returns that registered task.
  *
  * If [enclosedContent] is `true` then the contents inside the root directory is moved to the root
  * and the root directory is excluded.
@@ -60,14 +64,15 @@ private inline fun ExtractTaskRegistrationScope.extractFileTree(
     enclosedContent: Boolean,
     crossinline createTree: Project.(Provider<RegularFile>) -> FileTree
 ) = register<DefaultTask> { context ->
-    val sources = project.createTree(context.inputs.file)
+    val fileTree = project.createTree(context.inputs.file)
     val fileOperations = project.serviceOf<FileSystemOperations>()
     val destination = context.outputDirectory
+    outputs.dir(destination)
 
     if (enclosedContent) {
         doLast {
             fileOperations.copy {
-                from(sources) {
+                from(fileTree) {
                     eachFile {
                         val segments = relativePath.segments
 
@@ -88,7 +93,7 @@ private inline fun ExtractTaskRegistrationScope.extractFileTree(
     } else {
         doLast {
             fileOperations.copy {
-                from(sources)
+                from(fileTree)
                 into(destination)
             }
         }
@@ -96,24 +101,71 @@ private inline fun ExtractTaskRegistrationScope.extractFileTree(
 }
 
 /**
- * Registers a task that unzip downloaded file and returns it.
+ * Registers a task that unzip downloaded file.
  *
  * If [enclosedContent] is `true` then the contents inside the root directory is moved to the root
  * and the root directory is excluded.
  *
- * It is assumed that a single file has been downloaded and that downloaded file is a valid `zip`.
+ * It is assumed that a single file has been downloaded and that downloaded file is a valid `.zip`.
  */
 public fun ExtractTaskRegistrationScope.unzip(enclosedContent: Boolean): TaskProvider<*> =
     extractFileTree(enclosedContent) { zipTree(it) }
 
 /**
- * Registers a task that untar downloaded file and returns it.
+ * Registers a task that untar downloaded file.
  *
  * If [enclosedContent] is `true` then the contents inside the root directory is moved to the root
  * and the root directory is excluded.
  *
  * It is assumed that a single file has been downloaded and that downloaded file is a valid
- * `tar.gz`.
+ * `.tar.gz`.
  */
 public fun ExtractTaskRegistrationScope.untarGzip(enclosedContent: Boolean): TaskProvider<*> =
     extractFileTree(enclosedContent) { tarTree(resources.gzip(it)) }
+
+/**
+ * Registers a task extracts files from a DMG with the below steps:
+ *
+ * 1. Mount the DMG
+ * 2. Invokes [extractContent] with teh path to the mounted image.
+ * 3. Unmount the DMG
+ *
+ * It is assumed that a single file has been downloaded and that downloaded file is a valid `.dmg`.
+ */
+public fun ExtractTaskRegistrationScope.dmg(
+    extractContent: (
+        mountPoint: File,
+        extractDirectory: File
+    ) -> Unit
+): TaskProvider<*> = register<DefaultTask> { context ->
+    val execOperations = project.serviceOf<ExecOperations>()
+    val extractDirectory = context.outputDirectory
+    val dmgFile = context.inputs.file
+    outputs.dir(extractDirectory)
+
+    doLast {
+        val mountPoint = execOperations.execOutput(
+            bash(
+                "hdiutil",
+                "attach",
+                dmgFile.get().asFile.absoluteFile,
+                "-nobrowse",
+                "-readonly",
+                "-plist"
+            ) {
+                // TODO
+            }
+        )
+
+        try {
+            extractContent(
+                File(mountPoint),
+                extractDirectory.asFile
+            )
+        } finally {
+            execOperations.exec {
+                commandLine("hdiutil", "detach", mountPoint)
+            }
+        }
+    }
+}
