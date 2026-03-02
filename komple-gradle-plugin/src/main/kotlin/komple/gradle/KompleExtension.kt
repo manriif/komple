@@ -1,46 +1,39 @@
 package komple.gradle
 
-import komple.extension.ExtensionRegistrationScope
-import komple.gradle.extension.DefaultExtensionRegistrationScope
 import komple.tool.KompleTool
-import org.gradle.api.PolymorphicDomainObjectContainer
+import komple.tool.KompleToolConfigurator
+import org.gradle.api.DomainObjectSet
+import org.gradle.api.NamedDomainObjectSet
 import org.gradle.api.model.ObjectFactory
-import org.gradle.kotlin.dsl.polymorphicDomainObjectContainer
+import org.gradle.kotlin.dsl.domainObjectSet
+import org.gradle.kotlin.dsl.namedDomainObjectSet
+import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
 /**
- * Extension for [KomplePlugin].
+ * [KomplePlugin]'s extension.
  */
 abstract class KompleExtension @Inject constructor(private val objects: ObjectFactory) :
-    KompleBaseExtension,
-    ExtensionRegistrationScope by DefaultExtensionRegistrationScope() {
+    KompleBaseExtension {
 
-        internal val
+    /**
+     * Registered tools.
+     */
+    val tools: NamedDomainObjectSet<KompleTool> =
+        objects.namedDomainObjectSet(KompleTool::class)
 
-    internal val tools = objects.namedDomainObjectSet(KompleTool::class.java)
+    internal val toolConfigurators =
+        objects.polymorphicDomainObjectContainer(KompleToolConfigurator::class.java)
 
-    override fun <Tool : KompleTool> registerTool(name: String, klass: KClass<Tool>) {
-        tools
-    }
-
-    /*override fun <Tool : KompleTool> declareTool(
-        klass: KClass<Tool>,
-        id: String,
-        configurator: KompleToolConfigurator<Tool>
+    override fun <Configurator : KompleToolConfigurator> registerTool(
+        name: String,
+        klass: KClass<Configurator>
     ) {
-        tools.registerDefaultName(klass.java, id)
-
-        tools.registerFactory(klass.java) { name ->
-            objects.newInstance(javaClass, name).apply {
-                configurator?.configure(this, project)
-
-                project.configureAndRegisterPluginConfig(
-                    extension = extension,
-                    plugin = this,
-                    pluginId = id,
-                )
-            }
+        toolConfigurators.registerFactory(klass.java) { name ->
+            objects.newInstance(klass, name)
         }
-    }*/
+
+        toolConfigurators.register(name, klass.java)
+    }
 }

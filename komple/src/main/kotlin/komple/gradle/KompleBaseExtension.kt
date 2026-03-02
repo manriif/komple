@@ -1,7 +1,7 @@
 package komple.gradle
 
 import komple.extension.getExtensionByName
-import komple.tool.KompleTool
+import komple.tool.KompleToolConfigurator
 import org.gradle.api.Project
 import kotlin.reflect.KClass
 
@@ -11,11 +11,11 @@ import kotlin.reflect.KClass
 public interface KompleBaseExtension {
 
     /**
-     * Registers a tool of type [Tool], identified by [name].
+     * Registers a tool, identified by [name], that is configured by an instance of [klass].
      */
-    public fun <Tool : KompleTool> registerTool(
+    public fun <Configurator : KompleToolConfigurator> registerTool(
         name: String,
-        klass: KClass<Tool>
+        klass: KClass<Configurator>
     )
 }
 
@@ -30,8 +30,10 @@ public val Project.kompleExtension: KompleBaseExtension
     get() = getExtensionByName(KOMPLE_EXTENSION_NAME)
 
 /**
- * Registers a tool of type [Tool], identified by [name].
+ * Registers a tool, identified by [name], that is configured by an instance of [Configurator].
  */
-public inline fun <reified Tool : KompleTool> KompleBaseExtension.registerTool(name: String) {
-    registerTool(name, Tool::class)
+public inline fun <reified Configurator : KompleToolConfigurator> KompleBaseExtension.registerTool(
+    name: String
+) {
+    registerTool(name, Configurator::class)
 }

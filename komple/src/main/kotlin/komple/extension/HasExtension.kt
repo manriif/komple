@@ -9,9 +9,9 @@ public interface HasExtension {
 
     /**
      * Retrieve the extension of type [Extension] previously created using
-     * [ExtensionRegistrationScope.createExtension].
+     * [ExtensionConfigurationScope.createExtension].
      */
-    public fun <Extension : Any> retrieveExtension(type: KClass<Extension>): Extension
+    public fun <Extension : Any> extension(type: KClass<Extension>): Extension
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -20,8 +20,8 @@ public interface HasExtension {
 
 /**
  * Retrieve the extension of type [Extension] previously created using
- * [ExtensionRegistrationScope.createExtension].
+ * [ExtensionConfigurationScope.createExtension].
  */
-public inline fun <reified Extension : Any> HasExtension.retrieveExtension(): Extension {
-    return retrieveExtension(Extension::class)
+public inline fun <reified Extension : Any> HasExtension.extension(): Extension {
+    return extension(Extension::class)
 }

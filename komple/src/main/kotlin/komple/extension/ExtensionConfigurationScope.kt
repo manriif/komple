@@ -1,11 +1,12 @@
 package komple.extension
 
+import komple.gradle.HasProject
 import kotlin.reflect.KClass
 
 /**
  * Extends Gradle extension API for Komple.
  */
-public interface ExtensionRegistrationScope {
+public interface ExtensionConfigurationScope : HasProject {
 
     /**
      * Creates an extension of type [Extension] named after [name].
@@ -29,17 +30,15 @@ public interface ExtensionRegistrationScope {
  * Constructor [args] are passed as arguments to [Extension] constructor.
  * The returned extension itself can be configured inside [configure].
  */
-public inline fun <reified Extension : Any> ExtensionRegistrationScope.createExtension(
+public inline fun <reified Extension : Any> ExtensionConfigurationScope.createExtension(
     name: String,
     vararg args: Any,
     noinline configure: (ExtensionScope<Extension>.() -> Unit)? = null
-): Extension {
-    return createExtension(
-        name = name,
-        type = Extension::class,
-        args = args,
-        configure = configure
-    )
-}
+): Extension = createExtension(
+    name = name,
+    type = Extension::class,
+    args = args,
+    configure = configure
+)
 
 

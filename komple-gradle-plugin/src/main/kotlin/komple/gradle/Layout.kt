@@ -38,6 +38,12 @@ internal val Gradle.kompleToolsDownloadsDirectory: Directory
     get() = kompleCacheDirectory("downloads")
 
 /**
+ * Returns the directory where the tools are extracted.
+ */
+internal val Gradle.kompleToolsExtractsDirectory: Directory
+    get() = kompleCacheDirectory("extracts")
+
+/**
  * Returns the directory where the tools are installed.
  */
 internal val Gradle.kompleToolsInstallsDirectory: Directory

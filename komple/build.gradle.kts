@@ -5,5 +5,5 @@ plugins {
 
 dependencies {
     api(libs.kotlin.gradlePlugin)
-    api(libs.undercouch.dowload)
+    api(libs.undercouch.download)
 }

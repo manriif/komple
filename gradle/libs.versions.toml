@@ -33,5 +33,5 @@ vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "
 dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-undercouch-dowload = { module = "de.undercouch.download:de.undercouch.download.gradle.plugin", version.ref = "undercouch-download" }
+undercouch-download = { module = "de.undercouch.download:de.undercouch.download.gradle.plugin", version.ref = "undercouch-download" }
 vanniktech-mavenPublish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-mavenPublish" }

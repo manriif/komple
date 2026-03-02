@@ -5,7 +5,7 @@ import kotlin.reflect.KProperty1
 /**
  * Extends [Extension] DSL.
  */
-public interface ExtensionScope<Extension : Any> : ExtensionRegistrationScope {
+public interface ExtensionScope<Extension : Any> : ExtensionConfigurationScope {
 
     /**
      * Context extension.

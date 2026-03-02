@@ -1,9 +1,11 @@
 package komple.platform
 
+import java.io.Serializable
+
 /**
  * Host for which project is applied.
  */
-public interface Host {
+public interface Host : Serializable {
 
     /**
      * Operating system the host is running.

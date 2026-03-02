@@ -1,4 +1,4 @@
-package komple.gradle.scope
+package komple.gradle.util
 
 import java.lang.AutoCloseable
 
