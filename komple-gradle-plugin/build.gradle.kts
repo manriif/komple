@@ -10,6 +10,8 @@ dependencies {
 }
 
 kotlin {
+    explicitApi()
+
     compilerOptions {
         freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
@@ -28,10 +30,18 @@ gradlePlugin {
     vcsUrl = projectGitUrl
 
     plugins {
-        create("komple-plugin") {
+        create("komple") {
             id = projectGroup
             implementationClass = "komple.gradle.KomplePlugin"
             displayName = "Komple"
+            description = localDescription
+            tags = localTags.split(',')
+        }
+
+        create("komple-root") {
+            id = "$projectGroup-root"
+            implementationClass = "komple.gradle.KompleRootPlugin"
+            displayName = "Komple Root"
             description = localDescription
             tags = localTags.split(',')
         }
@@ -40,7 +50,7 @@ gradlePlugin {
             id = "$projectGroup-settings"
             displayName = "Komple Settings"
             description = localDescription
-            implementationClass = "komple.gradle.KompleSettings"
+            implementationClass = "komple.gradle.KompleSettingsPlugin"
             tags = localTags.split(',')
         }
     }

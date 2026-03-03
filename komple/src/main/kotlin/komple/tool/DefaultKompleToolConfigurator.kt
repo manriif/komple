@@ -1,6 +1,7 @@
 package komple.tool
 
 import komple.extension.ExtensionConfigurationScope
+import komple.tool.compile.ExecEnvironmentBuilderScope
 import org.gradle.api.tasks.Internal
 
 /**
@@ -14,5 +15,7 @@ public abstract class DefaultKompleToolConfigurator(@Internal protected val tool
         return toolName
     }
 
-    override fun ExtensionConfigurationScope.configureExtension() {}
+    override fun ExtensionConfigurationScope.configureExtension(): Unit = Unit
+
+    override fun ExecEnvironmentBuilderScope.configureEnvironment(): Unit = Unit
 }

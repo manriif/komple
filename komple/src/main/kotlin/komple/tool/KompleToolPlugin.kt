@@ -1,19 +1,19 @@
 package komple.tool
 
-import komple.gradle.KOMPLE_PLUGIN_ID
-import komple.gradle.KompleBaseExtension
-import komple.gradle.kompleExtension
+import komple.KOMPLE_ROOT_PLUGIN_ID
+import komple.KompleRootExtensionBase
+import komple.kompleRootExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 public abstract class KompleToolPlugin : Plugin<Project> {
 
     /**
-     * Applies the plugin only if Komple is applied.
+     * Applies the plugin only if Komple was applied.
      */
-    final override fun apply(target: Project) {
-        target.pluginManager.withPlugin(KOMPLE_PLUGIN_ID) {
-            configure(target, target.kompleExtension)
+    final override fun apply(project: Project) {
+        project.pluginManager.withPlugin(KOMPLE_ROOT_PLUGIN_ID) {
+            configure(project, project.kompleRootExtension)
         }
     }
 
@@ -25,6 +25,6 @@ public abstract class KompleToolPlugin : Plugin<Project> {
      */
     protected abstract fun configure(
         project: Project,
-        komple: KompleBaseExtension
+        komple: KompleRootExtensionBase
     )
 }

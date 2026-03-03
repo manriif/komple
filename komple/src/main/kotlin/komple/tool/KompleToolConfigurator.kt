@@ -2,10 +2,11 @@ package komple.tool
 
 import komple.extension.ExtensionConfigurationScope
 import komple.platform.Host
-import komple.task.DownloadTaskRegistrationScope
-import komple.task.ExtractTaskRegistrationScope
-import komple.task.InstallTaskRegistrationScope
-import komple.task.IntegrityTaskRegistrationScope
+import komple.tool.compile.ExecEnvironmentBuilderScope
+import komple.tool.install.DownloadTaskRegistrationScope
+import komple.tool.install.ExtractTaskRegistrationScope
+import komple.tool.install.InstallTaskRegistrationScope
+import komple.tool.install.IntegrityTaskRegistrationScope
 import org.gradle.api.Named
 import org.gradle.api.tasks.TaskProvider
 
@@ -15,15 +16,19 @@ import org.gradle.api.tasks.TaskProvider
 public interface KompleToolConfigurator : Named {
 
     /**
-     * Returns `true` if the current [host] is supported, otherwise returns `false`.
-     */
-    public fun supportHost(host: Host): Boolean
-
-    /**
      * Extends the base Komple extension by creating tool specific DSL via Gradle extension
      * mechanism.
      */
     public fun ExtensionConfigurationScope.configureExtension()
+
+    /**
+     * Returns `true` if the current [host] is supported, otherwise returns `false`.
+     */
+    public fun supportHost(host: Host): Boolean
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Installation
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Registers the task responsible for downloading the tool and returns a [TaskProvider] to the
@@ -60,4 +65,13 @@ public interface KompleToolConfigurator : Named {
      * to.
      */
     public fun InstallTaskRegistrationScope.registerInstallTask(): TaskProvider<*>
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Compilation
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Contributes to the execution environment.
+     */
+    public fun ExecEnvironmentBuilderScope.configureEnvironment()
 }

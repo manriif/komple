@@ -1,12 +1,17 @@
 package komple.extension
 
-import komple.gradle.HasProject
+import org.gradle.api.Project
 import kotlin.reflect.KClass
 
 /**
  * Extends Gradle extension API for Komple.
  */
-public interface ExtensionConfigurationScope : HasProject {
+public interface ExtensionConfigurationScope {
+
+    /**
+     * The Gradle [Project] associated with the Komple plugin.
+     */
+    public val project: Project
 
     /**
      * Creates an extension of type [Extension] named after [name].
