@@ -24,5 +24,5 @@ public interface ExecEnvironmentBuilder {
     /**
      * Registers a command line that will be executed first.
      */
-    public fun commandLine(commandProvider: Provider<CommandLine>)
+    public fun commandLine(commandProvider: Provider<Command>)
 }

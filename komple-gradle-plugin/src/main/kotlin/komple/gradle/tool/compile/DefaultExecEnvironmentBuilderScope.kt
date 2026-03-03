@@ -1,6 +1,6 @@
 package komple.gradle.tool.compile
 
-import komple.exec.CommandLine
+import komple.exec.Command
 import komple.gradle.Komple
 import komple.gradle.exec.ExecEnvironment
 import komple.gradle.platform.CurrentHost
@@ -39,6 +39,6 @@ internal class DefaultExecEnvironmentBuilderScope(
         valueProvider: Provider<String>
     ) = environment.notClosed { variables.put(name, valueProvider) }
 
-    override fun commandLine(commandProvider: Provider<CommandLine>) =
-        environment.notClosed { commandLines.add(commandProvider) }
+    override fun commandLine(commandProvider: Provider<Command>) =
+        environment.notClosed { commands.add(commandProvider) } // TODO filter
 }

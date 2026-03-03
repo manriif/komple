@@ -1,10 +1,9 @@
 package komple.gradle.exec
 
-import komple.exec.CommandLine
+import komple.exec.Command
 import komple.exec.ExecEnvironmentBuilder
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
-import org.gradle.api.provider.Provider
 
 /**
  * Default implementation of [ExecEnvironmentBuilder]
@@ -24,5 +23,5 @@ internal abstract class ExecEnvironment {
     /**
      * Commands that should be executed before main command.
      */
-    abstract val commandLines: ListProperty<CommandLine>
+    abstract val commands: ListProperty<Command>
 }

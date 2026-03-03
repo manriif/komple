@@ -1,17 +1,19 @@
 package komple.exec
 
+import java.io.Serializable
+
 /**
- * Represents a command ready to execute.
+ * Represents a command that can be mutated using [toBuilder].
  */
-public interface Command {
+public interface Command : Serializable {
 
     /**
-     * Returns all the command arguments.
+     * Returns `this` command interpreted by [interpreter].
      */
-    public val args: Array<out String>
+    public fun interpret(interpreter: CommandInterpreter): CommandLine
 
     /**
-     * Returns the command as a string.
+     * Returns a [CommandBuilder] initialized with `this` command arguments.
      */
-    public override fun toString(): String
+    public fun toBuilder(): CommandBuilder
 }

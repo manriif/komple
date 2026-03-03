@@ -11,9 +11,8 @@ import java.io.ByteArrayOutputStream
 /**
  * Sets the full command line, including the executable to be executed plus its arguments.
  */
-public fun ExecSpec.command(command: Command) {
-    commandLine(*command.args)
-}
+@IgnorableReturnValue
+public fun ExecSpec.commandLine(line: CommandLine): ExecSpec = commandLine(*line.args)
 
 ///////////////////////////////////////////////////////////////////////////
 // Exec with output
@@ -52,10 +51,10 @@ public fun ExecOperations.execOutput(args: Iterable<Any>): String {
 }
 
 /**
- * Executes [command] and returns the output.
+ * Executes [line] and returns the output.
  */
-public fun ExecOperations.execOutput(command: Command): String {
+public fun ExecOperations.execOutput(line: CommandLine): String {
     return execOutput {
-        command(command)
+        commandLine(line = line)
     }
 }

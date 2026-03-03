@@ -4,16 +4,17 @@ import org.gradle.process.ExecResult
 import java.io.File
 
 /**
- * Service for command execution in the context of compilation.
+ * Service for command execution in an environment where registered tools are available.
  */
 public interface ExecService {
 
     /**
-     * Executes the [command] in a configured execution environment where all the registered tools
-     * are available in the PATH.
+     * Executes the [command], using [interpreter], in an environment configured by registered
+     * tools.
      */
     public fun exec(
         command: Command,
+        interpreter: CommandInterpreter = Bash,
         workingDirectory: File? = null
     ): ExecResult
 }

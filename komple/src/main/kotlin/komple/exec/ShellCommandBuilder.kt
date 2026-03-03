@@ -1,65 +1,117 @@
 package komple.exec
 
 /**
- * Implementation of [CommandBuilder] for Unix shells.
+ * Implementation of [CommandBuilder] .
  */
-internal class ShellCommandBuilder(
-    private val shellArgs: Array<String>,
-    command: Array<out Any>
-) : CommandBuilder {
+internal class ShellCommandBuilder(command: Array<out Any>) : CommandBuilder {
 
     private val command = command.toMutableList()
 
-    private fun addOperator(operator: String, args: Array<out Any>): CommandBuilder = apply {
+    ///////////////////////////////////////////////////////////////////////////
+    // Alterations
+    ///////////////////////////////////////////////////////////////////////////
+
+    private inline fun addOperator(
+        operator: String,
+        insert: () -> Unit
+    ) = apply {
         command.add(operator)
+        insert()
+    }
+
+    private fun addOperator(
+        operator: String,
+        args: Array<out Any>
+    ): CommandBuilder = addOperator(operator) {
         command.addAll(args)
     }
 
-    private fun addOperator(operator: String, args: Iterable<Any>): CommandBuilder = apply {
-        command.add(operator)
+    private fun addOperator(
+        operator: String,
+        args: Iterable<Any>
+    ): CommandBuilder = addOperator(operator) {
         command.addAll(args)
     }
 
-    override fun pipe(vararg args: Any): CommandBuilder = addOperator("|", args)
+    private fun addOperator(
+        operator: String,
+        command: Command
+    ): CommandBuilder = addOperator(
+        operator = operator,
+        args = ForwardInterpreter.invoke(command).args
+    )
 
-    override fun pipe(args: Iterable<Any>): CommandBuilder = addOperator("|", args)
+    ///////////////////////////////////////////////////////////////////////////
+    // Operations
+    ///////////////////////////////////////////////////////////////////////////
 
-    override fun pipeAll(vararg args: Any): CommandBuilder = addOperator("|&", args)
+    override fun pipe(vararg args: Any): CommandBuilder = addOperator(PIPE, args)
 
-    override fun pipeAll(args: Iterable<Any>): CommandBuilder = addOperator("|&", args)
+    override fun pipe(args: Iterable<Any>): CommandBuilder = addOperator(PIPE, args)
 
-    override fun then(vararg args: Any): CommandBuilder = addOperator("&&", args)
+    override fun pipe(command: Command): CommandBuilder = addOperator(PIPE, command)
 
-    override fun then(args: Iterable<Any>): CommandBuilder = addOperator("&&", args)
+    override fun pipeAll(vararg args: Any): CommandBuilder = addOperator(PIPE_ALL, args)
 
-    override fun otherwise(vararg args: Any): CommandBuilder = addOperator("||", args)
+    override fun pipeAll(args: Iterable<Any>): CommandBuilder = addOperator(PIPE_ALL, args)
 
-    override fun otherwise(args: Iterable<Any>): CommandBuilder = addOperator("||", args)
+    override fun pipeAll(command: Command): CommandBuilder = addOperator(PIPE_ALL, command)
 
-    fun build(): Command {
-        return CommandImpl(shellArgs + command.joinToString(" "))
-    }
+    override fun then(vararg args: Any): CommandBuilder = addOperator(AND, args)
+
+    override fun then(args: Iterable<Any>): CommandBuilder = addOperator(AND, args)
+
+    override fun then(command: Command): CommandBuilder = addOperator(AND, command)
+
+    override fun otherwise(vararg args: Any): CommandBuilder = addOperator(OR, args)
+
+    override fun otherwise(args: Iterable<Any>): CommandBuilder = addOperator(OR, args)
+
+    override fun otherwise(command: Command): CommandBuilder = addOperator(OR, command)
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Command
+    ///////////////////////////////////////////////////////////////////////////
+
+    override fun build(): Command = CommandImpl(command.map { it.toString() })
 
     /**
-     * Implementation of [Command].
+     * Implementation of [Command] which is serializable.
      */
-    private data class CommandImpl(override val args: Array<out String>) : Command {
+    private data class CommandImpl(private val args: List<String>) : Command {
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as CommandImpl
-
-            return args.contentDeepEquals(other.args)
+        override fun interpret(interpreter: CommandInterpreter): CommandLine {
+            return interpreter.createCommandLine(args.toTypedArray())
         }
 
-        override fun hashCode(): Int {
-            return args.contentDeepHashCode()
+        override fun toBuilder(): CommandBuilder {
+            return ShellCommandBuilder(args.toTypedArray())
         }
+    }
 
-        override fun toString(): String {
-            return args.contentDeepToString()
+    ///////////////////////////////////////////////////////////////////////////
+    // Interpreter
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Interpreter not altering command.
+     */
+    private object ForwardInterpreter : CommandInterpreter {
+
+        override fun createCommandLine(args: Array<String>): CommandLine {
+            return DefaultCommandLine(args)
         }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Companion
+    ///////////////////////////////////////////////////////////////////////////
+
+    private companion object {
+
+        const val PIPE = "|"
+        const val PIPE_ALL = "|&"
+        const val AND = "&&"
+        const val OR = "||"
     }
 }

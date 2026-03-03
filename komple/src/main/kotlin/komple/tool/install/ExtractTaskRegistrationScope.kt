@@ -1,7 +1,8 @@
 package komple.tool.install
 
-import komple.exec.bash
+import komple.exec.Bash
 import komple.exec.execOutput
+import komple.exec.invoke
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.file.ArchiveOperations
@@ -149,21 +150,11 @@ public fun ExtractTaskRegistrationScope.dmg(
     outputs.dir(extractDirectory)
 
     doLast {
+        val dmgPath = dmgFile.get().asFile.absoluteFile
+
         val mountPoint = execOperations.execOutput(
-            bash(
-                "hdiutil",
-                "attach",
-                dmgFile.get().asFile.absoluteFile,
-                "-nobrowse",
-                "-plist"
-            ) {
-                pipe(
-                    "plutil",
-                    "-extract",
-                    "system-entities.0.mount-point",
-                    "raw",
-                    "-"
-                )
+            Bash("hdiutil", "attach", dmgPath, "-nobrowse", "-plist") {
+                pipe("plutil", "-extract", "system-entities.0.mount-point", "raw", "-")
             }
         )
 
