@@ -3,14 +3,9 @@ package komple.tool.install
 import org.gradle.api.file.Directory
 
 /**
- * Context for downloaded file(s) extraction.
+ * Context for files downloading.
  */
-public interface ExtractContext : TaskContext {
-
-    /**
-     * File(s) getting downloaded.
-     */
-    public val inputs: Inputs
+public interface DownloadTaskContext : TaskContext {
 
     /**
      * Directory that should preferably be used to write the extracted file(s) to.

@@ -3,11 +3,17 @@ package komple.project
 import org.gradle.api.Named
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.provider.Property
 
 /**
  * Project than can lead to compilation.
  */
-public abstract class KompleProject internal constructor(private val projectName: String) : Named {
+public sealed class KompleProject(private val projectName: String) : Named {
+
+    /**
+     * Package name for the output files.
+     */
+    public abstract val packageName: Property<String>
 
     /**
      * Sources files of the project.

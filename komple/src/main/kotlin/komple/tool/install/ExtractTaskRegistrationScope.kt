@@ -28,7 +28,7 @@ public interface ExtractTaskRegistrationScope : TaskRegistrationScope {
      */
     public fun <T : Task> register(
         klass: KClass<T>,
-        configure: T.(context: ExtractContext) -> Unit
+        configure: T.(context: ExtractTaskContext) -> Unit
     ): TaskProvider<T>
 }
 
@@ -41,7 +41,7 @@ public interface ExtractTaskRegistrationScope : TaskRegistrationScope {
  * The task must output the extracted file(s).
  */
 public inline fun <reified T : Task> ExtractTaskRegistrationScope.register(
-    noinline configure: T.(context: ExtractContext) -> Unit
+    noinline configure: T.(context: ExtractTaskContext) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
     configure = configure
@@ -72,7 +72,7 @@ private inline fun ExtractTaskRegistrationScope.extractFileTree(
     outputs.dir(destination)
 
     if (enclosedContent) {
-        doLast {
+        context.doLastWhenOutputChanged {
             fileOperations.copy {
                 from(fileTree) {
                     eachFile {
@@ -93,7 +93,7 @@ private inline fun ExtractTaskRegistrationScope.extractFileTree(
             }
         }
     } else {
-        doLast {
+        context.doLastWhenOutputChanged {
             fileOperations.copy {
                 from(fileTree)
                 into(destination)
@@ -149,7 +149,7 @@ public fun ExtractTaskRegistrationScope.dmg(
     val dmgFile = context.inputs.file
     outputs.dir(extractDirectory)
 
-    doLast {
+    context.doLastWhenOutputChanged {
         val dmgPath = dmgFile.get().asFile.absoluteFile
 
         val mountPoint = execOperations.execOutput(

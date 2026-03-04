@@ -3,7 +3,6 @@ package komple.gradle.tool
 import komple.gradle.Komple
 import komple.gradle.exec.ExecEnvironment
 import komple.gradle.extension.DefaultExtensionConfigurationScope
-import komple.gradle.extension.KompleExtension
 import komple.gradle.extension.KompleRootExtension
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
@@ -18,10 +17,7 @@ import komple.gradle.tool.install.DefaultInstallTaskRegistrationScope
 import komple.gradle.tool.install.DefaultIntegrityTaskRegistrationScope
 import komple.tool.KompleToolConfigurator
 import org.gradle.api.Project
-
-///////////////////////////////////////////////////////////////////////////
-// Configuration (root project)
-///////////////////////////////////////////////////////////////////////////
+import org.gradle.api.tasks.TaskProvider
 
 /**
  * Configures all tools.
@@ -32,7 +28,7 @@ internal fun Project.configureTools(
 ) {
     val komple = Komple(extension, this)
 
-    extension.toolConfigurators.configureEach {
+    extension.toolConfigurators.all {
         configureTool(komple, environment)
     }
 }
@@ -48,39 +44,11 @@ private fun KompleToolConfigurator.configureTool(
         scope.configureExtension()
     }
 
-    val toolName = this.name
-    val context = KompleToolConfigContext(komple, toolName)
-    val layout = komple.project.layout
+    val context = KompleToolConfigContext(komple, this.name)
+    val installTaskProvider = createInstallTaskProvider(context)
 
-    val installTaskProvider = if (supportHost(CurrentHost)) {
-        DefaultInstallTaskRegistrationScope(
-            context = context,
-            extractInputs = DefaultExtractTaskRegistrationScope(
-                context = context,
-                integrityInputs = DefaultIntegrityTaskRegistrationScope(
-                    context = context,
-                    downloadInputs = DefaultDownloadTaskRegistrationScope(context)
-                        .use { it.registerDownloadTask() }
-                        .outputFiles(layout)
-                ).use { it.registerIntegrityTask() }
-                    .outputFiles(layout)
-            ).use { it.registerExtractTask() }
-                .outputFiles(layout)
-        ).use { it.registerInstallTask() }
-    } else {
-        val unsupportedMessage = "Host is not supported by tool $name"
-
-        komple.project.run {
-            logger.warn(unsupportedMessage)
-
-            tasks.register(toolTaskName(toolName, TASK_TOOL_INSTALL_POSTFIX)) {
-                outputs.dir(gradle.kompleToolsInstallsDirectory.dir(toolName))
-                doLast { throw UnsupportedHostException(unsupportedMessage) }
-            }
-        }
-    }
-
-    val installDirectory = layout.dir(installTaskProvider.outputFiles().map { it.singleFile })
+    val installDirectory = komple.project.layout
+        .dir(installTaskProvider.outputFiles().map { it.singleFile })
 
     DefaultExecEnvironmentBuilderScope(
         komple = komple,
@@ -89,7 +57,7 @@ private fun KompleToolConfigurator.configureTool(
     ).use { it.configureEnvironment() }
 
     val tool = DefaultKompleTool(
-        toolName = toolName,
+        toolName = context.toolName,
         installTaskProvider = installTaskProvider,
         installDirectory = installDirectory
     )
@@ -97,18 +65,35 @@ private fun KompleToolConfigurator.configureTool(
     komple.extension.tools.add(tool)
 }
 
-///////////////////////////////////////////////////////////////////////////
-// Registration (subproject)
-///////////////////////////////////////////////////////////////////////////
-
 /**
- * Registers the configured tools.
+ * Creates the task responsible for installing the tool.
  */
-internal fun Project.registerTools(
-    extension: KompleExtension,
-    rootExtension: KompleRootExtension
-) {
-    rootExtension.tools.whenObjectAdded {
-        extension.tools.extensions.add(name, this)
+private fun KompleToolConfigurator.createInstallTaskProvider(
+    context: KompleToolConfigContext
+): TaskProvider<*> = if (supportHost(CurrentHost)) {
+    DefaultInstallTaskRegistrationScope(
+        context = context,
+        extractInputs = DefaultExtractTaskRegistrationScope(
+            context = context,
+            integrityInputs = DefaultIntegrityTaskRegistrationScope(
+                context = context,
+                downloadInputs = DefaultDownloadTaskRegistrationScope(context)
+                    .use { it.registerDownloadTask() }
+                    .outputFiles(context.komple.project.layout)
+            ).use { it.registerIntegrityTask() }
+                .outputFiles(context.komple.project.layout)
+        ).use { it.registerExtractTask() }
+            .outputFiles(context.komple.project.layout)
+    ).use { it.registerInstallTask() }
+} else {
+    val unsupportedMessage = "Host is not supported by tool $name"
+
+    context.komple.project.run {
+        logger.warn(unsupportedMessage)
+
+        tasks.register(toolTaskName(context.toolName, TASK_TOOL_INSTALL_POSTFIX)) {
+            outputs.dir(gradle.kompleToolsInstallsDirectory.dir(context.toolName))
+            doLast { throw UnsupportedHostException(unsupportedMessage) }
+        }
     }
 }

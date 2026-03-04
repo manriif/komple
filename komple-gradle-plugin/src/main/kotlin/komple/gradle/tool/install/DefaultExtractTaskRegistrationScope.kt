@@ -3,7 +3,7 @@ package komple.gradle.tool.install
 import komple.gradle.kompleToolsExtractsDirectory
 import komple.gradle.task.TASK_TOOL_EXTRACT_POSTFIX
 import komple.gradle.tool.KompleToolConfigContext
-import komple.tool.install.ExtractContext
+import komple.tool.install.ExtractTaskContext
 import komple.tool.install.ExtractTaskRegistrationScope
 import komple.tool.install.Inputs
 import org.gradle.api.Task
@@ -23,28 +23,30 @@ internal class DefaultExtractTaskRegistrationScope(
 
     override fun <T : Task> register(
         klass: KClass<T>,
-        configure: T.(context: ExtractContext) -> Unit
-    ): TaskProvider<T> {
+        configure: T.(context: ExtractTaskContext) -> Unit
+    ): TaskProvider<T> = registerTask(TASK_TOOL_EXTRACT_POSTFIX, klass) { outputChanged ->
+        description = "Extract $toolName"
+
         val extractDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolName)
-        val extractContext = DefaultExtractContext(extractDirectory, integrityInputs)
+        val extractContext = DefaultExtractTaskContext(
+            outputDirectory = extractDirectory,
+            outputChanged = outputChanged,
+            inputs = integrityInputs
+        )
 
-        return registerTask(TASK_TOOL_EXTRACT_POSTFIX, klass) {
-            description = "Extract $toolName"
+        inputs.files(integrityInputs.files)
+        configure(this, extractContext)
 
-            inputs.files(integrityInputs.files)
-            configure(this, extractContext)
+        check(!outputs.files.isEmpty) {
+            "Extract task did not registered outputs"
+        }
 
-            check(!outputs.files.isEmpty) {
-                "Extract task did not registered outputs"
-            }
+        val fileOperations = project.serviceOf<FileSystemOperations>()
 
-            val fileOperations = project.serviceOf<FileSystemOperations>()
-
-            doFirst {
-                fileOperations.delete {
-                    delete(integrityInputs.files)
-                    delete(extractDirectory)
-                }
+        doFirst {
+            fileOperations.delete {
+                delete(integrityInputs.files)
+                delete(extractDirectory)
             }
         }
     }

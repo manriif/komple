@@ -23,7 +23,6 @@ internal abstract class DefaultExecService @Inject constructor(
 
     /**
      * Configures the execution environment and sets the final command line.
-     * TODO filter for command
      */
     private fun ExecSpec.configure(
         mainCommand: Command,

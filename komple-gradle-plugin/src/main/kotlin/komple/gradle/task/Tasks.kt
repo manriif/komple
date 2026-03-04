@@ -70,37 +70,32 @@ internal fun Provider<out Task>.outputFiles(layout: ProjectLayout): Inputs = Def
 /**
  * Returns a file that can be used to store a checksum for task generated output(s).
  */
-internal fun Task.checksumFile(): RegularFile {
-    var taskUniqueName = name
-    var parentProject = project
+internal fun Project.checksumFile(taskName: String): RegularFile {
+    var taskUniqueName = taskName
+    var parentProject: Project? = this
 
     while (parentProject != null) {
         taskUniqueName = "${parentProject.name}-$taskUniqueName"
         parentProject = parentProject.parent
     }
 
-    return project.gradle.kompleChecksumsDirectory.file(taskUniqueName.lowercase())
+    return gradle.kompleChecksumsDirectory.file(taskUniqueName.lowercase())
 }
 
 /**
- * Invokes [execute] if [checksumFile] exists and its value differs from the one supplied by
- * [currentChecksum].
+ * Returns `true` if [checksumFile] exists and its value is equals to [checksum].
  */
-internal inline fun executeIfChecksumChanged(
+internal fun checksumsEquals(
     checksumFile: File,
-    currentChecksum: () -> String,
-    execute: () -> Unit
-) {
+    checksum: String,
+): Boolean {
     if (checksumFile.exists()) {
-        val current = currentChecksum()
         val previous = checksumFile.readText()
 
-        if (current == previous) {
-            return
+        if (checksum == previous) {
+            return true
         }
     }
 
-    execute()
-    checksumFile.parentFile.mkdirs()
-    checksumFile.writeText(currentChecksum())
+    return false
 }

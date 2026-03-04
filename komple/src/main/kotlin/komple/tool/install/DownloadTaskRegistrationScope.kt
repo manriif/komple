@@ -1,6 +1,8 @@
 package komple.tool.install
 
 import de.undercouch.gradle.tasks.download.Download
+import de.undercouch.gradle.tasks.download.DownloadAction
+import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
@@ -17,7 +19,7 @@ public interface DownloadTaskRegistrationScope : TaskRegistrationScope {
      */
     public fun <T : Task> register(
         klass: KClass<T>,
-        configure: T.(context: DownloadContext) -> Unit
+        configure: T.(context: DownloadTaskContext) -> Unit
     ): TaskProvider<T>
 }
 
@@ -30,7 +32,7 @@ public interface DownloadTaskRegistrationScope : TaskRegistrationScope {
  * The task must output the downloaded file(s).
  */
 public inline fun <reified T : Task> DownloadTaskRegistrationScope.register(
-    noinline configure: T.(context: DownloadContext) -> Unit
+    noinline configure: T.(context: DownloadTaskContext) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
     configure = configure
@@ -42,7 +44,7 @@ public inline fun <reified T : Task> DownloadTaskRegistrationScope.register(
  */
 public fun DownloadTaskRegistrationScope.url(
     url: Provider<String>
-): TaskProvider<*> = register<Download> { context ->
+): TaskProvider<*> = register<DefaultTask> { context ->
     val fileExtension = url.map { it.substringAfterLast('.') }
 
     val fileName = fileExtension.map { extension ->
@@ -54,10 +56,14 @@ public fun DownloadTaskRegistrationScope.url(
     inputs.property("url", url)
     outputs.file(destination)
 
-    dest(destination)
-    src(url)
-    overwrite(false)
-    quiet(false)
+    val download = DownloadAction(project, this).apply {
+        dest(destination)
+        src(url)
+        overwrite(false)
+        quiet(false)
+    }
+
+    context.doLastWhenOutputChanged(download::execute)
 }
 
 /**

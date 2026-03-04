@@ -5,7 +5,7 @@ import komple.KOMPLE_ROOT_PLUGIN_ID
 import komple.extension.getExtensionByName
 import komple.gradle.extension.KompleExtension
 import komple.gradle.extension.KompleRootExtension
-import komple.gradle.tool.registerTools
+import komple.gradle.extension.configureExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
@@ -26,7 +26,10 @@ public class KomplePlugin : Plugin<Project> {
             val rootExtensions =
                 rootProject.getExtensionByName<KompleRootExtension>(KOMPLE_EXTENSION_NAME)
 
-            project.registerTools(extension, rootExtensions)
+            configureExtension(
+                extension = extension,
+                rootExtension = rootExtensions
+            )
         }
     }
 }

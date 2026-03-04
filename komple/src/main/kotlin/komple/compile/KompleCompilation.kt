@@ -1,9 +1,8 @@
 package komple.compile
 
 import org.gradle.api.Named
-import org.gradle.api.file.ConfigurableFileCollection
 
-public interface KompleCompilation: Named {
-
-    public val sourceFiles: ConfigurableFileCollection
-}
+/**
+ * Compilation resulting from a project and processed by registered tools.
+ */
+public interface KompleCompilation : Named

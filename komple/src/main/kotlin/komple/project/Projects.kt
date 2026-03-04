@@ -1,9 +1,14 @@
 package komple.project
 
 import komple.KompleInternalApi
+import komple.compile.KompleCompilation
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer as ExtensibleContainer
+
+///////////////////////////////////////////////////////////////////////////
+// Container
+///////////////////////////////////////////////////////////////////////////
 
 /**
  * Registers factories for supported [KompleProject] types.

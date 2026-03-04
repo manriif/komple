@@ -15,7 +15,7 @@ public interface InstallTaskRegistrationScope : TaskRegistrationScope {
      */
     public fun <T : Task> register(
         klass: KClass<T>,
-        configure: T.(context: InstallContext) -> Unit
+        configure: T.(context: InstallTaskContext) -> Unit
     ): TaskProvider<T>
 }
 
@@ -28,7 +28,7 @@ public interface InstallTaskRegistrationScope : TaskRegistrationScope {
  * The task must output a single directory where all the installed files are written to.
  */
 public inline fun <reified T : Task> InstallTaskRegistrationScope.register(
-    noinline configure: T.(context: InstallContext) -> Unit
+    noinline configure: T.(context: InstallTaskContext) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
     configure = configure

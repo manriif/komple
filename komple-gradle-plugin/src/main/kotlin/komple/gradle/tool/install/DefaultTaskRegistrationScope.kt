@@ -2,7 +2,7 @@ package komple.gradle.tool.install
 
 import komple.gradle.platform.CurrentHost
 import komple.gradle.task.checksumFile
-import komple.gradle.task.executeIfChecksumChanged
+import komple.gradle.task.checksumsEquals
 import komple.gradle.task.registerToolTask
 import komple.gradle.task.toolTaskName
 import komple.gradle.tool.KompleToolConfigContext
@@ -12,10 +12,11 @@ import komple.platform.Host
 import komple.tool.install.TaskRegistrationScope
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.invoke
 import java.io.File
+import kotlin.io.writeText
 import kotlin.reflect.KClass
 
 /**
@@ -50,32 +51,29 @@ internal abstract class DefaultTaskRegistrationScope(protected val context: Komp
 
     /**
      * Registers a task [T] and returns a provider to the registered task.
-     * The task actions are only executed if outputs did not change.
      */
     protected inline fun <T : Task> registerTask(
         postfix: String,
         type: KClass<T>,
-        crossinline configure: T.() -> Unit
-    ): TaskProvider<T> = project.registerToolTask(
-        name = toolTaskName(toolName, postfix),
-        type = type
-    ) {
-        configure()
+        crossinline configure: T.(outputChanged: Provider<Boolean>) -> Unit
+    ): TaskProvider<T> = project.registerToolTask(toolTaskName(postfix), type) {
+        val checksumFile = project.checksumFile(name)
+        val checksumInputs = project.objects.fileCollection()
 
-        val checksumFile = checksumFile()
-        val checksumSources = outputs.files
-        val taskActions = this.actions
+        val checksumProvider = project.provider {
+            checksumInputs.files.filter(File::exists).sha256()
+        }
 
-        actions.clear()
+        configure(checksumProvider.map { checksum ->
+            checksumsEquals(checksumFile.asFile, checksum)
+        })
+
+        checksumInputs.from(outputs.files)
 
         doLast task@{
-            executeIfChecksumChanged(
-                checksumFile = checksumFile.asFile,
-                currentChecksum = checksumSources.files.filter(File::exists)::sha256
-            ) {
-                taskActions.forEach {
-                    it.execute(this@task)
-                }
+            checksumFile.asFile.run {
+                parentFile.mkdirs()
+                writeText(checksumProvider.get())
             }
         }
     }

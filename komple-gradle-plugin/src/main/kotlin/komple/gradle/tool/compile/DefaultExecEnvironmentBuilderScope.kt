@@ -40,5 +40,5 @@ internal class DefaultExecEnvironmentBuilderScope(
     ) = environment.notClosed { variables.put(name, valueProvider) }
 
     override fun commandLine(commandProvider: Provider<Command>) =
-        environment.notClosed { commands.add(commandProvider) } // TODO filter
+        environment.notClosed { commands.add(commandProvider) }
 }

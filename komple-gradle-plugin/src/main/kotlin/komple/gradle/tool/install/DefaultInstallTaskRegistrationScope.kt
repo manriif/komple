@@ -4,7 +4,7 @@ import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.task.TASK_TOOL_INSTALL_POSTFIX
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.install.Inputs
-import komple.tool.install.InstallContext
+import komple.tool.install.InstallTaskContext
 import komple.tool.install.InstallTaskRegistrationScope
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemOperations
@@ -23,32 +23,35 @@ internal class DefaultInstallTaskRegistrationScope(
 
     override fun <T : Task> register(
         klass: KClass<T>,
-        configure: T.(context: InstallContext) -> Unit
-    ): TaskProvider<T> {
+        configure: T.(context: InstallTaskContext) -> Unit
+    ): TaskProvider<T> = registerTask(TASK_TOOL_INSTALL_POSTFIX, klass) { outputChanged ->
+        description = "Install $toolName"
+
         val installDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolName)
-        val installContext = DefaultInstallContext(installDirectory, extractInputs)
 
-        return registerTask(TASK_TOOL_INSTALL_POSTFIX, klass) {
-            description = "Install $toolName"
+        val installContext = DefaultInstallTaskContext(
+            outputDirectory = installDirectory,
+            outputChanged = outputChanged,
+            inputs = extractInputs
+        )
 
-            inputs.files(extractInputs.files)
-            configure(this, installContext)
+        inputs.files(extractInputs.files)
+        configure(this, installContext)
 
-            check(!outputs.files.isEmpty) {
-                "Install task did not registered outputs"
-            }
+        check(!outputs.files.isEmpty) {
+            "Install task did not registered outputs"
+        }
 
-            check(outputs.files.files.size == 1) {
-                "Install task must output a single directory only"
-            }
+        check(outputs.files.files.size == 1) {
+            "Install task must output a single directory only"
+        }
 
-            val fileOperations = project.serviceOf<FileSystemOperations>()
+        val fileOperations = project.serviceOf<FileSystemOperations>()
 
-            doFirst {
-                fileOperations.delete {
-                    delete(extractInputs.files)
-                    delete(installDirectory)
-                }
+        doFirst {
+            fileOperations.delete {
+                delete(extractInputs.files)
+                delete(installDirectory)
             }
         }
     }
