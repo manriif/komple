@@ -1,35 +1,34 @@
 package komple.gradle.tool.compile
 
 import komple.exec.Command
-import komple.gradle.Komple
 import komple.gradle.exec.ExecEnvironment
 import komple.gradle.platform.CurrentHost
+import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.platform.Host
 import komple.tool.compile.ExecEnvironmentBuilderScope
+import komple.tool.extension.HasExtension
+import komple.tool.extension.KompleToolExtension
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import kotlin.reflect.KClass
 
 /**
  * Default implementation of [ExecEnvironmentBuilderScope].
  */
-internal class DefaultExecEnvironmentBuilderScope(
-    private val komple: Komple,
+internal class DefaultExecEnvironmentBuilderScope<Extension : KompleToolExtension>(
+    private val context: KompleToolConfigContext<Extension>,
     private val environment: ExecEnvironment,
     override val installDirectory: Provider<Directory>
-) : ExecEnvironmentBuilderScope,
+) : ExecEnvironmentBuilderScope<Extension>,
+    HasExtension<Extension> by context,
     ClosableScope() {
 
     override val host: Host
         get() = notClosed { CurrentHost }
 
     override val providers: ProviderFactory
-        get() = notClosed { komple.project.providers }
-
-    override fun <Extension : Any> extension(type: KClass<Extension>): Extension =
-        komple.notClosed { retrieve(type) }
+        get() = notClosed { context.project.providers }
 
     override fun path(pathProvider: Provider<String>) =
         environment.notClosed { paths.add(pathProvider) }

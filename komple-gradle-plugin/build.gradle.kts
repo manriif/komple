@@ -37,41 +37,13 @@ gradlePlugin {
             description = localDescription
             tags = localTags.split(',')
         }
-
-        create("komple-root") {
-            id = "$projectGroup-root"
-            implementationClass = "komple.gradle.KompleRootPlugin"
-            displayName = "Komple Root"
-            description = localDescription
-            tags = localTags.split(',')
-        }
-
-        create("komple-settings") {
-            id = "$projectGroup-settings"
-            displayName = "Komple Settings"
-            description = localDescription
-            implementationClass = "komple.gradle.KompleSettingsPlugin"
-            tags = localTags.split(',')
-        }
     }
 }
 
 tasks {
-    val generateVersionFile = register("generateVersionFile") {
-        val kompleVersion = libs.versions.komple.get()
-        val versionFile = layout.buildDirectory.file("generated/resources/version.txt")
-
-        doLast {
-            versionFile.get().asFile.let { file ->
-                check(file.parentFile.mkdirs())
-                file.writeText(kompleVersion)
-            }
-        }
-    }
-
-    // Include generated version file in resources
+    // Include tools.properties at the root project root
     processResources {
-        from(generateVersionFile) {
+        from(rootProject.layout.projectDirectory.file("tools.properties")) {
             into(".")
         }
     }

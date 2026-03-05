@@ -4,6 +4,6 @@ plugins {
 }
 
 dependencies {
-    api(libs.kotlin.gradlePlugin)
+    compileOnly(libs.kotlin.gradlePlugin)
     api(libs.undercouch.download)
 }

@@ -1,8 +1,8 @@
 package komple.gradle.task
 
 import komple.gradle.kompleChecksumsDirectory
-import komple.gradle.tool.install.DefaultInputs
-import komple.tool.install.Inputs
+import komple.gradle.tool.task.DefaultInputs
+import komple.tool.task.Inputs
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection

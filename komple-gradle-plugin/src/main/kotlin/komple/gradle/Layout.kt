@@ -26,12 +26,6 @@ internal val Gradle.kompleChecksumsDirectory: Directory
     get() = kompleCacheDirectory("checksums")
 
 /**
- * Returns the directory where the Komple plugin embedded resources resides.
- */
-internal val Gradle.kompleResourcesDirectory: Directory
-    get() = kompleCacheDirectory("resources")
-
-/**
  * Returns the directory where the tools are downloaded.
  */
 internal val Gradle.kompleToolsDownloadsDirectory: Directory

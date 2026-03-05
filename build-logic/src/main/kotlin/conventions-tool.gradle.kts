@@ -13,8 +13,8 @@ gradlePlugin {
     vcsUrl = projectGitUrl
 
     plugins {
-        create("komple-${localPluginId}") {
-            id = "${projectGroup}.${localPluginId}"
+        create(toolName) {
+            id = toolPluginId
             implementationClass = localPluginClass
             displayName = localName
             description = localDescription

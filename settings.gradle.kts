@@ -28,6 +28,11 @@ dependencyResolutionManagement {
 }
 
 include(":komple")
+include(":komple-catalog")
 include(":komple-gradle-plugin")
 
-include(":komple-android-ndk")
+fun includeTool(name: String) {
+    include(":tools:$name")
+}
+
+includeTool("android-ndk")

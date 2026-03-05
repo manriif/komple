@@ -14,7 +14,7 @@ public abstract class KompleCProject internal constructor(projectName: String) :
     KompleProject(projectName) {
 
     /**
-     * The main header file, starting point of everything.
+     * Main header file.
      */
     public abstract val headerFile: RegularFileProperty
 

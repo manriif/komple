@@ -1,7 +1,8 @@
 package komple
 
-import komple.extension.getExtensionByName
-import komple.tool.KompleToolConfigurator
+import komple.tool.configurator.KompleToolConfigurator
+import komple.util.getExtensionByName
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import kotlin.reflect.KClass
 
@@ -13,10 +14,12 @@ public interface KompleRootExtensionBase {
     /**
      * Registers a tool, identified by [name], that is configured by an instance of [klass].
      */
-    public fun <Configurator : KompleToolConfigurator> registerTool(
+    @IgnorableReturnValue
+    public fun <Configurator : KompleToolConfigurator<*>> registerTool(
         name: String,
-        klass: KClass<Configurator>
-    )
+        klass: KClass<Configurator>,
+        vararg args: Any
+    ): NamedDomainObjectProvider<Configurator>
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -32,8 +35,11 @@ public val Project.kompleRootExtension: KompleRootExtensionBase
 /**
  * Registers a tool, identified by [name], that is configured by an instance of [Config].
  */
-public inline fun <reified Config : KompleToolConfigurator> KompleRootExtensionBase.registerTool(
-    name: String
-) {
-    registerTool(name, Config::class)
-}
+public inline fun <reified Config : KompleToolConfigurator<*>> KompleRootExtensionBase.registerTool(
+    name: String,
+    vararg args: Any
+): NamedDomainObjectProvider<Config> = registerTool(
+    name = name,
+    klass = Config::class,
+    args = args
+)
