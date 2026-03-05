@@ -72,16 +72,14 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     }
 
     override fun IntegrityTaskRegistrationScope<AndroidNdkExtension>.registerIntegrityTask(): TaskProvider<*> {
-        return extension.checksums.run {
-            checksum(
-                checksum = when (host.operatingSystem) {
-                    OperatingSystem.Linux -> map(AndroidNdkChecksums::linux)
-                    OperatingSystem.MacOS -> map(AndroidNdkChecksums::macos)
-                    OperatingSystem.Windows -> map(AndroidNdkChecksums::windows)
-                },
-                algorithm = Algorithm.SHA1
-            )
-        }
+        return checksum(
+            checksum = when (host.operatingSystem) {
+                OperatingSystem.Linux -> extension.checksums.map(AndroidNdkChecksums::linux)
+                OperatingSystem.MacOS -> extension.checksums.map(AndroidNdkChecksums::macos)
+                OperatingSystem.Windows -> extension.checksums.map(AndroidNdkChecksums::windows)
+            },
+            algorithm = Algorithm.SHA1
+        )
     }
 
     override fun ExtractTaskRegistrationScope<AndroidNdkExtension>.registerExtractTask(): TaskProvider<*> {

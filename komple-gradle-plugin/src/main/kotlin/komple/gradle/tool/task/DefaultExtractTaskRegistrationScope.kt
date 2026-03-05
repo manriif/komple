@@ -29,6 +29,7 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
         description = "Extract $toolName"
 
         val extractDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolName)
+
         val extractContext = DefaultExtractTaskContext(
             outputDirectory = extractDirectory,
             outputChanged = outputChanged,
@@ -46,8 +47,8 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
 
         doFirst {
             fileOperations.delete {
-                delete(integrityInputs.files)
-                delete(extractDirectory)
+                delete(extractContext.inputs.files)
+                delete(extractContext.outputDirectory)
             }
         }
     }

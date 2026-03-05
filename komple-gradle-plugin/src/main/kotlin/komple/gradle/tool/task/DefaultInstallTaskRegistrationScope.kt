@@ -51,8 +51,8 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
 
         doFirst {
             fileOperations.delete {
-                delete(extractInputs.files)
-                delete(installDirectory)
+                delete(installContext.inputs.files)
+                delete(installContext.outputDirectory)
             }
         }
     }

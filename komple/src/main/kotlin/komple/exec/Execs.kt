@@ -3,6 +3,7 @@ package komple.exec
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import java.io.ByteArrayOutputStream
+import java.util.logging.Logger
 
 ///////////////////////////////////////////////////////////////////////////
 // Regular exec
@@ -12,7 +13,9 @@ import java.io.ByteArrayOutputStream
  * Sets the full command line, including the executable to be executed plus its arguments.
  */
 @IgnorableReturnValue
-public fun ExecSpec.commandLine(line: CommandLine): ExecSpec = commandLine(*line.args)
+public fun ExecSpec.commandLine(line: CommandLine): ExecSpec = commandLine(*line.args).also {
+    Logger.getGlobal().severe { "Command: ${line.args.joinToString(" ")}" }
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Exec with output

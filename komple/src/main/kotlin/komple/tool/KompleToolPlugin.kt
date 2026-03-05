@@ -12,6 +12,10 @@ public abstract class KompleToolPlugin : Plugin<Project> {
      * Applies the plugin only if Komple was applied.
      */
     final override fun apply(project: Project) {
+        check(project.parent == null) {
+            "Komple tool plugin must be applied on root project"
+        }
+
         project.pluginManager.withPlugin(KOMPLE_PLUGIN_ID) {
             configure(project, project.kompleRootExtension)
         }

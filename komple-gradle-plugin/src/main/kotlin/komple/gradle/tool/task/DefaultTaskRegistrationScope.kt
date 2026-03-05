@@ -62,12 +62,12 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
         }
 
         configure(checksumProvider.map { checksum ->
-            checksumsEquals(checksumFile.asFile, checksum)
+            !checksumsEquals(checksumFile.asFile, checksum)
         })
 
         checksumInputs.from(outputs.files)
 
-        doLast task@{
+        doLast {
             checksumFile.asFile.run {
                 parentFile.mkdirs()
                 writeText(checksumProvider.get())

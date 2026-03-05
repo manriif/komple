@@ -73,8 +73,7 @@ private inline fun ExtractTaskRegistrationScope<*>.extractFileTree(
     val archiveOperations = project.serviceOf<ArchiveOperations>()
     val fileTree = archiveOperations.createTree(context.inputs.file)
     val fileOperations = project.serviceOf<FileSystemOperations>()
-    val destination = context.outputDirectory
-    outputs.dir(destination)
+    outputs.dir(context.outputDirectory)
 
     if (enclosedContent) {
         context.doLastWhenOutputChanged {
@@ -94,14 +93,14 @@ private inline fun ExtractTaskRegistrationScope<*>.extractFileTree(
                     }
                 }
 
-                into(destination)
+                into(context.outputDirectory)
             }
         }
     } else {
         context.doLastWhenOutputChanged {
             fileOperations.copy {
                 from(fileTree)
-                into(destination)
+                into(context.outputDirectory)
             }
         }
     }
@@ -154,11 +153,10 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
 ): TaskProvider<*> = register<DefaultTask> { context ->
     val execOperations = project.serviceOf<ExecOperations>()
     val fileOperations = project.serviceOf<FileSystemOperations>()
-    val extractDirectory = context.outputDirectory
     val dmgFile = context.inputs.file
 
     configureInputs?.invoke(inputs, context)
-    outputs.dir(extractDirectory)
+    outputs.dir(context.outputDirectory)
 
     context.doLastWhenOutputChanged {
         val dmgPath = dmgFile.get().asFile.absoluteFile
@@ -172,7 +170,7 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
         try {
             fileOperations.extractContent(
                 File(mountPoint),
-                extractDirectory.asFile
+                context.outputDirectory.asFile
             )
         } finally {
             execOperations.exec {
