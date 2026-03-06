@@ -10,19 +10,7 @@ dependencies {
 }
 
 kotlin {
-    explicitApi()
-
-    compilerOptions {
-        freeCompilerArgs.add("-Xexplicit-backing-fields")
-    }
-
-    jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(libs.versions.jvm.toolchain.get())
-    }
-
-    sourceSets.main {
-        languageSettings.optIn("komple.KompleInternalApi")
-    }
+    configureKotlin()
 }
 
 gradlePlugin {

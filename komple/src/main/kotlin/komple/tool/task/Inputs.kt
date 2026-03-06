@@ -1,5 +1,6 @@
 package komple.tool.task
 
+import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -10,7 +11,12 @@ import org.gradle.api.provider.Provider
 public interface Inputs {
 
     /**
-     * Assumes that only a single file was produced by previous task and returns it.
+     * Assumes that only a single [Directory] was produced by previous task.
+     */
+    public val directory: Provider<Directory>
+
+    /**
+     * Assumes that only a single [RegularFile] was produced by previous task.
      */
     public val file: Provider<RegularFile>
 

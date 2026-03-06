@@ -33,6 +33,12 @@ public interface ExtractTaskRegistrationScope<Extension : KompleToolExtension> :
         klass: KClass<T>,
         configure: T.(context: ExtractTaskContext) -> Unit
     ): TaskProvider<T>
+
+    /**
+     * Registers a task that skips extraction, causing downloaded files to be used as extracted
+     * files.
+     */
+    public fun skipExtraction(): TaskProvider<*>
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -49,16 +55,6 @@ public inline fun <reified T : Task> ExtractTaskRegistrationScope<*>.register(
     klass = T::class,
     configure = configure
 )
-
-/**
- * Registers a task that just forwards downloaded files, in a way that they'll be available for
- * installation, and returns that registered task.
- */
-public fun ExtractTaskRegistrationScope<*>.forward(): TaskProvider<*> {
-    return register<DefaultTask> { context ->
-        outputs.files(context.inputs.files)
-    }
-}
 
 /**
  * Registers a task that copies file from [createTree] and returns that registered task.
@@ -163,7 +159,14 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
 
         val mountPoint = execOperations.execOutput(
             Bash("hdiutil", "attach", dmgPath, "-nobrowse", "-plist") {
-                pipe("plutil", "-extract", "system-entities.0.mount-point", "raw", "-")
+                pipe(
+                    "xpath",
+                    "-e",
+                    """'//key[.="mount-point"]/following-sibling::string[1]/text()'""",
+                    "2>/dev/null"
+                )
+
+                pipe("tail", "-1")
             }
         )
 

@@ -22,6 +22,14 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
         klass: KClass<T>,
         configure: T.(inputs: Inputs) -> Unit
     ): TaskProvider<T>
+
+    /**
+     * Returns a task that skips integrity checking, causing downloaded files tobe considered safe.
+     *
+     * Note that skipping integrity check is discouraged if the tools is getting downloaded from an
+     * external source.
+     */
+    public fun skipIntegrityCheck(): TaskProvider<*>
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -2,11 +2,13 @@ package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsExtractsDirectory
 import komple.gradle.task.TASK_TOOL_EXTRACT_POSTFIX
+import komple.gradle.task.outputFiles
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExtractTaskContext
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.Inputs
+import komple.tool.task.doFirstWhenOutputChanged
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskProvider
@@ -18,7 +20,7 @@ import kotlin.reflect.KClass
  */
 internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtension>(
     context: KompleToolConfigContext<Extension>,
-    private val integrityInputs: Inputs
+    private val integrityTask: TaskProvider<*>
 ) : ExtractTaskRegistrationScope<Extension>,
     DefaultTaskRegistrationScope<Extension>(context) {
 
@@ -28,15 +30,13 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
     ): TaskProvider<T> = registerTask(TASK_TOOL_EXTRACT_POSTFIX, klass) { outputChanged ->
         description = "Extract $toolName"
 
-        val extractDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolName)
-
         val extractContext = DefaultExtractTaskContext(
-            outputDirectory = extractDirectory,
+            outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolName),
             outputChanged = outputChanged,
-            inputs = integrityInputs
+            inputs = integrityTask.outputFiles(project.layout)
         )
 
-        inputs.files(integrityInputs.files)
+        inputs.files(extractContext.inputs.files)
         configure(this, extractContext)
 
         check(!outputs.files.isEmpty) {
@@ -44,13 +44,17 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
         }
 
         val fileOperations = project.serviceOf<FileSystemOperations>()
+        val outputFiles = outputs.files
 
-        doFirst {
+        extractContext.doFirstWhenOutputChanged {
             fileOperations.delete {
-                delete(extractContext.inputs.files)
-                delete(extractContext.outputDirectory)
+                delete(outputFiles)
             }
         }
+    }
+
+    override fun skipExtraction(): TaskProvider<*> {
+        return integrityTask
     }
 
     override fun unsupported(): TaskProvider<*> =

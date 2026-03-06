@@ -46,6 +46,30 @@ public inline fun TaskContext.whenOutputChanged(action: () -> Unit) {
 }
 
 /**
+ * Registers a [Task.doFirst] action invoking [action] only if `this` [TaskContext.outputChanged]
+ * provides `true` when read.
+ */
+public inline fun Task.doFirstWhenOutputChanged(
+    context: TaskContext,
+    crossinline action: () -> Unit
+) {
+    doFirst {
+        context.whenOutputChanged(action)
+    }
+}
+
+/**
+ * Registers a [Task.doFirst] action invoking [action] only if `this` [TaskContext.outputChanged]
+ * provides `true` when read.
+ */
+@JvmSynthetic
+@JvmName("doFirstWhenOutputChangedKt")
+context(task: Task)
+public inline fun TaskContext.doFirstWhenOutputChanged(crossinline action: () -> Unit) {
+    task.doFirstWhenOutputChanged(this, action)
+}
+
+/**
  * Registers a [Task.doLast] action invoking [action] only if `this` [TaskContext.outputChanged]
  * provides `true` when read.
  */

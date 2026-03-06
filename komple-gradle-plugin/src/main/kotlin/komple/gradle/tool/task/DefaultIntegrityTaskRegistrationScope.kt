@@ -1,6 +1,7 @@
 package komple.gradle.tool.task
 
 import komple.gradle.task.TASK_TOOL_INTEGRITY_POSTFIX
+import komple.gradle.task.outputFiles
 import komple.gradle.task.registerToolTask
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
@@ -15,7 +16,7 @@ import kotlin.reflect.KClass
  */
 internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExtension>(
     context: KompleToolConfigContext<Extension>,
-    private val downloadInputs: Inputs
+    private val downloadTask: TaskProvider<*>
 ) : IntegrityTaskRegistrationScope<Extension>,
     DefaultTaskRegistrationScope<Extension>(context) {
 
@@ -28,6 +29,8 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
     ) {
         description = "Check $toolName integrity"
 
+        val downloadInputs = downloadTask.outputFiles(project.layout)
+
         inputs.files(downloadInputs.files)
         configure(this, downloadInputs)
 
@@ -36,6 +39,10 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
         }
 
         outputs.files(downloadInputs.files)
+    }
+
+    override fun skipIntegrityCheck(): TaskProvider<*> {
+        return downloadTask
     }
 
     override fun unsupported(): TaskProvider<*> =

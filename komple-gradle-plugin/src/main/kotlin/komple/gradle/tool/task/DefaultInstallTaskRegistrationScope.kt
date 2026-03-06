@@ -2,11 +2,13 @@ package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.task.TASK_TOOL_INSTALL_POSTFIX
+import komple.gradle.task.outputFiles
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
-import komple.tool.task.Inputs
 import komple.tool.task.InstallTaskContext
 import komple.tool.task.InstallTaskRegistrationScope
+import komple.tool.task.doFirstWhenOutputChanged
+import komple.tool.task.doLastWhenOutputChanged
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskProvider
@@ -18,7 +20,7 @@ import kotlin.reflect.KClass
  */
 internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtension>(
     context: KompleToolConfigContext<Extension>,
-    private val extractInputs: Inputs
+    private val extractTask: TaskProvider<*>
 ) : InstallTaskRegistrationScope<Extension>,
     DefaultTaskRegistrationScope<Extension>(context) {
 
@@ -28,33 +30,39 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
     ): TaskProvider<T> = registerTask(TASK_TOOL_INSTALL_POSTFIX, klass) { outputChanged ->
         description = "Install $toolName"
 
-        val installDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolName)
-
         val installContext = DefaultInstallTaskContext(
-            outputDirectory = installDirectory,
+            outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolName),
             outputChanged = outputChanged,
-            inputs = extractInputs
+            inputs = extractTask.outputFiles(project.layout)
         )
 
-        inputs.files(extractInputs.files)
+        inputs.files(installContext.inputs.files)
         configure(this, installContext)
 
-        check(!outputs.files.isEmpty) {
-            "Install task did not registered outputs"
-        }
+        val outputFiles = outputs.files
 
-        check(outputs.files.files.size == 1) {
-            "Install task must output a single directory only"
+        check(outputFiles.count() == 1) {
+            "Install task must output a single directory"
         }
 
         val fileOperations = project.serviceOf<FileSystemOperations>()
+        val outputFile = outputFiles.singleFile
 
-        doFirst {
+        installContext.doFirstWhenOutputChanged {
             fileOperations.delete {
-                delete(installContext.inputs.files)
-                delete(installContext.outputDirectory)
+                delete(outputFile.listFiles())
             }
         }
+
+        installContext.doLastWhenOutputChanged {
+            check(outputFile.isDirectory) {
+                "Install task output must be a directory"
+            }
+        }
+    }
+
+    override fun skipInstallation(): TaskProvider<*> {
+        return extractTask
     }
 
     override fun unsupported(): TaskProvider<*> =

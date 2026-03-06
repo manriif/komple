@@ -12,11 +12,9 @@ import komple.tool.extension.kompleStringProperty
 import komple.tool.task.Algorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
-import komple.tool.task.InstallTaskRegistrationScope
 import komple.tool.task.IntegrityTaskRegistrationScope
 import komple.tool.task.checksum
 import komple.tool.task.dmg
-import komple.tool.task.forward
 import komple.tool.task.unzip
 import komple.tool.task.url
 import org.gradle.api.tasks.TaskProvider
@@ -99,10 +97,6 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
                 }
             }
         }
-    }
-
-    override fun InstallTaskRegistrationScope<AndroidNdkExtension>.registerInstallTask(): TaskProvider<*> {
-        return forward()
     }
 
     override fun ExecEnvironmentBuilderScope<AndroidNdkExtension>.configureEnvironment() {

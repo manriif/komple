@@ -1,6 +1,7 @@
 package komple.gradle.tool.task
 
 import komple.tool.task.Inputs
+import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
@@ -13,6 +14,9 @@ internal class DefaultInputs(
     override val files: Provider<FileCollection>,
     private val layout: ProjectLayout
 ) : Inputs {
+
+    override val directory: Provider<Directory>
+        get() = layout.dir(files.map { it.singleFile })
 
     override val file: Provider<RegularFile>
         get() = layout.file(files.map { it.singleFile })

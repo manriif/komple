@@ -104,17 +104,14 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstal
 ): TaskProvider<*> = if (supportHost(CurrentHost)) {
     DefaultInstallTaskRegistrationScope(
         context = context,
-        extractInputs = DefaultExtractTaskRegistrationScope(
+        extractTask = DefaultExtractTaskRegistrationScope(
             context = context,
-            integrityInputs = DefaultIntegrityTaskRegistrationScope(
+            integrityTask = DefaultIntegrityTaskRegistrationScope(
                 context = context,
-                downloadInputs = DefaultDownloadTaskRegistrationScope(context)
+                downloadTask = DefaultDownloadTaskRegistrationScope(context)
                     .use { it.registerDownloadTask() }
-                    .outputFiles(context.project.layout)
             ).use { it.registerIntegrityTask() }
-                .outputFiles(context.project.layout)
         ).use { it.registerExtractTask() }
-            .outputFiles(context.project.layout)
     ).use { it.registerInstallTask() }
 } else {
     val unsupportedMessage = "Host is not supported by tool $name"

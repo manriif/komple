@@ -20,6 +20,12 @@ public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
         klass: KClass<T>,
         configure: T.(context: InstallTaskContext) -> Unit
     ): TaskProvider<T>
+
+    /**
+     * Registers a task that skips installation, causing extracted files to be used as installed
+     * files.
+     */
+    public fun skipInstallation(): TaskProvider<*>
 }
 
 ///////////////////////////////////////////////////////////////////////////

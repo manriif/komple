@@ -8,40 +8,51 @@ import java.security.MessageDigest
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Returns the SHA-256 hash of this file or directory.
+ * Returns a new [MessageDigest] for
  */
-internal fun File.sha256(): String {
-    val messageDigest = when {
-        isFile -> MessageDigest.getInstance("SHA-256").apply {
-            update(readBytes())
-        }
+private inline fun sha256Hex(block: MessageDigest.() -> Unit): String =
+    MessageDigest.getInstance("SHA-256")
+        .apply(block)
+        .digest()
+        .joinToString("") { "%02x".format(it) }
 
-        isDirectory -> MessageDigest.getInstance("SHA-256").apply {
-            walkTopDown()
-                .filter { it.isFile }
-                .sortedBy { it.relativeTo(this@sha256).path }
-                .forEach { file ->
-                    update(file.relativeTo(this@sha256).path.toByteArray())
-                    update(file.readBytes())
-                }
-        }
+
+/**
+ * Append [file]'content to `this`.
+ * For directory, files path are included in the digest.
+ */
+private fun MessageDigest.append(file: File) {
+    when {
+        file.isFile -> update(file.readBytes())
+
+        file.isDirectory -> file.walkTopDown()
+            .filter { it.isFile }
+            .sortedBy { it.relativeTo(file).path }
+            .forEach { childFile ->
+                update(childFile.relativeTo(file).path.toByteArray())
+                append(childFile)
+            }
 
         else -> error("File is not a regular file nor a directory")
     }
-
-    return messageDigest.digest().joinToString("") { "%02x".format(it) }
 }
 
 /**
- * Returns the SHA-256 hash of this files.
+ * Returns the SHA-256 hex hash of `this` file or directory.
  */
-internal fun List<File>.sha256(): String {
-    val messageDigest = MessageDigest.getInstance("SHA-256").apply {
-        sortedBy { it.path }.forEach { file ->
-            update(file.path.toByteArray())
-            update(file.readBytes())
-        }
+internal fun File.sha256(): String {
+    return sha256Hex { append(this@sha256) }
+}
+
+/**
+ * Returns the SHA-256 hex hash of `these` [File]s.
+ */
+internal fun Collection<File>.sha256(): String {
+    if (isEmpty()) {
+        return ""
     }
 
-    return messageDigest.digest().joinToString("") { "%02x".format(it) }
+    return sha256Hex {
+        forEach(::append)
+    }
 }
