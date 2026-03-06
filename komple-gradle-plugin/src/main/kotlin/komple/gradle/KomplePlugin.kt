@@ -66,10 +66,7 @@ public class KomplePlugin : Plugin<Project> {
             val rootExtensions =
                 rootProject.getExtensionByName<KompleRootProjectExtension>(KOMPLE_EXTENSION_NAME)
 
-            configureExtension(
-                extension = extension,
-                rootExtension = rootExtensions
-            )
+            extension.configureExtension(rootExtensions)
         }
     }
 }

@@ -8,7 +8,7 @@ import org.gradle.api.file.Directory
 public interface DownloadTaskContext : TaskContext {
 
     /**
-     * Directory that should preferably be used to write the extracted file(s) to.
+     * Directory where downloaded file(s) must be written to.
      */
     override val outputDirectory: Directory
 }

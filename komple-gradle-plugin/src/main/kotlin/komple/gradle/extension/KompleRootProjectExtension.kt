@@ -1,6 +1,6 @@
 package komple.gradle.extension
 
-import komple.KompleRootExtensionBase
+import komple.KompleRootExtension
 import komple.exec.ExecService
 import komple.project.KompleProject
 import komple.tool.KompleTool
@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 public abstract class KompleRootProjectExtension @Inject constructor(
     internal val execService: Provider<ExecService>,
     private val objects: ObjectFactory
-) : KompleRootExtensionBase {
+) : KompleRootExtension {
 
     private val registeredToolClasses = mutableSetOf<KClass<*>>()
 

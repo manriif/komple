@@ -1,6 +1,6 @@
 package komple.tool.andk
 
-import komple.KompleRootExtensionBase
+import komple.KompleRootExtension
 import komple.tool.KompleToolPlugin
 import org.gradle.api.Project
 
@@ -8,7 +8,7 @@ public class AndroidNdkPlugin: KompleToolPlugin() {
 
     override fun configure(
         project: Project,
-        komple: KompleRootExtensionBase
+        komple: KompleRootExtension
     ) {
         komple.registerTool("androidNdk", AndroidNdkConfigurator::class)
     }

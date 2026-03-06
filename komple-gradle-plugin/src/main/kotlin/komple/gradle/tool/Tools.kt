@@ -7,7 +7,6 @@ import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
 import komple.gradle.task.TASK_TOOL_INSTALL_POSTFIX
-import komple.gradle.task.outputFiles
 import komple.gradle.task.toolTaskName
 import komple.gradle.tool.compile.DefaultExecEnvironmentBuilderScope
 import komple.gradle.tool.extension.DefaultExtensionConfigurationScope
@@ -82,7 +81,7 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     val installTaskProvider = createInstallTaskProvider(context)
 
     val installDirectory = project.layout
-        .dir(installTaskProvider.outputFiles().map { it.singleFile })
+        .dir(installTaskProvider.map { it.outputs.files.singleFile })
 
     DefaultExecEnvironmentBuilderScope(context, environment, installDirectory)
         .use { it.configureEnvironment() }

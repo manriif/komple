@@ -1,12 +1,12 @@
 package komple.gradle.tool.task
 
 import komple.gradle.task.TASK_TOOL_INTEGRITY_POSTFIX
-import komple.gradle.task.outputFiles
+import komple.gradle.task.outputDir
 import komple.gradle.task.registerToolTask
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
-import komple.tool.task.Inputs
 import komple.tool.task.IntegrityTaskRegistrationScope
+import komple.tool.task.TaskDirectory
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
@@ -22,23 +22,21 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
 
     override fun <T : Task> register(
         klass: KClass<T>,
-        configure: T.(inputs: Inputs) -> Unit
+        configure: T.(directory: TaskDirectory) -> Unit
     ): TaskProvider<T> = context.project.registerToolTask(
         name = toolTaskName(TASK_TOOL_INTEGRITY_POSTFIX),
         type = klass
     ) {
         description = "Check $toolName integrity"
 
-        val downloadInputs = downloadTask.outputFiles(project.layout)
+        val downloadDirectory = downloadTask.outputDir(project.layout)
+        inputs.dir(downloadDirectory.directory)
 
-        inputs.files(downloadInputs.files)
-        configure(this, downloadInputs)
-
-        check(outputs.files.isEmpty) {
-            "Integrity task should not declare output file(s)"
-        }
-
-        outputs.files(downloadInputs.files)
+        configureTask(
+            context = downloadDirectory,
+            outputDirectory = downloadDirectory.directory,
+            configurator = configure
+        )
     }
 
     override fun skipIntegrityCheck(): TaskProvider<*> {

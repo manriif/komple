@@ -1,7 +1,7 @@
 package komple.tool
 
 import komple.KOMPLE_PLUGIN_ID
-import komple.KompleRootExtensionBase
+import komple.KompleRootExtension
 import komple.kompleRootExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -13,7 +13,7 @@ public abstract class KompleToolPlugin : Plugin<Project> {
      */
     final override fun apply(project: Project) {
         check(project.parent == null) {
-            "Komple tool plugin must be applied on root project"
+            "Komple tool plugin can only be applied on root project"
         }
 
         project.pluginManager.withPlugin(KOMPLE_PLUGIN_ID) {
@@ -29,6 +29,6 @@ public abstract class KompleToolPlugin : Plugin<Project> {
      */
     protected abstract fun configure(
         project: Project,
-        komple: KompleRootExtensionBase
+        komple: KompleRootExtension
     )
 }

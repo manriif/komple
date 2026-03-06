@@ -10,8 +10,8 @@ import org.gradle.api.provider.Provider
 public interface TaskContext {
 
     /**
-     * The directory that should optionally be used to output task file(s).
-     * Anyway, the task output files are used as input to the forward step.
+     * The directory that must be used to write task produced file(s).
+     * The task output directory is used as input directory for the next task.
      */
     public val outputDirectory: Directory
 

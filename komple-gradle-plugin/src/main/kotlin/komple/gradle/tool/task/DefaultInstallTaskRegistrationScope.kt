@@ -2,17 +2,13 @@ package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.task.TASK_TOOL_INSTALL_POSTFIX
-import komple.gradle.task.outputFiles
+import komple.gradle.task.outputDir
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.InstallTaskContext
 import komple.tool.task.InstallTaskRegistrationScope
-import komple.tool.task.doFirstWhenOutputChanged
-import komple.tool.task.doLastWhenOutputChanged
 import org.gradle.api.Task
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.support.serviceOf
 import kotlin.reflect.KClass
 
 /**
@@ -31,34 +27,18 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
         description = "Install $toolName"
 
         val installContext = DefaultInstallTaskContext(
+            extractDirectory = extractTask.outputDir(project.layout),
             outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolName),
-            outputChanged = outputChanged,
-            inputs = extractTask.outputFiles(project.layout)
+            outputChanged = outputChanged
         )
 
-        inputs.files(installContext.inputs.files)
-        configure(this, installContext)
+        inputs.dir(installContext.extractDirectory.directory)
 
-        val outputFiles = outputs.files
-
-        check(outputFiles.count() == 1) {
-            "Install task must output a single directory"
-        }
-
-        val fileOperations = project.serviceOf<FileSystemOperations>()
-        val outputFile = outputFiles.singleFile
-
-        installContext.doFirstWhenOutputChanged {
-            fileOperations.delete {
-                delete(outputFile.listFiles())
-            }
-        }
-
-        installContext.doLastWhenOutputChanged {
-            check(outputFile.isDirectory) {
-                "Install task output must be a directory"
-            }
-        }
+        configureTask(
+            context = installContext,
+            configurator = configure,
+            deleteFirst = true
+        )
     }
 
     override fun skipInstallation(): TaskProvider<*> {

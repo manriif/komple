@@ -12,12 +12,17 @@ import komple.gradle.util.sha256
 import komple.platform.Host
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
+import komple.tool.task.TaskContext
 import komple.tool.task.TaskRegistrationScope
+import komple.tool.task.doFirstWhenOutputChanged
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.support.serviceOf
 import java.io.File
 import kotlin.reflect.KClass
 
@@ -71,6 +76,48 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
             checksumFile.asFile.run {
                 parentFile.mkdirs()
                 writeText(checksumProvider.get())
+            }
+        }
+    }
+
+    /**
+     * Invokes [configurator] and ensures no output file(s) were registered for task.
+     */
+    protected inline fun <T : Task, C> T.configureTask(
+        context: C,
+        outputDirectory: Provider<Directory>,
+        configurator: T.(C) -> Unit
+    ) {
+        configurator(this, context)
+
+        check(outputs.files.isEmpty) {
+            "Task must not register output file(s)"
+        }
+
+        outputs.dir(outputDirectory)
+    }
+
+    /**
+     * Invokes [configurator] and ensures no output file(s) were registered for task.
+     */
+    protected inline fun <T : Task, C : TaskContext> T.configureTask(
+        context: C,
+        configurator: T.(C) -> Unit,
+        deleteFirst: Boolean
+    ) {
+        configureTask(
+            context = context,
+            outputDirectory = project.providers.provider(context::outputDirectory),
+            configurator = configurator
+        )
+
+        if (deleteFirst) {
+            val fileOperations = project.serviceOf<FileSystemOperations>()
+
+            context.doFirstWhenOutputChanged {
+                fileOperations.delete {
+                    delete(context.outputDirectory)
+                }
             }
         }
     }

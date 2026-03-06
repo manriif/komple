@@ -11,7 +11,7 @@ public const val KOMPLE_GROUP: String = "io.github.manriif.komple"
 public const val KOMPLE_PLUGIN_ID: String = KOMPLE_GROUP
 
 /**
- * Name of the [KompleRootExtensionBase].
+ * Name of the [KompleRootExtension].
  */
 public const val KOMPLE_EXTENSION_NAME: String = "komple"
 

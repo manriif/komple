@@ -1,11 +1,10 @@
 package komple.gradle.task
 
 import komple.gradle.kompleChecksumsDirectory
-import komple.gradle.tool.task.DefaultInputs
-import komple.tool.task.Inputs
+import komple.gradle.tool.task.DefaultTaskDirectory
+import komple.tool.task.TaskDirectory
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileCollection
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -49,19 +48,10 @@ internal fun <T : Task> Project.registerToolTask(
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Returns a provider resolving the output files of the task.
+ * Returns the outputs directory as [TaskDirectory] object.
  */
-internal fun Provider<out Task>.outputFiles(): Provider<FileCollection> {
-    return map { it.outputs.files }
-}
-
-/**
- * Returns the outputs files as [Inputs] object.
- */
-internal fun Provider<out Task>.outputFiles(layout: ProjectLayout): Inputs = DefaultInputs(
-    files = outputFiles(),
-    layout = layout
-)
+internal fun Provider<out Task>.outputDir(layout: ProjectLayout): TaskDirectory =
+    DefaultTaskDirectory(layout.dir(map { it.outputs.files.singleFile }))
 
 ///////////////////////////////////////////////////////////////////////////
 // Checksum

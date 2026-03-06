@@ -2,9 +2,9 @@ package komple.gradle.tool.task
 
 import komple.tool.task.DownloadTaskContext
 import komple.tool.task.ExtractTaskContext
-import komple.tool.task.Inputs
 import komple.tool.task.InstallTaskContext
 import komple.tool.task.TaskContext
+import komple.tool.task.TaskDirectory
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 
@@ -32,9 +32,9 @@ internal class DefaultDownloadTaskContext(
  * Default implementation of [ExtractTaskContext].
  */
 internal class DefaultExtractTaskContext(
+    override val downloadDirectory: TaskDirectory,
     outputDirectory: Directory,
-    outputChanged: Provider<Boolean>,
-    override val inputs: Inputs
+    outputChanged: Provider<Boolean>
 ) : ExtractTaskContext,
     DefaultTaskContext(
         outputDirectory = outputDirectory,
@@ -45,9 +45,9 @@ internal class DefaultExtractTaskContext(
  * Default implementation of [InstallTaskContext].
  */
 internal class DefaultInstallTaskContext(
+    override val extractDirectory: TaskDirectory,
     outputDirectory: Directory,
-    outputChanged: Provider<Boolean>,
-    override val inputs: Inputs
+    outputChanged: Provider<Boolean>
 ) : InstallTaskContext,
     DefaultTaskContext(
         outputDirectory = outputDirectory,

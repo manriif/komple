@@ -1,6 +1,5 @@
 package komple.tool.task
 
-import de.undercouch.gradle.tasks.download.Download
 import de.undercouch.gradle.tasks.download.DownloadAction
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.DefaultTask
@@ -17,7 +16,9 @@ public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> 
 
     /**
      * Registers a task of type [T], [configure]s it and returns that registered task.
-     * The task must output the downloaded file(s).
+     *
+     * The directory where downloaded file(s) must be written to can be obtained from the
+     * [DownloadTaskContext] passed to [configure].
      */
     public fun <T : Task> register(
         klass: KClass<T>,
@@ -31,7 +32,9 @@ public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> 
 
 /**
  * Registers a task of type [T], [configure]s it and returns that registered task.
- * The task must output the downloaded file(s).
+ *
+ * The directory where downloaded file(s) must be written to can be obtained from the
+ * [DownloadTaskContext] passed to [configure].
  */
 public inline fun <reified T : Task> DownloadTaskRegistrationScope<*>.register(
     noinline configure: T.(context: DownloadTaskContext) -> Unit
@@ -42,11 +45,12 @@ public inline fun <reified T : Task> DownloadTaskRegistrationScope<*>.register(
 
 /**
  * Registers a download task downloading a single file at [url].
- * The used [Download] task has its own checksum mechanism.
  */
 public fun DownloadTaskRegistrationScope<*>.url(
     url: Provider<String>
 ): TaskProvider<*> = register<DefaultTask> { context ->
+    inputs.property("url", url)
+
     val fileExtension = url.map { it.substringAfterLast('.') }
 
     val fileName = fileExtension.map { extension ->
@@ -55,9 +59,6 @@ public fun DownloadTaskRegistrationScope<*>.url(
 
     val destination = context.outputDirectory.file(fileName)
 
-    inputs.property("url", url)
-    outputs.file(destination)
-
     val download = DownloadAction(project, this).apply {
         dest(destination)
         src(url)
@@ -65,7 +66,9 @@ public fun DownloadTaskRegistrationScope<*>.url(
         quiet(false)
     }
 
-    context.doLastWhenOutputChanged(download::execute)
+    doLast {
+        download.execute(true)
+    }
 }
 
 /**

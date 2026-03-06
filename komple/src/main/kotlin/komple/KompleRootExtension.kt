@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 /**
  * Base for Komple root extension.
  */
-public interface KompleRootExtensionBase {
+public interface KompleRootExtension {
 
     /**
      * Registers a tool, identified by [name], that is configured by an instance of [klass].
@@ -27,15 +27,15 @@ public interface KompleRootExtensionBase {
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Returns the [KompleRootExtensionBase] for `this` [Project].
+ * Returns the [KompleRootExtension] for `this` [Project].
  */
-public val Project.kompleRootExtension: KompleRootExtensionBase
+internal val Project.kompleRootExtension: KompleRootExtension
     get() = rootProject.getExtensionByName(KOMPLE_EXTENSION_NAME)
 
 /**
  * Registers a tool, identified by [name], that is configured by an instance of [Config].
  */
-public inline fun <reified Config : KompleToolConfigurator<*>> KompleRootExtensionBase.registerTool(
+public inline fun <reified Config : KompleToolConfigurator<*>> KompleRootExtension.registerTool(
     name: String,
     vararg args: Any
 ): NamedDomainObjectProvider<Config> = registerTool(

@@ -2,17 +2,13 @@ package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsExtractsDirectory
 import komple.gradle.task.TASK_TOOL_EXTRACT_POSTFIX
-import komple.gradle.task.outputFiles
+import komple.gradle.task.outputDir
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExtractTaskContext
 import komple.tool.task.ExtractTaskRegistrationScope
-import komple.tool.task.Inputs
-import komple.tool.task.doFirstWhenOutputChanged
 import org.gradle.api.Task
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.support.serviceOf
 import kotlin.reflect.KClass
 
 /**
@@ -31,26 +27,18 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
         description = "Extract $toolName"
 
         val extractContext = DefaultExtractTaskContext(
+            downloadDirectory = integrityTask.outputDir(project.layout),
             outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolName),
-            outputChanged = outputChanged,
-            inputs = integrityTask.outputFiles(project.layout)
+            outputChanged = outputChanged
         )
 
-        inputs.files(extractContext.inputs.files)
-        configure(this, extractContext)
+        inputs.dir(extractContext.downloadDirectory.directory)
 
-        check(!outputs.files.isEmpty) {
-            "Extract task did not registered outputs"
-        }
-
-        val fileOperations = project.serviceOf<FileSystemOperations>()
-        val outputFiles = outputs.files
-
-        extractContext.doFirstWhenOutputChanged {
-            fileOperations.delete {
-                delete(outputFiles)
-            }
-        }
+        configureTask(
+            context = extractContext,
+            configurator = configure,
+            deleteFirst = true
+        )
     }
 
     override fun skipExtraction(): TaskProvider<*> {

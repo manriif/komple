@@ -60,9 +60,6 @@ public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
      * [TaskProvider] to the registered task.
      *
      * The previously installed files are deleted first before the task action is executed.
-     *
-     * Note that the task must output a single directory where all the installed files are written
-     * to.
      */
     public fun InstallTaskRegistrationScope<Ext>.registerInstallTask(): TaskProvider<*>
 

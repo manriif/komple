@@ -11,7 +11,7 @@ import org.gradle.api.tasks.TaskProvider
 public interface KompleTool : Named {
 
     /**
-     * Provider to the task responsible for installing the tool.
+     * Provider of the task responsible for installing the tool.
      */
     public val installTaskProvider: TaskProvider<*>
 

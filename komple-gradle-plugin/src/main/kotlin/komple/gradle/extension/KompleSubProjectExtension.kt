@@ -3,6 +3,7 @@ package komple.gradle.extension
 import komple.exec.ExecService
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.create
 import javax.inject.Inject
 
 /**
@@ -12,21 +13,22 @@ import javax.inject.Inject
 public abstract class KompleSubProjectExtension @Inject constructor(objects: ObjectFactory) {
 
     /**
-     * Command executor service which can be used to exec command in task.
+     * Command executor service which can be used to execute command in an environment populated and
+     * configured by registered tools.
      */
     public abstract val execService: Property<ExecService>
 
     /**
      * Available compilations.
      */
-    @get:Inject
-    public abstract val compilations: KompleCompilationsExtension
+    public val compilations: KompleCompilationsExtension =
+        extensions.create("compilations", KompleCompilationsExtension::class)
 
     /**
      * Registered tools.
      */
-    @get:Inject
-    public abstract val tools: KompleToolsExtension
+    public val tools: KompleToolsExtension =
+        extensions.create("tools", KompleToolsExtension::class)
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -34,22 +36,19 @@ public abstract class KompleSubProjectExtension @Inject constructor(objects: Obj
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Configure [extension] from the [rootExtension].
+ * Configure [this@configureExtension] from the [root].
  */
-internal fun configureExtension(
-    extension: KompleSubProjectExtension,
-    rootExtension: KompleRootProjectExtension
-) {
-    extension.execService.set(rootExtension.execService)
+internal fun KompleSubProjectExtension.configureExtension(root: KompleRootProjectExtension) {
+    execService.set(root.execService)
 
-    rootExtension.projects.whenObjectAdded {
-        extension.compilations.extensions.add(
-            name,
+    root.projects.all {
+        compilations.extensions.add(
+            this.name,
             this
         )
     }
 
-    rootExtension.tools.whenObjectAdded {
-        extension.tools.extensions.add(name, this)
+    root.tools.all {
+        tools.extensions.add(this.name, this)
     }
 }

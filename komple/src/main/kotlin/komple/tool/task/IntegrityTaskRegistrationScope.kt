@@ -16,11 +16,13 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
 
     /**
      * Registers a task of type [T], [configure]s it and returns it.
+     * 
+     * Downloaded file(s) lives in the [TaskDirectory] passed to [configure].
      * The task should only perform integrity checking against downloaded file(s).
      */
     public fun <T : Task> register(
         klass: KClass<T>,
-        configure: T.(inputs: Inputs) -> Unit
+        configure: T.(directory: TaskDirectory) -> Unit
     ): TaskProvider<T>
 
     /**
@@ -38,10 +40,12 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
 
 /**
  * Registers a task of type [T], [configure]s it and returns it.
+ *
+ * Downloaded file(s) lives in the [TaskDirectory] passed to [configure].
  * The task should only perform integrity checking against downloaded file(s).
  */
 public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
-    noinline configure: T.(inputs: Inputs) -> Unit
+    noinline configure: T.(directory: TaskDirectory) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
     configure = configure
@@ -56,14 +60,14 @@ public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
 public fun IntegrityTaskRegistrationScope<*>.checksum(
     checksum: Provider<String>,
     algorithm: Algorithm
-): TaskProvider<*> = register<DefaultTask> { inputs ->
+): TaskProvider<*> = register<DefaultTask> { directory ->
     val verify = VerifyAction(project.layout).apply {
         algorithm(algorithm.toMessageDigestConstant())
     }
 
     doLast {
         verify.apply {
-            src(inputs.file)
+            src(directory.singleFile)
             checksum(checksum.get())
         }
 

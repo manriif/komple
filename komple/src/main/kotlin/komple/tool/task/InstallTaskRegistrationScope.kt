@@ -1,7 +1,6 @@
 package komple.tool.task
 
 import komple.tool.extension.KompleToolExtension
-import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
@@ -14,7 +13,9 @@ public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
 
     /**
      * Registers a task of type [T], [configure]s it and returns that registered task.
-     * The task must output a single directory where all the installed files are written to.
+     *
+     * The directory where extracted file(s) lives and where installed file(s) must be written to
+     * can be obtained from the [InstallTaskContext] passed to [configure].
      */
     public fun <T : Task> register(
         klass: KClass<T>,
@@ -34,7 +35,9 @@ public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
 
 /**
  * Registers a task of type [T] and [configure]s it.
- * The task must output a single directory where all the installed files are written to.
+ *
+ * The directory where extracted file(s) lives and where installed file(s) must be written to
+ * can be obtained from the [InstallTaskContext] passed to [configure].
  */
 public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
     noinline configure: T.(context: InstallTaskContext) -> Unit
@@ -42,13 +45,3 @@ public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
     klass = T::class,
     configure = configure
 )
-
-/**
- * Registers a task that just forwards extracted files, in a way that they'll become the actual
- * installed files, and returns that registered task.
- */
-public fun InstallTaskRegistrationScope<*>.forward(): TaskProvider<*> {
-    return register<DefaultTask> { context ->
-        outputs.files(context.inputs.files)
-    }
-}

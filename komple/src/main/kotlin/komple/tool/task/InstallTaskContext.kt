@@ -8,12 +8,12 @@ import org.gradle.api.file.Directory
 public interface InstallTaskContext : TaskContext {
 
     /**
-     * File(s) getting extracted.
+     * Directory containing extracted file(s).
      */
-    public val inputs: Inputs
+    public val extractDirectory: TaskDirectory
 
     /**
-     * Directory that should preferably be used to write the installed file(s) to.
+     * Directory where installed file(s) must be written to.
      */
     override val outputDirectory: Directory
 }

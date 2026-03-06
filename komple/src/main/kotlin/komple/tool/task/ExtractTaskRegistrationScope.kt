@@ -27,7 +27,9 @@ public interface ExtractTaskRegistrationScope<Extension : KompleToolExtension> :
 
     /**
      * Registers a task of type [T], [configure]s it and returns that registered task.
-     * The task must output the extracted file(s).
+     *
+     * The directory where downloaded file(s) lives and where extracted file(s) must be written to
+     * can be obtained from the [ExtractTaskContext] passed to [configure].
      */
     public fun <T : Task> register(
         klass: KClass<T>,
@@ -47,7 +49,9 @@ public interface ExtractTaskRegistrationScope<Extension : KompleToolExtension> :
 
 /**
  * Registers a task of type [T] and [configure]s it.
- * The task must output the extracted file(s).
+ *
+ * The directory where downloaded file(s) lives and where extracted file(s) must be written to
+ * can be obtained from the [ExtractTaskContext] passed to [configure].
  */
 public inline fun <reified T : Task> ExtractTaskRegistrationScope<*>.register(
     noinline configure: T.(context: ExtractTaskContext) -> Unit
@@ -67,9 +71,8 @@ private inline fun ExtractTaskRegistrationScope<*>.extractFileTree(
     crossinline createTree: ArchiveOperations.(Provider<RegularFile>) -> FileTree
 ) = register<DefaultTask> { context ->
     val archiveOperations = project.serviceOf<ArchiveOperations>()
-    val fileTree = archiveOperations.createTree(context.inputs.file)
+    val fileTree = archiveOperations.createTree(context.downloadDirectory.singleFile)
     val fileOperations = project.serviceOf<FileSystemOperations>()
-    outputs.dir(context.outputDirectory)
 
     if (enclosedContent) {
         context.doLastWhenOutputChanged {
@@ -149,13 +152,11 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
 ): TaskProvider<*> = register<DefaultTask> { context ->
     val execOperations = project.serviceOf<ExecOperations>()
     val fileOperations = project.serviceOf<FileSystemOperations>()
-    val dmgFile = context.inputs.file
 
     configureInputs?.invoke(inputs, context)
-    outputs.dir(context.outputDirectory)
 
     context.doLastWhenOutputChanged {
-        val dmgPath = dmgFile.get().asFile.absoluteFile
+        val dmgPath = context.downloadDirectory.singleFile.get().asFile.absoluteFile
 
         val mountPoint = execOperations.execOutput(
             Bash("hdiutil", "attach", dmgPath, "-nobrowse", "-plist") {
