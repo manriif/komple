@@ -34,5 +34,6 @@ public sealed class KompleProject(private val projectName: String) : Named {
  */
 @Suppress("UnstableApiUsage")
 internal fun KompleProject.configureCommonConventions(project: Project) {
+    packageName.convention(project.provider { "No package name was provided" })
     sourceFiles.convention(project.provider { error("No source files were provided") })
 }

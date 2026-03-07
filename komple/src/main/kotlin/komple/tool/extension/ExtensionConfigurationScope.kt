@@ -37,5 +37,3 @@ public inline fun <reified Extension : KompleToolExtension>
     args = args,
     configure = configure
 )
-
-

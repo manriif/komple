@@ -32,7 +32,7 @@ public interface ExtensionScope<Extension : Any> {
  * @throws groovy.lang.MissingPropertyException if the property is missing.
  */
 @KompleInternalApi
-public fun ExtensionScope<*>.kompleStringProperty(name: String): String {
+public fun ExtensionScope<*>.kompleProperty(name: String): String {
     val propertyName = "komple.$name"
 
     if (!project.extra.has(propertyName)) {

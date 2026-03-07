@@ -1,9 +1,11 @@
 package komple.exec
 
+import java.io.Serializable
+
 /**
  * Command interpreter.
  */
-public fun interface CommandInterpreter {
+public fun interface CommandInterpreter : Serializable {
 
     /**
      * Returns the ready to execute command line given [args].
@@ -20,6 +22,13 @@ public fun interface CommandInterpreter {
  */
 public val Bash: CommandInterpreter = CommandInterpreter { args ->
     DefaultCommandLine(arrayOf("bash", "-c", args.joinToString(" ")))
+}
+
+/**
+ * Zsh [Command] interpreter.
+ */
+public val Zsh: CommandInterpreter = CommandInterpreter { args ->
+    DefaultCommandLine(arrayOf("zsh", "-c", args.joinToString(" ")))
 }
 
 ///////////////////////////////////////////////////////////////////////////

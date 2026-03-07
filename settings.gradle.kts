@@ -32,7 +32,8 @@ include(":komple-catalog")
 include(":komple-gradle-plugin")
 
 fun includeTool(name: String) {
-    include(":tools:$name")
+    include(":komple-tools:$name")
 }
 
 includeTool("android-ndk")
+includeTool("jextract")

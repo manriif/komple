@@ -100,5 +100,9 @@ public interface CommandBuilder {
  * Returns a new [CommandBuilder] initialized with [args].
  */
 public fun CommandBuilder(vararg args: Any): CommandBuilder {
+    check(args.isNotEmpty()) {
+        "At least one argument is expected for a command"
+    }
+
     return ShellCommandBuilder(args)
 }

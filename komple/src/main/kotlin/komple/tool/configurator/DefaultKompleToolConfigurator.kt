@@ -1,5 +1,6 @@
 package komple.tool.configurator
 
+import komple.tool.compile.CompilationBuilderScope
 import komple.tool.compile.ExecEnvironmentBuilderScope
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExtractTaskRegistrationScope
@@ -20,8 +21,6 @@ public abstract class DefaultKompleToolConfigurator<Extension : KompleToolExtens
         return toolName
     }
 
-    override fun ExecEnvironmentBuilderScope<Extension>.configureEnvironment() {}
-
     override fun IntegrityTaskRegistrationScope<Extension>.registerIntegrityTask(): TaskProvider<*> {
         return skipIntegrityCheck()
     }
@@ -33,4 +32,8 @@ public abstract class DefaultKompleToolConfigurator<Extension : KompleToolExtens
     override fun InstallTaskRegistrationScope<Extension>.registerInstallTask(): TaskProvider<*> {
         return skipInstallation()
     }
+
+    override fun CompilationBuilderScope<Extension>.configureCompilation() {}
+
+    override fun ExecEnvironmentBuilderScope<Extension>.configureEnvironment() {}
 }

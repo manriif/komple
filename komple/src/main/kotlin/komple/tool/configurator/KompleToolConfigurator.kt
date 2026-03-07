@@ -1,6 +1,7 @@
 package komple.tool.configurator
 
 import komple.platform.Host
+import komple.tool.compile.CompilationBuilderScope
 import komple.tool.compile.ExecEnvironmentBuilderScope
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.KompleToolExtension
@@ -8,11 +9,19 @@ import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.InstallTaskRegistrationScope
 import komple.tool.task.IntegrityTaskRegistrationScope
+import komple.tool.task.TaskRegistrationScope
 import org.gradle.api.Named
 import org.gradle.api.tasks.TaskProvider
 
 /**
  * [KompleToolConfigurator] contributes to the Gradle project configuration.
+ *
+ * If [supportHost] returns `false` then [registerDownloadTask] [registerIntegrityTask],
+ * [registerExtractTask], [registerInstallTask], [configureCompilation] and [configureEnvironment]
+ * are never called. Inside the body of the previously enumerated functions, it is safe to assume
+ * that the [Host] Komple was applied on is supported.
+ * Anyway, is always possible to return [TaskRegistrationScope.unsupported] on complex branch in
+ * [registerDownloadTask], [registerIntegrityTask]; [registerExtractTask] and [registerInstallTask].
  */
 public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
 
@@ -36,6 +45,10 @@ public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
      *
      * The task output is then used as the input for the tasks registered by [registerIntegrityTask]
      * and [registerExtractTask].
+     *
+     * Note that if [supportHost] returned `false` then this function is never called for the same
+     * [Host] value that was passed to [supportHost]. It is safe to assume that this function is
+     * called only for supported host.
      */
     public fun DownloadTaskRegistrationScope<Ext>.registerDownloadTask(): TaskProvider<*>
 
@@ -68,7 +81,12 @@ public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Contributes to the execution environment.
+     * Extends the compilation for a project.
+     */
+    public fun CompilationBuilderScope<Ext>.configureCompilation()
+
+    /**
+     * Populates the execution environment.
      */
     public fun ExecEnvironmentBuilderScope<Ext>.configureEnvironment()
 }

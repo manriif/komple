@@ -26,7 +26,6 @@ internal abstract class DefaultExecService @Inject constructor(
      */
     private fun ExecSpec.configure(
         mainCommand: Command,
-        interpreter: CommandInterpreter,
         workingDirectory: File?
     ) {
         workingDirectory?.let { workingDir = it }
@@ -42,23 +41,21 @@ internal abstract class DefaultExecService @Inject constructor(
 
         val commands = execEnvironment.commands.get()
 
-        val command: Command = if (commands.isEmpty()) mainCommand else {
+        val command = if (commands.isEmpty()) mainCommand else {
             commands.fold(mainCommand) { left, right ->
                 right.toBuilder().then(left).build()
             }
         }
 
-        commandLine(line = command.interpret(interpreter))
+        commandLine(line = command.interpret(parameters.interpreter.get()))
     }
 
     override fun exec(
         command: Command,
-        interpreter: CommandInterpreter,
         workingDirectory: File?
     ): ExecResult = execOperations.exec {
         configure(
             mainCommand = command,
-            interpreter = interpreter,
             workingDirectory = workingDirectory
         )
     }
@@ -69,6 +66,7 @@ internal abstract class DefaultExecService @Inject constructor(
 
     interface Params : BuildServiceParameters {
 
+        val interpreter: Property<CommandInterpreter>
         val environment: Property<ExecEnvironment>
     }
 

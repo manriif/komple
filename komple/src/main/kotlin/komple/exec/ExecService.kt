@@ -9,12 +9,11 @@ import java.io.File
 public interface ExecService {
 
     /**
-     * Executes the [command], using [interpreter], in an environment configured by registered
-     * tools.
+     * Executes the [command], in an environment configured by registered tools.
      */
+    @IgnorableReturnValue
     public fun exec(
         command: Command,
-        interpreter: CommandInterpreter = Bash,
         workingDirectory: File? = null
     ): ExecResult
 }

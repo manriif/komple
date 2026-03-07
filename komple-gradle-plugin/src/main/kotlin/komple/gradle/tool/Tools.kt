@@ -83,8 +83,10 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     val installDirectory = project.layout
         .dir(installTaskProvider.map { it.outputs.files.singleFile })
 
-    DefaultExecEnvironmentBuilderScope(context, environment, installDirectory)
-        .use { it.configureEnvironment() }
+    if (supportHost(CurrentHost)) {
+        DefaultExecEnvironmentBuilderScope(context, environment, installDirectory)
+            .use { it.configureEnvironment() }
+    }
 
     val tool = DefaultKompleTool(
         toolName = context.toolName,

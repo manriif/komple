@@ -12,7 +12,7 @@ catalog {
         plugin(komple, group).versionRef(komple)
 
         rootProject.subprojects.forEach { project ->
-            if (project.path.startsWith(":tools:")) {
+            if (project.path.startsWith(":komple-tools:")) {
                 plugin(project.toolName, project.toolPluginId).versionRef(komple)
             }
         }
