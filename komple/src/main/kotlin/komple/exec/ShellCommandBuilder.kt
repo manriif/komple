@@ -8,35 +8,35 @@ internal class ShellCommandBuilder(command: Array<out Any>) : CommandBuilder {
     private val command = command.toMutableList()
 
     ///////////////////////////////////////////////////////////////////////////
-    // Alterations
+    // Insertions
     ///////////////////////////////////////////////////////////////////////////
 
-    private inline fun addOperator(
-        operator: String,
+    private inline fun insert(
+        operator: String?,
         insert: () -> Unit
     ) = apply {
-        command.add(operator)
+        operator?.let(command::add)
         insert()
     }
 
-    private fun addOperator(
-        operator: String,
+    private fun insert(
+        operator: String?,
         args: Array<out Any>
-    ): CommandBuilder = addOperator(operator) {
+    ): CommandBuilder = insert(operator) {
         command.addAll(args)
     }
 
-    private fun addOperator(
-        operator: String,
+    private fun insert(
+        operator: String?,
         args: Iterable<Any>
-    ): CommandBuilder = addOperator(operator) {
+    ): CommandBuilder = insert(operator) {
         command.addAll(args)
     }
 
-    private fun addOperator(
-        operator: String,
+    private fun insert(
+        operator: String?,
         command: Command
-    ): CommandBuilder = addOperator(
+    ): CommandBuilder = insert(
         operator = operator,
         args = ForwardInterpreter.invoke(command).args
     )
@@ -45,29 +45,35 @@ internal class ShellCommandBuilder(command: Array<out Any>) : CommandBuilder {
     // Operations
     ///////////////////////////////////////////////////////////////////////////
 
-    override fun pipe(vararg args: Any): CommandBuilder = addOperator(PIPE, args)
+    override fun append(vararg args: Any): CommandBuilder = insert(null, args)
 
-    override fun pipe(args: Iterable<Any>): CommandBuilder = addOperator(PIPE, args)
+    override fun append(args: Iterable<Any>): CommandBuilder = insert(null, args)
 
-    override fun pipe(command: Command): CommandBuilder = addOperator(PIPE, command)
+    override fun append(command: Command): CommandBuilder = insert(null, command)
 
-    override fun pipeAll(vararg args: Any): CommandBuilder = addOperator(PIPE_ALL, args)
+    override fun pipe(vararg args: Any): CommandBuilder = insert(PIPE, args)
 
-    override fun pipeAll(args: Iterable<Any>): CommandBuilder = addOperator(PIPE_ALL, args)
+    override fun pipe(args: Iterable<Any>): CommandBuilder = insert(PIPE, args)
 
-    override fun pipeAll(command: Command): CommandBuilder = addOperator(PIPE_ALL, command)
+    override fun pipe(command: Command): CommandBuilder = insert(PIPE, command)
 
-    override fun then(vararg args: Any): CommandBuilder = addOperator(AND, args)
+    override fun pipeAll(vararg args: Any): CommandBuilder = insert(PIPE_ALL, args)
 
-    override fun then(args: Iterable<Any>): CommandBuilder = addOperator(AND, args)
+    override fun pipeAll(args: Iterable<Any>): CommandBuilder = insert(PIPE_ALL, args)
 
-    override fun then(command: Command): CommandBuilder = addOperator(AND, command)
+    override fun pipeAll(command: Command): CommandBuilder = insert(PIPE_ALL, command)
 
-    override fun otherwise(vararg args: Any): CommandBuilder = addOperator(OR, args)
+    override fun then(vararg args: Any): CommandBuilder = insert(AND, args)
 
-    override fun otherwise(args: Iterable<Any>): CommandBuilder = addOperator(OR, args)
+    override fun then(args: Iterable<Any>): CommandBuilder = insert(AND, args)
 
-    override fun otherwise(command: Command): CommandBuilder = addOperator(OR, command)
+    override fun then(command: Command): CommandBuilder = insert(AND, command)
+
+    override fun otherwise(vararg args: Any): CommandBuilder = insert(OR, args)
+
+    override fun otherwise(args: Iterable<Any>): CommandBuilder = insert(OR, args)
+
+    override fun otherwise(command: Command): CommandBuilder = insert(OR, command)
 
     ///////////////////////////////////////////////////////////////////////////
     // Command
@@ -97,6 +103,8 @@ internal class ShellCommandBuilder(command: Array<out Any>) : CommandBuilder {
      * Interpreter not altering command.
      */
     private object ForwardInterpreter : CommandInterpreter {
+
+        private fun readResolve(): Any = ForwardInterpreter
 
         override fun createCommandLine(args: Array<String>): CommandLine {
             return DefaultCommandLine(args)

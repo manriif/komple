@@ -4,20 +4,24 @@ import org.gradle.api.Named
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 
 /**
  * Project than can lead to compilation.
  */
-public sealed class KompleProject(private val projectName: String) : Named {
+public sealed class KompleProject(@Internal private val projectName: String) : Named {
 
     /**
      * Package name for the output files.
      */
+    @get:Input
     public abstract val packageName: Property<String>
 
     /**
      * Sources files of the project.
      */
+    @get:Input
     public abstract val sourceFiles: ConfigurableFileCollection
 
     override fun getName(): String {

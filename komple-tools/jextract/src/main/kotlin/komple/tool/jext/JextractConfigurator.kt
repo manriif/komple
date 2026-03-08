@@ -8,10 +8,15 @@ import komple.project.KompleCProject
 import komple.tool.compile.CompilationBuilderScope
 import komple.tool.compile.ExecEnvironmentBuilderScope
 import komple.tool.compile.createExtension
+import komple.tool.compile.registerTask
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
 import komple.tool.extension.kompleProperty
+import komple.tool.jext.generator.JextractBindingGenerator
+import komple.tool.jext.generator.JextractBindingGeneratorImpl
+import komple.tool.jext.generator.JextractCommandLineOptions
+import komple.tool.jext.generator.JextractGenerateBindingsTask
 import komple.tool.task.Algorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
@@ -21,6 +26,7 @@ import komple.tool.task.untarGzip
 import komple.tool.task.url
 import org.gradle.api.JavaVersion
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
@@ -110,14 +116,22 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
     }
 
     override fun CompilationBuilderScope<JextractExtension>.configureCompilation() {
-        when (project) {
+        when (val kompleProject = project) {
             is KompleCProject -> createExtension<JextractCompilationExtension>("jextract") {
                 extension.extensibleGenerateBindingsTasks.registerFactory(
-                    JextractBindingConfig::class.java
+                    JextractBindingGenerator::class.java
                 ) { name ->
-                    val task = project.tasks.create<>("$name")
+                    val options = project.objects.newInstance<JextractCommandLineOptions>()
 
-                    project.objects.newInstance<JextractBindingConfig>()
+                    val task = registerTask<JextractGenerateBindingsTask>(
+                        postfix = "jextractGenerateBindings${name}"
+                    ) {
+                        this.cProject = kompleProject
+                        this.cliOptions = options
+                        this.outputDirectory = generatedDirectory("jextract-${name}")
+                    }
+
+                    project.objects.newInstance<JextractBindingGeneratorImpl>(options, task)
                 }
             }
         }

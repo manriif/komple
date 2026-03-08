@@ -15,6 +15,24 @@ package komple.exec
 public interface CommandBuilder {
 
     /**
+     * Adds [args] to the end of current arguments.
+     */
+    @IgnorableReturnValue
+    public fun append(vararg args: Any): CommandBuilder
+
+    /**
+     * Adds [args] to the end of current arguments.
+     */
+    @IgnorableReturnValue
+    public fun append(args: Iterable<Any>): CommandBuilder
+
+    /**
+     * Adds [command] to the end of current arguments.
+     */
+    @IgnorableReturnValue
+    public fun append(command: Command): CommandBuilder
+
+    /**
      * `|` — pipe stdout to the given command.
      */
     @IgnorableReturnValue

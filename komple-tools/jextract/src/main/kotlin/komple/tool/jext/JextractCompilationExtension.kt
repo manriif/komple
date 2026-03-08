@@ -1,5 +1,6 @@
 package komple.tool.jext
 
+import komple.tool.jext.generator.JextractBindingGenerator
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
@@ -11,12 +12,12 @@ import javax.inject.Inject
  */
 public abstract class JextractCompilationExtension @Inject constructor(objects: ObjectFactory) {
 
-    internal val extensibleGenerateBindingsTasks: ExtensiblePolymorphicDomainObjectContainer<JextractGenerateBindingsTask> =
-        objects.polymorphicDomainObjectContainer(JextractGenerateBindingsTask::class)
+    internal val extensibleGenerateBindingsTasks: ExtensiblePolymorphicDomainObjectContainer<JextractBindingGenerator> =
+        objects.polymorphicDomainObjectContainer(JextractBindingGenerator::class)
 
     /**
      * Bindings generator tasks.
      */
-    public val generateBindingsTasks: NamedDomainObjectContainer<JextractGenerateBindingsTask>
+    public val generateBindingsTasks: NamedDomainObjectContainer<JextractBindingGenerator>
         get() = extensibleGenerateBindingsTasks
 }
