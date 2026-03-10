@@ -4,8 +4,8 @@ import komple.KompleRootExtension
 import komple.exec.Bash
 import komple.exec.CommandInterpreter
 import komple.exec.ExecService
+import komple.gradle.tool.DefaultKompleTool
 import komple.project.KompleProject
-import komple.tool.KompleTool
 import komple.tool.configurator.KompleToolConfigurator
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
@@ -54,7 +54,7 @@ public abstract class KompleRootProjectExtension @Inject constructor(
     /**
      * Configured tools.
      */
-    internal val tools = objects.domainObjectSet(KompleTool::class)
+    internal val tools = objects.domainObjectSet(DefaultKompleTool::class)
 
     override fun <Configurator : KompleToolConfigurator<*>> registerTool(
         name: String,

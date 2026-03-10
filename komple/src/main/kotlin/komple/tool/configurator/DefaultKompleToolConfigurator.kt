@@ -1,7 +1,7 @@
 package komple.tool.configurator
 
-import komple.tool.compile.CompilationBuilderScope
-import komple.tool.compile.ExecEnvironmentBuilderScope
+import komple.tool.project.ProjectConfigurationScope
+import komple.tool.project.ExecEnvironmentBuilderScope
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.InstallTaskRegistrationScope
@@ -33,7 +33,7 @@ public abstract class DefaultKompleToolConfigurator<Extension : KompleToolExtens
         return skipInstallation()
     }
 
-    override fun CompilationBuilderScope<Extension>.configureCompilation() {}
+    override fun ProjectConfigurationScope<Extension>.configureProject() {}
 
     override fun ExecEnvironmentBuilderScope<Extension>.configureEnvironment() {}
 }

@@ -6,14 +6,17 @@ import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
-import komple.gradle.task.TASK_TOOL_INSTALL_POSTFIX
-import komple.gradle.task.toolTaskName
-import komple.gradle.tool.compile.DefaultExecEnvironmentBuilderScope
+import komple.gradle.tool.task.TASK_TOOL_INSTALL_POSTFIX
+import komple.gradle.tool.task.toolTaskName
+import komple.gradle.tool.project.DefaultExecEnvironmentBuilderScope
 import komple.gradle.tool.extension.DefaultExtensionConfigurationScope
+import komple.gradle.tool.project.DefaultProjectConfigurationScope
 import komple.gradle.tool.task.DefaultDownloadTaskRegistrationScope
 import komple.gradle.tool.task.DefaultExtractTaskRegistrationScope
 import komple.gradle.tool.task.DefaultInstallTaskRegistrationScope
 import komple.gradle.tool.task.DefaultIntegrityTaskRegistrationScope
+import komple.gradle.extension.KompleProjectExtension
+import komple.project.KompleProject
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Project
@@ -77,7 +80,7 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         toolName = toolName
     ).use { it.configureExtension() }
 
-    val context = KompleToolConfigContext(project, rootExtension, toolName, extension)
+    val context = KompleToolConfigContext(project, toolName, extension)
     val installTaskProvider = createInstallTaskProvider(context)
 
     val installDirectory = project.layout
@@ -89,6 +92,8 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     }
 
     val tool = DefaultKompleTool(
+        configurator = this,
+        extension = context.extension,
         toolName = context.toolName,
         installTaskProvider = installTaskProvider,
         installDirectory = installDirectory
@@ -124,5 +129,21 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstal
             outputs.dir(gradle.kompleToolsInstallsDirectory.dir(context.toolName))
             doLast { throw UnsupportedHostException(unsupportedMessage) }
         }
+    }
+}
+
+/**
+ * Configures the [kProject] from `this` tool.
+ */
+internal fun <Ext : KompleToolExtension> DefaultKompleTool<Ext>.configureProject(
+    project: Project,
+    kProject: KompleProject,
+    projectExtension: KompleProjectExtension
+) {
+    val context = KompleToolConfigContext(project, toolName, extension)
+    val scope = DefaultProjectConfigurationScope(context, projectExtension, kProject)
+
+    configurator.run {
+        scope.use { it.configureProject() }
     }
 }

@@ -37,7 +37,7 @@ internal class DefaultExtensionConfigurationScope<Extension : KompleToolExtensio
     }
 
     /**
-     * Default implementation of [ExtensionScope].
+     * Implementation of [ExtensionScope].
      */
     internal inner class ExtensionScopeImpl(override val extension: Extension) :
         ExtensionScope<Extension>,

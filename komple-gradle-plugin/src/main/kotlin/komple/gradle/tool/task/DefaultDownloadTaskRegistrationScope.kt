@@ -1,7 +1,6 @@
 package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsDownloadsDirectory
-import komple.gradle.task.TASK_TOOL_DOWNLOAD_POSTFIX
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.DownloadTaskContext

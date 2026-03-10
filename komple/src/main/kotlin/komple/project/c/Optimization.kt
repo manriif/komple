@@ -1,4 +1,4 @@
-package komple.compile.c
+package komple.project.c
 
 /**
  * Optimization for a C compilation.

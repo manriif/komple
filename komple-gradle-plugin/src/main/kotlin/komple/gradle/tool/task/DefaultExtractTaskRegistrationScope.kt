@@ -1,8 +1,6 @@
 package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsExtractsDirectory
-import komple.gradle.task.TASK_TOOL_EXTRACT_POSTFIX
-import komple.gradle.task.outputDir
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExtractTaskContext

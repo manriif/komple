@@ -1,4 +1,4 @@
-package komple.tool.compile
+package komple.tool.project
 
 import komple.exec.ExecEnvironmentBuilder
 import komple.platform.HasHost

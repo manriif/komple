@@ -10,6 +10,6 @@ public class AndroidNdkPlugin: KompleToolPlugin() {
         project: Project,
         komple: KompleRootExtension
     ) {
-        komple.registerTool("androidNdk", AndroidNdkConfigurator::class)
+        komple.registerTool("Android NDK", AndroidNdkConfigurator::class)
     }
 }

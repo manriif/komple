@@ -12,12 +12,12 @@ import javax.inject.Inject
  */
 public abstract class JextractCompilationExtension @Inject constructor(objects: ObjectFactory) {
 
-    internal val extensibleGenerateBindingsTasks: ExtensiblePolymorphicDomainObjectContainer<JextractBindingGenerator> =
+    internal val extensibleBindingGenerators: ExtensiblePolymorphicDomainObjectContainer<JextractBindingGenerator> =
         objects.polymorphicDomainObjectContainer(JextractBindingGenerator::class)
 
     /**
-     * Bindings generator tasks.
+     * Bindings generators.
      */
-    public val generateBindingsTasks: NamedDomainObjectContainer<JextractBindingGenerator>
-        get() = extensibleGenerateBindingsTasks
+    public val bindingGenerators: NamedDomainObjectContainer<JextractBindingGenerator>
+        get() = extensibleBindingGenerators
 }

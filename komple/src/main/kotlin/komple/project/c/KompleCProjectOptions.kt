@@ -1,7 +1,5 @@
-package komple.project
+package komple.project.c
 
-import komple.compile.c.Optimization
-import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
@@ -13,17 +11,16 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 
 /**
- * C project.
+ * Options for C project.
  */
-public abstract class KompleCProject internal constructor(projectName: String) :
-    KompleProject(projectName) {
+public interface KompleCProjectOptions {
 
     /**
      * Main header file.
      */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public abstract val headerFile: RegularFileProperty
+    public val headerFile: RegularFileProperty
 
     /**
      * Headers to include as they are discovered.
@@ -31,27 +28,27 @@ public abstract class KompleCProject internal constructor(projectName: String) :
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public abstract val headerFilters: ConfigurableFileCollection
+    public val headerFilters: ConfigurableFileCollection
 
     /**
      * Directories to includes for header search.
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public abstract val includeDirs: ConfigurableFileCollection
+    public val includeDirs: ConfigurableFileCollection
 
     /**
      * Optimization level.
      * Default to [Optimization.Level2].
      */
     @get:Input
-    public abstract val optimization: Property<Optimization>
+    public val optimization: Property<Optimization>
 
     /**
      * Pre-processor definitions.
      */
     @get:Input
-    public abstract val defines: MapProperty<String, String>
+    public val defines: MapProperty<String, String>
 
     /**
      * Adds a definition with the value `1`.
@@ -59,18 +56,4 @@ public abstract class KompleCProject internal constructor(projectName: String) :
     public fun define(name: String) {
         defines.put(name, "1")
     }
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Conventions
-///////////////////////////////////////////////////////////////////////////
-
-/**
- * Configures the conventions values.
- */
-@Suppress("UnstableApiUsage")
-internal fun KompleCProject.configureConventions(project: Project) {
-    headerFile.convention(project.provider { error("Main header file was not set") })
-    headerFilters.convention(headerFile)
-    optimization.convention(Optimization.Level2)
 }

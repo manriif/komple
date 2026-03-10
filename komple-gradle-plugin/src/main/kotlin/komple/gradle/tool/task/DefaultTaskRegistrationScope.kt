@@ -2,12 +2,9 @@ package komple.gradle.tool.task
 
 import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
-import komple.gradle.task.checksumFile
-import komple.gradle.task.checksumsEquals
-import komple.gradle.task.registerToolTask
-import komple.gradle.task.toolTaskName
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
+import komple.gradle.util.dashCased
 import komple.gradle.util.sha256
 import komple.platform.Host
 import komple.tool.extension.HasExtension
@@ -59,7 +56,7 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
         type: KClass<T>,
         crossinline configure: T.(outputChanged: Provider<Boolean>) -> Unit
     ): TaskProvider<T> = context.project.registerToolTask(toolTaskName(postfix), type) {
-        val checksumFile = project.checksumFile(name)
+        val checksumFile = project.checksumFile(name.dashCased())
         val checksumInputs = project.objects.fileCollection()
 
         val checksumProvider = project.provider {

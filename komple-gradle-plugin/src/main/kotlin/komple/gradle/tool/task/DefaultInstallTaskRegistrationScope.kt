@@ -1,8 +1,6 @@
 package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsInstallsDirectory
-import komple.gradle.task.TASK_TOOL_INSTALL_POSTFIX
-import komple.gradle.task.outputDir
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.InstallTaskContext

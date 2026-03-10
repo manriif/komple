@@ -1,6 +1,8 @@
 package komple.gradle.extension
 
 import komple.exec.ExecService
+import komple.gradle.tool.configureProject
+import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.create
@@ -19,10 +21,10 @@ public abstract class KompleSubProjectExtension @Inject constructor(objects: Obj
     public abstract val execService: Property<ExecService>
 
     /**
-     * Available compilations.
+     * Configured projects.
      */
-    public val compilations: KompleCompilationsExtension =
-        extensions.create("compilations", KompleCompilationsExtension::class)
+    public val projects: KompleProjectsExtension =
+        extensions.create("projects", KompleProjectsExtension::class)
 
     /**
      * Registered tools.
@@ -38,14 +40,18 @@ public abstract class KompleSubProjectExtension @Inject constructor(objects: Obj
 /**
  * Configure [this@configureExtension] from the [root].
  */
-internal fun KompleSubProjectExtension.configureExtension(root: KompleRootProjectExtension) {
+internal fun KompleSubProjectExtension.configureExtension(
+    root: KompleRootProjectExtension,
+    project: Project
+) {
     execService.set(root.execService)
 
-    root.projects.all {
-        compilations.extensions.add(
-            this.name,
-            this
-        )
+    root.projects.all kProject@{
+        val projectExtension = projects.extensions.create<KompleProjectExtension>(this.name)
+
+        root.tools.all {
+            configureProject(project, this@kProject, projectExtension)
+        }
     }
 
     root.tools.all {

@@ -1,4 +1,4 @@
-package komple.tool.compile
+package komple.tool.project
 
 import komple.project.KompleProject
 import komple.tool.extension.ExtensionScope
@@ -11,13 +11,13 @@ import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
 
 /**
- * Scope for [komple.compile.KompleCompilation] building.
+ * Scope for [KompleProject] configuration.
  */
-public interface CompilationBuilderScope<Extension : KompleToolExtension> :
+public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     HasExtension<Extension> {
 
     /**
-     * The [KompleProject] that lead to a new compilation.
+     * The [KompleProject] that is being configured.
      */
     public val project: KompleProject
 
@@ -61,7 +61,7 @@ public interface CompilationBuilderScope<Extension : KompleToolExtension> :
  * The returned extension itself can be configured inside [configure].
  */
 @IgnorableReturnValue
-public inline fun <reified E : Any> CompilationBuilderScope<*>.createExtension(
+public inline fun <reified E : Any> ProjectConfigurationScope<*>.createExtension(
     name: String,
     vararg args: Any,
     noinline configure: (ExtensionScope<E>.() -> Unit)? = null
@@ -77,7 +77,7 @@ public inline fun <reified E : Any> CompilationBuilderScope<*>.createExtension(
  * The returned extension itself can be configured inside [configure].
  */
 @IgnorableReturnValue
-public inline fun <reified T : Task> CompilationBuilderScope<*>.registerTask(
+public inline fun <reified T : Task> ProjectConfigurationScope<*>.registerTask(
     postfix: String,
     noinline configure: (T.() -> Unit)? = null
 ): TaskProvider<T> = registerTask(

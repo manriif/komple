@@ -1,8 +1,5 @@
 package komple.gradle.tool.task
 
-import komple.gradle.task.TASK_TOOL_INTEGRITY_POSTFIX
-import komple.gradle.task.outputDir
-import komple.gradle.task.registerToolTask
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.IntegrityTaskRegistrationScope

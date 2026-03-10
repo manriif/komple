@@ -43,16 +43,24 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Defa
             .append("--target-package", project.packageName.get())
             .append("--header-class-name", options.headerClassName.get())
             .appendValues("--include-dir", project.includeDirs, File::getAbsolutePath)
-            .appendValues("")
-
-
-
+            .appendValues("--include-function", options.includeFunctions.get())
+            .appendValues("--include-constant", options.includeConstants.get())
+            .appendValues("--include-struct", options.includeStructs.get())
+            .appendValues("--include-union", options.includeUnions.get())
+            .appendValues("--include-typedef", options.includeTypedefs.get())
+            .appendValues("--include-var", options.includeVars.get())
+            .appendValues("--define-macro", project.defines.get().entries) { (key, value) ->
+                "$key=$value"
+            }
+            .append(project.headerFile.get().asFile.absolutePath)
             .build()
 
         execService.get().exec(command)
     }
 
-
+    /**
+     * Appends each [optionValues] prefixed by [optionName].
+     */
     private inline fun <T : Any> CommandBuilder.appendValues(
         optionName: String,
         optionValues: Iterable<T>,

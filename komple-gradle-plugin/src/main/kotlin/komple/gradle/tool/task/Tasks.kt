@@ -1,7 +1,7 @@
-package komple.gradle.task
+package komple.gradle.tool.task
 
 import komple.gradle.kompleChecksumsDirectory
-import komple.gradle.tool.task.DefaultTaskDirectory
+import komple.gradle.util.camelCased
 import komple.tool.task.TaskDirectory
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -27,8 +27,7 @@ internal const val TASK_TOOL_INSTALL_POSTFIX = "Install"
  * Returns a conventional name for a task and for the tool.
  */
 internal fun toolTaskName(toolName: String, postfix: String): String {
-    val prefix = toolName.replaceFirstChar { it.lowercase(getDefault()) }
-    return "$prefix$postfix"
+    return "${toolName.camelCased()}$postfix"
 }
 
 /**

@@ -10,6 +10,6 @@ public class JextractPlugin : KompleToolPlugin() {
         project: Project,
         komple: KompleRootExtension
     ) {
-        komple.registerTool("jextract", JextractConfigurator::class)
+        komple.registerTool("Jextract", JextractConfigurator::class)
     }
 }

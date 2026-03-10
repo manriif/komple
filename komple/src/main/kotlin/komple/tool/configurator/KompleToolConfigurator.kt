@@ -1,8 +1,8 @@
 package komple.tool.configurator
 
 import komple.platform.Host
-import komple.tool.compile.CompilationBuilderScope
-import komple.tool.compile.ExecEnvironmentBuilderScope
+import komple.tool.project.ProjectConfigurationScope
+import komple.tool.project.ExecEnvironmentBuilderScope
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.DownloadTaskRegistrationScope
@@ -17,7 +17,7 @@ import org.gradle.api.tasks.TaskProvider
  * [KompleToolConfigurator] contributes to the Gradle project configuration.
  *
  * If [supportHost] returns `false` then [registerDownloadTask] [registerIntegrityTask],
- * [registerExtractTask], [registerInstallTask], [configureCompilation] and [configureEnvironment]
+ * [registerExtractTask], [registerInstallTask], [configureProject] and [configureEnvironment]
  * are never called. Inside the body of the previously enumerated functions, it is safe to assume
  * that the [Host] Komple was applied on is supported.
  * Anyway, is always possible to return [TaskRegistrationScope.unsupported] on complex branch in
@@ -77,13 +77,13 @@ public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
     public fun InstallTaskRegistrationScope<Ext>.registerInstallTask(): TaskProvider<*>
 
     ///////////////////////////////////////////////////////////////////////////
-    // Compilation
+    // Project
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Extends the compilation for a project.
+     * Configures a project.
      */
-    public fun CompilationBuilderScope<Ext>.configureCompilation()
+    public fun ProjectConfigurationScope<Ext>.configureProject()
 
     /**
      * Populates the execution environment.
