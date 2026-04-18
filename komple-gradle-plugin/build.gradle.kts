@@ -6,6 +6,7 @@ plugins {
 }
 
 dependencies {
+    compileOnly(libs.kotlin.gradlePlugin)
     api(projects.komple)
 }
 

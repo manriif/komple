@@ -117,7 +117,7 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
 
     override fun ProjectConfigurationScope<JextractExtension>.configureProject() {
         when (val kompleProject = project) {
-            is KompleCProject -> createExtension<JextractCompilationExtension>("jextract") {
+            is KompleCProject -> createExtension<JextractCProjectExtension>("jextract") {
                 extension.extensibleBindingGenerators.registerFactory(
                     JextractBindingGenerator::class.java
                 ) { name ->

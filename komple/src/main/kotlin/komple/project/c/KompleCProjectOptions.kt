@@ -1,5 +1,9 @@
+@file:Suppress("UnstableApiUsage")
+
 package komple.project.c
 
+import komple.project.KompleCProject
+import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
@@ -56,4 +60,13 @@ public interface KompleCProjectOptions {
     public fun define(name: String) {
         defines.put(name, "1")
     }
+}
+
+/**
+ * Configures the convention values.
+ */
+internal fun KompleCProject.configureConventions(project: Project) {
+    headerFile.convention(project.provider { error("Main header file was not set") })
+    headerFilters.convention(headerFile)
+    optimization.convention(Optimization.Level2)
 }

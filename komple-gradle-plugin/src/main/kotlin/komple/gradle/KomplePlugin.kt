@@ -2,12 +2,14 @@ package komple.gradle
 
 import komple.KOMPLE_EXTENSION_NAME
 import komple.KOMPLE_PLUGIN_ID
+import komple.gradle.project.configureKmpExtension
+import komple.gradle.project.withKmpPlugin
 import komple.gradle.exec.DefaultExecService
 import komple.gradle.exec.ExecEnvironment
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.extension.KompleSubProjectExtension
 import komple.gradle.extension.configureConventions
-import komple.gradle.extension.configureExtension
+import komple.gradle.extension.configureSubProjectExtension
 import komple.gradle.tool.configureTools
 import komple.project.registerFactories
 import komple.util.getExtensionByName
@@ -19,7 +21,7 @@ import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.registerIfAbsent
 
 /**
- * Komple plugin that applies to subproject.
+ * Komple Gradle plugin.
  */
 public class KomplePlugin : Plugin<Project> {
 
@@ -67,10 +69,14 @@ public class KomplePlugin : Plugin<Project> {
             val extension =
                 project.extensions.create<KompleSubProjectExtension>(KOMPLE_EXTENSION_NAME)
 
-            val rootExtensions =
+            val rootExtension =
                 rootProject.getExtensionByName<KompleRootProjectExtension>(KOMPLE_EXTENSION_NAME)
 
-            extension.configureExtension(rootExtensions)
+            project.configureSubProjectExtension(extension, rootExtension)
+
+            project.withKmpPlugin { kmp ->
+                configureKmpExtension(rootExtension, kmp)
+            }
         }
     }
 }

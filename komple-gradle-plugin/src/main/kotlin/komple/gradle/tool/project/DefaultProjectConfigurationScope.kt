@@ -1,9 +1,8 @@
 package komple.gradle.tool.project
 
-import komple.gradle.extension.KompleProjectExtension
+import komple.gradle.project.KompleProjectExtension
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
-import komple.gradle.util.camelCased
 import komple.gradle.util.dashCased
 import komple.gradle.util.pascalCased
 import komple.project.KompleProject

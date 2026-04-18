@@ -29,7 +29,6 @@ public interface ExtensionScope<Extension : Any> {
  *
  * @throws ClassCastException if the returned value is not a [String].
  * @throws NullPointerException if the returned value is `null` or do not exist.
- * @throws groovy.lang.MissingPropertyException if the property is missing.
  */
 @KompleInternalApi
 public fun ExtensionScope<*>.kompleProperty(name: String): String {

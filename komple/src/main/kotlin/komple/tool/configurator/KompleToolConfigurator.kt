@@ -20,7 +20,7 @@ import org.gradle.api.tasks.TaskProvider
  * [registerExtractTask], [registerInstallTask], [configureProject] and [configureEnvironment]
  * are never called. Inside the body of the previously enumerated functions, it is safe to assume
  * that the [Host] Komple was applied on is supported.
- * Anyway, is always possible to return [TaskRegistrationScope.unsupported] on complex branch in
+ * Anyway, it is always possible to return [TaskRegistrationScope.unsupported] on complex branch in
  * [registerDownloadTask], [registerIntegrityTask]; [registerExtractTask] and [registerInstallTask].
  */
 public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {

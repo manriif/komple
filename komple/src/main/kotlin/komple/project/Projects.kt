@@ -1,6 +1,7 @@
 package komple.project
 
 import komple.KompleInternalApi
+import komple.project.c.configureConventions
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer as ExtensibleContainer

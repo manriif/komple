@@ -8,9 +8,10 @@ import org.gradle.kotlin.dsl.polymorphicDomainObjectContainer
 import javax.inject.Inject
 
 /**
- * Compilation extension for Jextract.
+ *
+ * Jextract extension for C Project.
  */
-public abstract class JextractCompilationExtension @Inject constructor(objects: ObjectFactory) {
+public abstract class JextractCProjectExtension @Inject constructor(objects: ObjectFactory) {
 
     internal val extensibleBindingGenerators: ExtensiblePolymorphicDomainObjectContainer<JextractBindingGenerator> =
         objects.polymorphicDomainObjectContainer(JextractBindingGenerator::class)

@@ -1,4 +1,4 @@
-package komple.gradle.compile
+package komple.gradle.project
 
 import komple.KOMPLE_EXEC_SERVICE_NAME
 import komple.exec.ExecService

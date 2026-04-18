@@ -50,7 +50,7 @@ internal abstract class DefaultExecService @Inject constructor(
         commandLine(line = command.interpret(parameters.interpreter.get()))
     }
 
-    override fun exec(
+    override fun execute(
         command: Command,
         workingDirectory: File?
     ): ExecResult = execOperations.exec {

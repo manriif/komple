@@ -2,8 +2,6 @@
 
 package komple.project
 
-import komple.project.c.KompleCProjectOptions
-import komple.project.c.Optimization
 import org.gradle.api.Named
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
@@ -40,24 +38,4 @@ public sealed class KompleProject(@Internal private val projectName: String) : N
 internal fun KompleProject.configureCommonConventions(project: Project) {
     packageName.convention(project.provider { "No package name was provided" })
     sourceFiles.convention(project.provider { error("No source files were provided") })
-}
-
-///////////////////////////////////////////////////////////////////////////
-// C
-///////////////////////////////////////////////////////////////////////////
-
-/**
- * C project.
- */
-public abstract class KompleCProject internal constructor(projectName: String) :
-    KompleProject(projectName),
-    KompleCProjectOptions
-
-/**
- * Configures the conventions values.
- */
-internal fun KompleCProject.configureConventions(project: Project) {
-    headerFile.convention(project.provider { error("Main header file was not set") })
-    headerFilters.convention(headerFile)
-    optimization.convention(Optimization.Level2)
 }

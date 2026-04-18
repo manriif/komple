@@ -12,7 +12,7 @@ public interface ExecService {
      * Executes the [command], in an environment configured by registered tools.
      */
     @IgnorableReturnValue
-    public fun exec(
+    public fun execute(
         command: Command,
         workingDirectory: File? = null
     ): ExecResult

@@ -35,6 +35,7 @@ internal val Project.kompleRootExtension: KompleRootExtension
 /**
  * Registers a tool, identified by [name], that is configured by an instance of [Config].
  */
+@IgnorableReturnValue
 public inline fun <reified Config : KompleToolConfigurator<*>> KompleRootExtension.registerTool(
     name: String,
     vararg args: Any

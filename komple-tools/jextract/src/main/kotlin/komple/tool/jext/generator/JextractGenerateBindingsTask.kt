@@ -55,7 +55,7 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Defa
             .append(project.headerFile.get().asFile.absolutePath)
             .build()
 
-        execService.get().exec(command)
+        execService.get().execute(command)
     }
 
     /**

@@ -15,7 +15,7 @@ import komple.gradle.tool.task.DefaultDownloadTaskRegistrationScope
 import komple.gradle.tool.task.DefaultExtractTaskRegistrationScope
 import komple.gradle.tool.task.DefaultInstallTaskRegistrationScope
 import komple.gradle.tool.task.DefaultIntegrityTaskRegistrationScope
-import komple.gradle.extension.KompleProjectExtension
+import komple.gradle.project.KompleProjectExtension
 import komple.project.KompleProject
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension

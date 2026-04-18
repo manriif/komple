@@ -1,7 +1,9 @@
 package komple.gradle.extension
 
 import komple.exec.ExecService
+import komple.gradle.project.KompleCProjectExtension
 import komple.gradle.tool.configureProject
+import komple.project.KompleCProject
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -38,23 +40,28 @@ public abstract class KompleSubProjectExtension @Inject constructor(objects: Obj
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Configure [this@configureExtension] from the [root].
+ * Configure `this` extension.
  */
-internal fun KompleSubProjectExtension.configureExtension(
-    root: KompleRootProjectExtension,
-    project: Project
+internal fun Project.configureSubProjectExtension(
+    extension: KompleSubProjectExtension,
+    root: KompleRootProjectExtension
 ) {
-    execService.set(root.execService)
+    extension.execService.set(root.execService)
 
     root.projects.all kProject@{
-        val projectExtension = projects.extensions.create<KompleProjectExtension>(this.name)
+        val extensionType = when (this@kProject) {
+            is KompleCProject -> KompleCProjectExtension::class
+        }
+
+        val projectExtension =
+            extension.projects.extensions.create(this@kProject.name, extensionType)
 
         root.tools.all {
-            configureProject(project, this@kProject, projectExtension)
+            configureProject(this@configureSubProjectExtension, this@kProject, projectExtension)
         }
     }
 
-    root.tools.all {
-        tools.extensions.add(this.name, this)
+    root.tools.all kTool@{
+        extension.tools.extensions.add(this@kTool.name, this)
     }
 }
