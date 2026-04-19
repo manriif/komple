@@ -1,13 +1,10 @@
 package komple.tool.jext.generator
 
-import komple.KOMPLE_EXEC_SERVICE_NAME
 import komple.exec.CommandBuilder
-import komple.exec.ExecService
+import komple.exec.KompleExecTask
 import komple.project.KompleCProject
-import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.services.ServiceReference
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
@@ -19,10 +16,7 @@ import java.io.File
  * Outputs the generated bindings files.
  */
 @CacheableTask
-public abstract class JextractGenerateBindingsTask internal constructor() : DefaultTask() {
-
-    @get:ServiceReference(KOMPLE_EXEC_SERVICE_NAME)
-    internal abstract val execService: Property<ExecService>
+public abstract class JextractGenerateBindingsTask internal constructor() : KompleExecTask() {
 
     @get:Nested
     internal abstract val cProject: Property<KompleCProject>

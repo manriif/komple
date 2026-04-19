@@ -1,7 +1,6 @@
 package komple.project
 
 import komple.KompleInternalApi
-import komple.project.c.configureConventions
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer as ExtensibleContainer
@@ -11,7 +10,7 @@ import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer as ExtensibleCo
  */
 @KompleInternalApi
 public fun ExtensibleContainer<KompleProject>.registerFactories(project: Project) {
-    registerFactory<KompleCProject>(project, KompleCProject::configureConventions)
+    registerFactory<KompleCProject>(project, KompleCProject::configureConventions, project.objects)
 }
 
 /**
@@ -19,9 +18,10 @@ public fun ExtensibleContainer<KompleProject>.registerFactories(project: Project
  */
 internal inline fun <reified P : KompleProject> ExtensibleContainer<KompleProject>.registerFactory(
     project: Project,
-    crossinline configureConventions: P.(Project) -> Unit
+    crossinline configureConventions: P.(Project) -> Unit,
+    vararg args: Any
 ) = registerFactory(P::class.java) { name ->
-    project.objects.newInstance<P>(name).apply {
+    project.objects.newInstance<P>(name, *args).apply {
         configureCommonConventions(project)
         configureConventions(project)
     }

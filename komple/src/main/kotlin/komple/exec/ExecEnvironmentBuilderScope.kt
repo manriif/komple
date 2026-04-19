@@ -1,6 +1,5 @@
-package komple.tool.project
+package komple.exec
 
-import komple.exec.ExecEnvironmentBuilder
 import komple.platform.HasHost
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension

@@ -1,7 +1,7 @@
 package komple.tool.configurator
 
-import komple.tool.project.ProjectConfigurationScope
-import komple.tool.project.ExecEnvironmentBuilderScope
+import komple.project.ProjectConfigurationScope
+import komple.exec.ExecEnvironmentBuilderScope
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.InstallTaskRegistrationScope

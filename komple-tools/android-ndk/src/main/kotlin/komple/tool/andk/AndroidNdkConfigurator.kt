@@ -1,10 +1,9 @@
 package komple.tool.andk
 
-import komple.exec.variable
 import komple.platform.Architecture
 import komple.platform.Host
 import komple.platform.OperatingSystem
-import komple.tool.project.ExecEnvironmentBuilderScope
+import komple.exec.ExecEnvironmentBuilderScope
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension

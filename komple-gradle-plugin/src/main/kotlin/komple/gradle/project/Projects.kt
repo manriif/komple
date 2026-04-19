@@ -1,26 +1,46 @@
 package komple.gradle.project
 
-import komple.gradle.extension.extensions
-import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import komple.gradle.util.camelCased
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
+import kotlin.reflect.KClass
+
+private const val KOMPLE_PROJECTS_TASK_GROUP = "komple projects"
+
+///////////////////////////////////////////////////////////////////////////
+// Task
+///////////////////////////////////////////////////////////////////////////
 
 /**
- * Configures the Kotlin [target] for given Komple project [kProject].
+ * Returns a directory where to store project generated files.
  */
-internal fun configureKotlinTargetForKompleProject(
-    kProject: KompleProject,
-    target: KotlinTarget
-) {
-    when (kProject) {
-        is KompleCProject -> configureKotlinTargetForKompleCProject(kProject, target)
-    }
+internal fun Project.projectGeneratedOutputDir(
+    projectName: String,
+    subdirectory: String
+): Provider<Directory> {
+    return layout.buildDirectory.dir(
+        "generated/komple/projects/${projectName}/$subdirectory"
+    )
 }
 
 /**
- * Configures the Kotlin [target] for given Komple C project [kProject].
+ * Returns a conventional name for a task and for the project.
  */
-private fun configureKotlinTargetForKompleCProject(
-    kProject: KompleCProject,
-    target: KotlinTarget
-) {
-    kProject.extensions.getByName()
+internal fun projectTaskName(projectName: String, postfix: String): String {
+    return "${projectName.camelCased()}$postfix"
+}
+
+/**
+ * Registers a project task and applies default configuration.
+ */
+internal fun <T : Task> Project.registerProjectTask(
+    name: String,
+    type: KClass<T>,
+    configure: T.() -> Unit
+): TaskProvider<T> = tasks.register(name, type.java) {
+    group = KOMPLE_PROJECTS_TASK_GROUP
+    configure(this)
 }

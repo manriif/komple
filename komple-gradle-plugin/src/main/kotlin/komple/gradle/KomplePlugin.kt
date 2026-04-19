@@ -2,8 +2,6 @@ package komple.gradle
 
 import komple.KOMPLE_EXTENSION_NAME
 import komple.KOMPLE_PLUGIN_ID
-import komple.gradle.project.configureKmpExtension
-import komple.gradle.project.withKmpPlugin
 import komple.gradle.exec.DefaultExecService
 import komple.gradle.exec.ExecEnvironment
 import komple.gradle.extension.KompleRootProjectExtension
@@ -73,10 +71,6 @@ public class KomplePlugin : Plugin<Project> {
                 rootProject.getExtensionByName<KompleRootProjectExtension>(KOMPLE_EXTENSION_NAME)
 
             project.configureSubProjectExtension(extension, rootExtension)
-
-            project.withKmpPlugin { kmp ->
-                configureKmpExtension(rootExtension, kmp)
-            }
         }
     }
 }

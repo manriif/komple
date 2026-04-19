@@ -1,14 +1,13 @@
 package komple.tool.jext
 
-import komple.exec.path
 import komple.platform.Architecture
 import komple.platform.Host
 import komple.platform.OperatingSystem
 import komple.project.KompleCProject
-import komple.tool.project.ProjectConfigurationScope
-import komple.tool.project.ExecEnvironmentBuilderScope
-import komple.tool.project.createExtension
-import komple.tool.project.registerTask
+import komple.project.ProjectConfigurationScope
+import komple.exec.ExecEnvironmentBuilderScope
+import komple.project.createExtension
+import komple.project.registerTask
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
@@ -116,7 +115,7 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
     }
 
     override fun ProjectConfigurationScope<JextractExtension>.configureProject() {
-        when (val kompleProject = project) {
+        when (val kProject = project) {
             is KompleCProject -> createExtension<JextractCProjectExtension>("jextract") {
                 extension.extensibleBindingGenerators.registerFactory(
                     JextractBindingGenerator::class.java
@@ -126,7 +125,7 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
                     val task = registerTask<JextractGenerateBindingsTask>(
                         postfix = "jextractGenerateBindings${name}"
                     ) {
-                        this.cProject = kompleProject
+                        this.cProject = kProject
                         this.cliOptions = options
                         this.outputDirectory = generatedDirectory("jextract-${name}")
                     }

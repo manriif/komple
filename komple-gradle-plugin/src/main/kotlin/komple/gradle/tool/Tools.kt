@@ -8,9 +8,8 @@ import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
 import komple.gradle.tool.task.TASK_TOOL_INSTALL_POSTFIX
 import komple.gradle.tool.task.toolTaskName
-import komple.gradle.tool.project.DefaultExecEnvironmentBuilderScope
-import komple.gradle.tool.extension.DefaultExtensionConfigurationScope
-import komple.gradle.tool.project.DefaultProjectConfigurationScope
+import komple.gradle.project.DefaultExecEnvironmentBuilderScope
+import komple.gradle.project.DefaultProjectConfigurationScope
 import komple.gradle.tool.task.DefaultDownloadTaskRegistrationScope
 import komple.gradle.tool.task.DefaultExtractTaskRegistrationScope
 import komple.gradle.tool.task.DefaultInstallTaskRegistrationScope

@@ -2,10 +2,12 @@
 
 package komple.project.c
 
-import komple.project.KompleCProject
-import org.gradle.api.Project
+import komple.platform.Platform
+import komple.project.KompleProjectBase
+import org.gradle.api.Action
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -15,9 +17,16 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 
 /**
- * Options for C project.
+ * Base fpr Komple C project.
  */
-public interface KompleCProjectOptions {
+public interface KompleCProjectBase : KompleProjectBase {
+
+    /**
+     * Name of the library to generate.
+     * Default to the project name.
+     */
+    @get:Input
+    public val libraryName: Property<String>
 
     /**
      * Main header file.
@@ -49,6 +58,17 @@ public interface KompleCProjectOptions {
     public val optimization: Property<Optimization>
 
     /**
+     * Compiler options.
+     */
+    public val compilerOptions: ListProperty<String>
+
+    /**
+     * Linker options.
+     */
+    @get:Input
+    public val linkerOptions: ListProperty<String>
+
+    /**
      * Pre-processor definitions.
      */
     @get:Input
@@ -60,13 +80,20 @@ public interface KompleCProjectOptions {
     public fun define(name: String) {
         defines.put(name, "1")
     }
-}
 
-/**
- * Configures the convention values.
- */
-internal fun KompleCProject.configureConventions(project: Project) {
-    headerFile.convention(project.provider { error("Main header file was not set") })
-    headerFilters.convention(headerFile)
-    optimization.convention(Optimization.Level2)
+    /**
+     * Sets the compiler options for the specified [platform].
+     */
+    public fun compilerOptions(
+        platform: Platform,
+        configure: Action<in ListProperty<String>>
+    )
+
+    /**
+     * Sets the linker options for the specified [platform].
+     */
+    public fun linkerOptions(
+        platform: Platform,
+        configure: Action<in ListProperty<String>>
+    )
 }

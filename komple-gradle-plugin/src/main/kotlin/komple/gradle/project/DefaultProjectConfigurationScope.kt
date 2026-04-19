@@ -1,15 +1,14 @@
-package komple.gradle.tool.project
+package komple.gradle.project
 
-import komple.gradle.project.KompleProjectExtension
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
 import komple.gradle.util.pascalCased
 import komple.project.KompleProject
+import komple.project.ProjectConfigurationScope
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
-import komple.tool.project.ProjectConfigurationScope
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -30,8 +29,10 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
     ClosableScope() {
 
     override fun generatedDirectory(subdirectory: String): Provider<Directory> {
-        return context.project.layout.buildDirectory
-            .dir("generated/komple/${project.name}/${context.toolName.dashCased()}/$subdirectory")
+        return context.project.projectGeneratedOutputDir(
+            projectName = project.name,
+            subdirectory = "${context.toolName.dashCased()}/$subdirectory"
+        )
     }
 
     override fun <E : Any> createExtension(

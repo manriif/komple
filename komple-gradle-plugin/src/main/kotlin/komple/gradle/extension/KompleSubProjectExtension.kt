@@ -1,8 +1,9 @@
 package komple.gradle.extension
 
 import komple.exec.ExecService
-import komple.gradle.project.KompleCProjectExtension
+import komple.gradle.project.c.KompleCProjectExtension
 import komple.gradle.tool.configureProject
+import komple.gradle.util.camelCased
 import komple.project.KompleCProject
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
@@ -53,8 +54,12 @@ internal fun Project.configureSubProjectExtension(
             is KompleCProject -> KompleCProjectExtension::class
         }
 
-        val projectExtension =
-            extension.projects.extensions.create(this@kProject.name, extensionType)
+        val projectExtension = extension.projects.extensions.create(
+            this@kProject.name.camelCased(),
+            extensionType,
+            this@configureSubProjectExtension,
+            this@kProject
+        )
 
         root.tools.all {
             configureProject(this@configureSubProjectExtension, this@kProject, projectExtension)
@@ -62,6 +67,6 @@ internal fun Project.configureSubProjectExtension(
     }
 
     root.tools.all kTool@{
-        extension.tools.extensions.add(this@kTool.name, this)
+        extension.tools.extensions.add(this@kTool.name.camelCased(), this)
     }
 }

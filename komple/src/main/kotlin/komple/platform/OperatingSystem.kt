@@ -10,9 +10,15 @@ import java.io.Serializable
 public sealed interface OperatingSystem : Serializable {
 
     /**
-     * Name of the operating system.
+     * Primary name.
      */
     public val name: String
+
+    /**
+     * Alternative name.
+     */
+    public val altName: String
+        get() = name
 
     /**
      * Library information.
@@ -122,6 +128,9 @@ public sealed interface OperatingSystem : Serializable {
 
         override val name: String
             get() = "windows"
+
+        override val altName: String
+            get() = "mingw"
 
         override val library: Library
             get() = Library.MinGw

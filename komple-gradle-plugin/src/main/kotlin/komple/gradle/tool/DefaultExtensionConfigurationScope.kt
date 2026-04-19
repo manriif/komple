@@ -1,4 +1,4 @@
-package komple.gradle.tool.extension
+package komple.gradle.tool
 
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.extension.extensions
@@ -11,7 +11,7 @@ import org.gradle.kotlin.dsl.create
 import kotlin.reflect.KClass
 
 /**
- * Default implementation of [ExtensionConfigurationScope].
+ * Default implementation of [komple.tool.extension.ExtensionConfigurationScope].
  */
 internal class DefaultExtensionConfigurationScope<Extension : KompleToolExtension>(
     private val project: Project,

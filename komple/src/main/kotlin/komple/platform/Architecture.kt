@@ -10,9 +10,15 @@ import java.io.Serializable
 public sealed interface Architecture : Serializable {
 
     /**
-     * Name of the architecture.
+     * Primary name.
      */
     public val name: String
+
+    /**
+     * Alternative name.
+     */
+    public val altName: String
+        get() = name
 
     /**
      * Supported by toolchains for compilation.
@@ -28,6 +34,9 @@ public sealed interface Architecture : Serializable {
         override val name: String
             get() = "aarch64"
 
+        override val altName: String
+            get() = "arm64"
+
         private fun readResolve(): Any = Arm64
     }
 
@@ -35,6 +44,9 @@ public sealed interface Architecture : Serializable {
 
         override val name: String
             get() = "aarch32"
+
+        override val altName: String
+            get() = "arm32"
 
         private fun readResolve(): Any = Arm32
     }
@@ -47,6 +59,9 @@ public sealed interface Architecture : Serializable {
 
         override val name: String
             get() = "x86_64"
+
+        override val altName: String
+            get() = "x64"
 
         private fun readResolve(): Any = X64
     }

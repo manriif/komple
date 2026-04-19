@@ -1,6 +1,5 @@
-package komple.tool.project
+package komple.project
 
-import komple.project.KompleProject
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension

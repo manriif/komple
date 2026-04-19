@@ -10,10 +10,9 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import java.io.File
-import java.util.Locale.getDefault
 import kotlin.reflect.KClass
 
-private const val KOMPLE_TOOLS_TASK_GROUP = "komple tools"
+internal const val KOMPLE_TOOLS_TASK_GROUP = "komple tools"
 internal const val TASK_TOOL_DOWNLOAD_POSTFIX = "Download"
 internal const val TASK_TOOL_INTEGRITY_POSTFIX = "Integrity"
 internal const val TASK_TOOL_EXTRACT_POSTFIX = "Extract"
