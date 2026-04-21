@@ -8,9 +8,7 @@ import komple.gradle.kmp.toPlatform
 import komple.gradle.project.KompleProjectExtension
 import komple.gradle.project.projectGeneratedOutputDir
 import komple.platform.Platform
-import komple.project.KompleCProject
 import komple.project.c.CLibraryType
-import org.gradle.api.Project
 import org.gradle.kotlin.dsl.assign
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -18,9 +16,8 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 /**
  * Extension for a configured C project.
  */
-public abstract class KompleCProjectExtension(
-    private val project: Project,
-    private val cProject: KompleCProject
+public abstract class CProjectExtension internal constructor(
+    internal val cProject: DefaultCProject
 ) : KompleProjectExtension {
 
     /**
@@ -31,6 +28,7 @@ public abstract class KompleCProjectExtension(
         platform: Platform
     ): CLibrary {
 
+        //val handler = TODO()
     }
 
     /**

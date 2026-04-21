@@ -16,14 +16,14 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     HasExtension<Extension> {
 
     /**
-     * The [KompleProject] that is being configured.
+     * The [KompleProject] configurator.
      */
-    public val project: KompleProject
+    public val configurator: ProjectConfigurator
 
     /**
      * Returns a directory where to store generated files.
      */
-    public fun generatedDirectory(subdirectory: String): Provider<Directory>
+    public fun generatedDirectory(): Provider<Directory>
 
     /**
      * Creates an extension of type [E], named after [name].

@@ -1,11 +1,12 @@
 package komple.tool.jext
 
+import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.path
 import komple.platform.Architecture
 import komple.platform.Host
 import komple.platform.OperatingSystem
-import komple.project.KompleCProject
+import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
-import komple.exec.ExecEnvironmentBuilderScope
 import komple.project.createExtension
 import komple.project.registerTask
 import komple.tool.configurator.DefaultKompleToolConfigurator
@@ -115,22 +116,27 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
     }
 
     override fun ProjectConfigurationScope<JextractExtension>.configureProject() {
-        when (val kProject = project) {
-            is KompleCProject -> createExtension<JextractCProjectExtension>("jextract") {
-                extension.extensibleBindingGenerators.registerFactory(
-                    JextractBindingGenerator::class.java
-                ) { name ->
-                    val options = project.objects.newInstance<JextractCommandLineOptions>()
+        when (val configurator = configurator) {
+            is CProjectConfigurator -> {
+                createExtension<JextractCProjectExtension>("jextract") {
+                    extension.extensibleBindingGenerators.registerFactory(
+                        JextractBindingGenerator::class.java
+                    ) { name ->
+                        val options = project.objects.newInstance<JextractCommandLineOptions>()
 
-                    val task = registerTask<JextractGenerateBindingsTask>(
-                        postfix = "jextractGenerateBindings${name}"
-                    ) {
-                        this.cProject = kProject
-                        this.cliOptions = options
-                        this.outputDirectory = generatedDirectory("jextract-${name}")
+                        val task = registerTask<JextractGenerateBindingsTask>(
+                            postfix = "jextractGenerateBindings${name}"
+                        ) {
+                            cProject = configurator.project
+                            cliOptions = options
+
+                            outputDirectory = generatedDirectory().map { directory ->
+                                directory.dir("jextract-${name}")
+                            }
+                        }
+
+                        project.objects.newInstance<JextractBindingGeneratorImpl>(options, task)
                     }
-
-                    project.objects.newInstance<JextractBindingGeneratorImpl>(options, task)
                 }
             }
         }

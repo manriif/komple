@@ -3,7 +3,7 @@
 package komple.project.c
 
 import komple.platform.Platform
-import komple.project.KompleProjectBase
+import komple.project.KompleProject
 import org.gradle.api.Action
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
@@ -17,9 +17,9 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 
 /**
- * Base fpr Komple C project.
+ * Base for C project.
  */
-public interface KompleCProjectBase : KompleProjectBase {
+public interface CProject : KompleProject {
 
     /**
      * Name of the library to generate.
@@ -52,14 +52,15 @@ public interface KompleCProjectBase : KompleProjectBase {
 
     /**
      * Optimization level.
-     * Default to [Optimization.Level2].
+     * Default to [COptimization.Level2].
      */
     @get:Input
-    public val optimization: Property<Optimization>
+    public val optimization: Property<COptimization>
 
     /**
      * Compiler options.
      */
+    @get:Input
     public val compilerOptions: ListProperty<String>
 
     /**

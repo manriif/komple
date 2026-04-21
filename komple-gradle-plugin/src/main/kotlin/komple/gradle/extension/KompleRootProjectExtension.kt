@@ -4,6 +4,7 @@ import komple.KompleRootExtension
 import komple.exec.Bash
 import komple.exec.CommandInterpreter
 import komple.exec.ExecService
+import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.DefaultKompleTool
 import komple.project.KompleProject
 import komple.tool.configurator.KompleToolConfigurator
@@ -28,10 +29,10 @@ public abstract class KompleRootProjectExtension @Inject constructor(
     internal abstract val execService: Property<ExecService>
 
     /**
-     * Registered tools' configurators.
+     * The interpreter to use for command execution.
+     * Default to [Bash].
      */
-    internal val toolConfigurators =
-        objects.polymorphicDomainObjectContainer(KompleToolConfigurator::class)
+    public abstract val commandInterpreter: Property<CommandInterpreter>
 
     /**
      * Projects exposed as polymorphic container.
@@ -40,16 +41,22 @@ public abstract class KompleRootProjectExtension @Inject constructor(
         objects.polymorphicDomainObjectContainer(KompleProject::class)
 
     /**
-     * The interpreter to use for command execution.
-     * Default to [Bash].
+     * Registered project configurators.
      */
-    public abstract val commandInterpreter: Property<CommandInterpreter>
+    internal val projectConfiguratorFactories =
+        objects.domainObjectSet(ProjectConfiguratorFactory::class)
 
     /**
      * Komple projects.
      */
     public val projects: PolymorphicDomainObjectContainer<KompleProject>
         get() = extensibleProjects
+
+    /**
+     * Registered tool configurators.
+     */
+    internal val toolConfigurators =
+        objects.polymorphicDomainObjectContainer(KompleToolConfigurator::class)
 
     /**
      * Configured tools.

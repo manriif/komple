@@ -9,7 +9,7 @@ import komple.gradle.extension.KompleSubProjectExtension
 import komple.gradle.extension.configureConventions
 import komple.gradle.extension.configureSubProjectExtension
 import komple.gradle.tool.configureTools
-import komple.project.registerFactories
+import komple.gradle.project.registerProjectFactories
 import komple.util.getExtensionByName
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -40,7 +40,7 @@ public class KomplePlugin : Plugin<Project> {
 
         extension.run {
             configureConventions()
-            extensibleProjects.registerFactories(project)
+            project.registerProjectFactories(extensibleProjects, projectConfiguratorFactories)
 
             execService = project.gradle.sharedServices.registerIfAbsent(
                 name = KOMPLE_EXTENSION_NAME,

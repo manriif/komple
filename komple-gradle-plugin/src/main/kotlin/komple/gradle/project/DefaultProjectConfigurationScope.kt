@@ -4,7 +4,7 @@ import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
 import komple.gradle.util.pascalCased
-import komple.project.KompleProject
+import komple.project.ProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
@@ -23,15 +23,15 @@ import kotlin.reflect.KClass
 internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>(
     private val context: KompleToolConfigContext<Extension>,
     private val projectExtension: KompleProjectExtension,
-    override val project: KompleProject
+    override val configurator: ProjectConfigurator
 ) : ProjectConfigurationScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {
 
-    override fun generatedDirectory(subdirectory: String): Provider<Directory> {
+    override fun generatedDirectory(): Provider<Directory> {
         return context.project.projectGeneratedOutputDir(
-            projectName = project.name,
-            subdirectory = "${context.toolName.dashCased()}/$subdirectory"
+            projectName = configurator.project.name,
+            subdirectory = context.toolName.dashCased()
         )
     }
 
@@ -57,7 +57,7 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         type: KClass<T>,
         configure: (T.() -> Unit)?
     ): TaskProvider<T> {
-        val name = "${project.name}${context.toolName.pascalCased()}$postfix"
+        val name = "${configurator.project.name}${context.toolName.pascalCased()}$postfix"
 
         return context.project.tasks.register(name, type.java) {
             configure?.invoke(this)

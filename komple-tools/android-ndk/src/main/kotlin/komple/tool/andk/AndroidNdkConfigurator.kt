@@ -1,9 +1,13 @@
 package komple.tool.andk
 
+import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.variable
 import komple.platform.Architecture
 import komple.platform.Host
 import komple.platform.OperatingSystem
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.project.CProjectConfigurator
+import komple.project.ProjectConfigurationScope
+import komple.project.registerCompileTask
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
@@ -98,5 +102,23 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     override fun ExecEnvironmentBuilderScope<AndroidNdkExtension>.configureEnvironment() {
         variable("ANDROID_NDK_HOME", installDirectory)
         variable("ANDROID_NDK_ROOT", installDirectory)
+    }
+
+    override fun ProjectConfigurationScope<AndroidNdkExtension>.configureProject() {
+        when (val configurator = configurator) {
+            is CProjectConfigurator -> {
+                val parameters =
+                configurator.registerCompileTask(
+                    configure = {
+
+                    },
+                    filter = {
+
+                    }
+                )
+
+                TODO()
+            }
+        }
     }
 }

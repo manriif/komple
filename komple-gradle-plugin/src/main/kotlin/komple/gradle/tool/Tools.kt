@@ -6,23 +6,23 @@ import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
-import komple.gradle.tool.task.TASK_TOOL_INSTALL_POSTFIX
-import komple.gradle.tool.task.toolTaskName
 import komple.gradle.project.DefaultExecEnvironmentBuilderScope
 import komple.gradle.project.DefaultProjectConfigurationScope
+import komple.gradle.project.KompleProjectExtension
 import komple.gradle.tool.task.DefaultDownloadTaskRegistrationScope
 import komple.gradle.tool.task.DefaultExtractTaskRegistrationScope
 import komple.gradle.tool.task.DefaultInstallTaskRegistrationScope
 import komple.gradle.tool.task.DefaultIntegrityTaskRegistrationScope
-import komple.gradle.project.KompleProjectExtension
-import komple.project.KompleProject
+import komple.gradle.tool.task.TASK_TOOL_INSTALL_POSTFIX
+import komple.gradle.tool.task.toolTaskName
+import komple.project.ProjectConfigurator
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Project
 import org.gradle.api.resources.MissingResourceException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.extensions.core.extra
-import java.util.Properties
+import java.util.*
 
 private const val TOOLS_PROPERTIES = "tools.properties"
 
@@ -132,15 +132,15 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstal
 }
 
 /**
- * Configures the [kProject] from `this` tool.
+ * Makes `this` tool configure the project.
  */
 internal fun <Ext : KompleToolExtension> DefaultKompleTool<Ext>.configureProject(
     project: Project,
-    kProject: KompleProject,
-    projectExtension: KompleProjectExtension
+    projectExtension: KompleProjectExtension,
+    projectConfigurator: ProjectConfigurator
 ) {
     val context = KompleToolConfigContext(project, toolName, extension)
-    val scope = DefaultProjectConfigurationScope(context, projectExtension, kProject)
+    val scope = DefaultProjectConfigurationScope(context, projectExtension, projectConfigurator)
 
     configurator.run {
         scope.use { it.configureProject() }

@@ -2,7 +2,7 @@ package komple.tool.jext.generator
 
 import komple.exec.CommandBuilder
 import komple.exec.KompleExecTask
-import komple.project.KompleCProject
+import komple.project.c.CProject
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
@@ -19,7 +19,7 @@ import java.io.File
 public abstract class JextractGenerateBindingsTask internal constructor() : KompleExecTask() {
 
     @get:Nested
-    internal abstract val cProject: Property<KompleCProject>
+    internal abstract val cProject: Property<CProject>
 
     @get:Nested
     internal abstract val cliOptions: Property<JextractCommandLineOptions>

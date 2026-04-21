@@ -33,7 +33,7 @@ public abstract class DefaultKompleToolConfigurator<Extension : KompleToolExtens
         return skipInstallation()
     }
 
-    override fun ProjectConfigurationScope<Extension>.configureProject() {}
-
     override fun ExecEnvironmentBuilderScope<Extension>.configureEnvironment() {}
+
+    override fun ProjectConfigurationScope<Extension>.configureProject() {}
 }

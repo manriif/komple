@@ -4,7 +4,7 @@ import komple.gradle.project.projectTaskName
 import komple.gradle.project.registerProjectTask
 import komple.gradle.util.pascalCased
 import komple.platform.Platform
-import komple.project.KompleCProject
+import komple.gradle.project.c.DefaultCProject
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.tasks.DefFileTask
@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.gradle.tasks.DefFileTask
  * [platform].
  */
 internal fun Project.registerGenerateCInteropDefTask(
-    cProject: KompleCProject,
+    cProject: DefaultCProject,
     options: DefFileOptions,
     platform: Platform,
 ): TaskProvider<*> = registerProjectTask(
@@ -41,7 +41,7 @@ internal fun Project.registerGenerateCInteropDefTask(
 /**
  * Returns the definition file content.
  */
-private fun KompleCProject.createDefContent(
+private fun DefaultCProject.createDefContent(
     options: DefFileOptions,
     platform: Platform,
 ): String {

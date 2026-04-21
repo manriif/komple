@@ -77,16 +77,16 @@ public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
     public fun InstallTaskRegistrationScope<Ext>.registerInstallTask(): TaskProvider<*>
 
     ///////////////////////////////////////////////////////////////////////////
-    // Project
+    // Other
     ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Configures a project.
-     */
-    public fun ProjectConfigurationScope<Ext>.configureProject()
 
     /**
      * Populates the execution environment.
      */
     public fun ExecEnvironmentBuilderScope<Ext>.configureEnvironment()
+
+    /**
+     * Configures a project.
+     */
+    public fun ProjectConfigurationScope<Ext>.configureProject()
 }

@@ -1,10 +1,11 @@
 package komple.gradle.extension
 
 import komple.exec.ExecService
-import komple.gradle.project.c.KompleCProjectExtension
+import komple.gradle.project.KompleProjectExtension
+import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.configureProject
 import komple.gradle.util.camelCased
-import komple.project.KompleCProject
+import komple.project.ProjectConfigurator
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -49,24 +50,28 @@ internal fun Project.configureSubProjectExtension(
 ) {
     extension.execService.set(root.execService)
 
-    root.projects.all kProject@{
-        val extensionType = when (this@kProject) {
-            is KompleCProject -> KompleCProjectExtension::class
-        }
-
-        val projectExtension = extension.projects.extensions.create(
-            this@kProject.name.camelCased(),
-            extensionType,
-            this@configureSubProjectExtension,
-            this@kProject
-        )
+    root.projectConfiguratorFactories .all kProject@{
+        val (projectExtension, configurator) = createProjectConfigurator(extension, this)
 
         root.tools.all {
-            configureProject(this@configureSubProjectExtension, this@kProject, projectExtension)
+            configureProject(this@configureSubProjectExtension, projectExtension, configurator)
         }
     }
 
     root.tools.all kTool@{
         extension.tools.extensions.add(this@kTool.name.camelCased(), this)
     }
+}
+
+private fun <Extension : KompleProjectExtension> createProjectConfigurator(
+    extension: KompleSubProjectExtension,
+    factory: ProjectConfiguratorFactory<Extension>
+): Pair<Extension, ProjectConfigurator> {
+    val projectExtension = extension.projects.extensions.create(
+        factory.kProject.name.camelCased(),
+        factory.extensionType,
+        factory.kProject
+    )
+
+    return projectExtension to factory.createConfigurator(projectExtension)
 }
