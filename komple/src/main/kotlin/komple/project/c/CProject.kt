@@ -10,6 +10,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
@@ -91,10 +92,21 @@ public interface CProject : KompleProject {
     )
 
     /**
+     * Returns all the compiler options, including [defines] and [optimization], for the specified
+     * [platform].
+     */
+    public fun compilerOptions(platform: Platform): Provider<List<String>>
+
+    /**
      * Sets the linker options for the specified [platform].
      */
     public fun linkerOptions(
         platform: Platform,
         configure: Action<in ListProperty<String>>
     )
+
+    /**
+     * Returns all the linker options, for the specified [platform].
+     */
+    public fun linkerOptions(platform: Platform): Provider<List<String>>
 }

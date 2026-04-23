@@ -34,7 +34,7 @@ public interface CProjectConfigurator : ProjectConfigurator {
     public fun <Task : CCompileTask<*, *>> registerCompileTask(
         klass: KClass<out Task>,
         configure: (Task.() -> Unit)? = null,
-        filter: (Platform) -> Boolean
+        platformFilter: (Platform) -> Boolean
     )
 }
 
@@ -44,7 +44,7 @@ public interface CProjectConfigurator : ProjectConfigurator {
  */
 public inline fun <reified Task : CCompileTask<*, *>> CProjectConfigurator.registerCompileTask(
     noinline configure: (Task.() -> Unit)? = null,
-    noinline filter: (Platform) -> Boolean
+    noinline platformFilter: (Platform) -> Boolean
 ) {
-    registerCompileTask(Task::class, configure, filter)
+    registerCompileTask(Task::class, configure, platformFilter)
 }

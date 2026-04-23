@@ -117,26 +117,24 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
 
     override fun ProjectConfigurationScope<JextractExtension>.configureProject() {
         when (val configurator = configurator) {
-            is CProjectConfigurator -> {
-                createExtension<JextractCProjectExtension>("jextract") {
-                    extension.extensibleBindingGenerators.registerFactory(
-                        JextractBindingGenerator::class.java
-                    ) { name ->
-                        val options = project.objects.newInstance<JextractCommandLineOptions>()
+            is CProjectConfigurator -> createExtension<JextractCProjectExtension>("jextract") {
+                extension.extensibleBindingGenerators.registerFactory(
+                    JextractBindingGenerator::class.java
+                ) { name ->
+                    val options = project.objects.newInstance<JextractCommandLineOptions>()
 
-                        val task = registerTask<JextractGenerateBindingsTask>(
-                            postfix = "jextractGenerateBindings${name}"
-                        ) {
-                            cProject = configurator.project
-                            cliOptions = options
+                    val task = registerTask<JextractGenerateBindingsTask>(
+                        postfix = "jextractGenerateBindings${name}"
+                    ) {
+                        cProject = configurator.project
+                        cliOptions = options
 
-                            outputDirectory = generatedDirectory().map { directory ->
-                                directory.dir("jextract-${name}")
-                            }
+                        outputDirectory = generatedDirectory().map { directory ->
+                            directory.dir("jextract-${name}")
                         }
-
-                        project.objects.newInstance<JextractBindingGeneratorImpl>(options, task)
                     }
+
+                    project.objects.newInstance<JextractBindingGeneratorImpl>(options, task)
                 }
             }
         }

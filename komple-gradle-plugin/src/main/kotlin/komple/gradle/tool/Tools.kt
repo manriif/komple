@@ -140,7 +140,13 @@ internal fun <Ext : KompleToolExtension> DefaultKompleTool<Ext>.configureProject
     projectConfigurator: ProjectConfigurator
 ) {
     val context = KompleToolConfigContext(project, toolName, extension)
-    val scope = DefaultProjectConfigurationScope(context, projectExtension, projectConfigurator)
+
+    val scope = DefaultProjectConfigurationScope(
+        context = context,
+        projectExtension = projectExtension,
+        configurator = projectConfigurator,
+        installDirectory = installDirectory
+    )
 
     configurator.run {
         scope.use { it.configureProject() }

@@ -1,5 +1,6 @@
 package komple.project
 
+import komple.platform.HasHost
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
@@ -13,12 +14,18 @@ import kotlin.reflect.KClass
  * Scope for [KompleProject] configuration.
  */
 public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
-    HasExtension<Extension> {
+    HasExtension<Extension>,
+    HasHost {
 
     /**
      * The [KompleProject] configurator.
      */
     public val configurator: ProjectConfigurator
+
+    /**
+     * Directory where the tool is installed.
+     */
+    public val installDirectory: Provider<Directory>
 
     /**
      * Returns a directory where to store generated files.

@@ -17,3 +17,14 @@ public interface Command : Serializable {
      */
     public fun toBuilder(): CommandBuilder
 }
+
+///////////////////////////////////////////////////////////////////////////
+// Factory
+///////////////////////////////////////////////////////////////////////////
+
+/**
+ * Builds and returns a command with [args].
+ */
+public fun Command(vararg args: Any): Command {
+    return CommandBuilder(*args).build()
+}

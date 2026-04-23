@@ -17,7 +17,7 @@ internal fun Project.registerGenerateCInteropDefTask(
     cProject: DefaultCProject,
     options: DefFileOptions,
     platform: Platform,
-): TaskProvider<*> = registerProjectTask(
+): TaskProvider<*> = tasks.registerProjectTask(
     name = projectTaskName(cProject.name, "generateCInteropDef${platform.altName.pascalCased()}"),
     type = DefFileTask::class
 ) {
@@ -45,17 +45,10 @@ private fun DefaultCProject.createDefContent(
     options: DefFileOptions,
     platform: Platform,
 ): String {
-    val definitions = defines.map { entries ->
-        entries.map { "-D${it.key}=${it.value}" }
-    }
-
-    val compilerOptions = compilerOptions(platform)
-        .zip(definitions, List<String>::plus)
-        .get()
-
-    val linkerOptions = linkerOptions(platform).get()
     val libraryFile = options.libraryFile.get().asFile
     val headerFileName = headerFile.get().asFile.name
+    val compilerOptions = compilerOptions(platform).get().joinToString(" ")
+    val linkerOptions = linkerOptions(platform).get().joinToString(" ")
     val filterHeaderFileNames = headerFilters.joinToString(" ") { it.name }
     val excludedFunctions = options.excludedFunctions.get().joinToString(" ")
     val noStringConversion = options.noStringConversion.get().joinToString(" ")

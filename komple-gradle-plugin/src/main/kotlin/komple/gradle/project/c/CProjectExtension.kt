@@ -7,28 +7,89 @@ import komple.gradle.kmp.registerGenerateCInteropDefTask
 import komple.gradle.kmp.toPlatform
 import komple.gradle.project.KompleProjectExtension
 import komple.gradle.project.projectGeneratedOutputDir
+import komple.gradle.project.projectTaskName
+import komple.gradle.project.registerProjectTask
+import komple.gradle.util.pascalCased
 import komple.platform.Platform
+import komple.project.c.CCompilation
+import komple.project.c.CCompileTask
 import komple.project.c.CLibraryType
+import org.gradle.api.file.Directory
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import javax.inject.Inject
 
 /**
  * Extension for a configured C project.
  */
-public abstract class CProjectExtension internal constructor(
-    internal val cProject: DefaultCProject
+public abstract class CProjectExtension @Inject internal constructor(
+    internal val cProject: DefaultCProject,
+    internal val tasks: TaskContainer,
+    internal val layout: ProjectLayout
 ) : KompleProjectExtension {
 
+    internal val compileTaskFactories = mutableListOf<CCompileTaskFactory<*>>()
+
     /**
-     * Registers a task that generates a library of type [type] for the provided [platform].
+     * Registers a [Task] obtained from [factory] for [compilation] and returns a [TaskProvider] to
+     * it.
+     */
+    private fun <Task : CCompileTask<*, *>> createCompileTaskProvider(
+        factory: CCompileTaskFactory<Task>,
+        compilation: CCompilation,
+    ): TaskProvider<out Task> {
+        val taskName = projectTaskName(
+            projectName = cProject.name,
+            postfix = "generate${compilation.libraryType.name}" +
+                    "Library${compilation.platform.altName.pascalCased()}"
+        )
+
+        return tasks.registerProjectTask(taskName, factory.klass) {
+            this.cProject = cProject
+            this.compilations.add(compilation)
+
+            factory.configure?.invoke(this)
+        }
+    }
+
+    /**
+     * Registers a task that generate a library of type [type] for the provided [platform].
      */
     public fun createLibrary(
         type: CLibraryType,
         platform: Platform
     ): CLibrary {
+        val factory = compileTaskFactories.firstOrNull { it.platformFilter(platform) }
+            ?: throw MissingCompilerException(
+                "No compile task could be created for compiling on platform $platform, " +
+                        "registering a tool able to compile for the platform can solve the problem"
+            )
 
-        //val handler = TODO()
+        val (libraryPrefix, librarySuffix) = platform.operatingSystem.library.run {
+            when (type) {
+                CLibraryType.Shared -> sharedPrefix to sharedSuffix
+                CLibraryType.Static -> staticPrefix to staticSuffix
+            }
+        }
+
+        val libraryFileName = cProject.libraryName.map { name ->
+            "${libraryPrefix}${name}.${librarySuffix}"
+        }
+
+        val libraryDirectory = layout.projectGeneratedOutputDir(
+            projectName = cProject.name,
+            subdirectory = "libraries/${type.name.lowercase()}"
+        )
+
+        val libraryFile = libraryDirectory.zip(libraryFileName, Directory::file)
+        val compilation = CCompilationImpl(platform, type, libraryFile)
+        val compileTaskProvider = createCompileTaskProvider(factory, compilation)
+
+        return CLibraryImpl(compilation, compileTaskProvider)
     }
 
     /**
@@ -52,7 +113,7 @@ public abstract class CProjectExtension internal constructor(
                 val settings = DefaultCInteropSettings(this, project.objects)
                 configureInterop?.invoke(settings)
 
-                val cInteropDir = project.projectGeneratedOutputDir(cProject.name, "cinterop")
+                val cInteropDir = layout.projectGeneratedOutputDir(cProject.name, "cinterop")
                 val defFileName = "${cProject.name}_${platform.altName}.def"
                 val defFileProvider = cInteropDir.map { it.file(defFileName) }
 
@@ -64,7 +125,7 @@ public abstract class CProjectExtension internal constructor(
                     excludedFunctions = settings.excludedFunctions,
                     noStringConversion = settings.noStringConversion,
                     outputFile = defFile,
-                    libraryFile = library.outputFile
+                    libraryFile = library.libraryFile
                 )
 
                 val generateCInteropDefTaskProvider = project.registerGenerateCInteropDefTask(

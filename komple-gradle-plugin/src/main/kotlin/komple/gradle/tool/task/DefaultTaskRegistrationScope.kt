@@ -55,7 +55,7 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
         postfix: String,
         type: KClass<T>,
         crossinline configure: T.(outputChanged: Provider<Boolean>) -> Unit
-    ): TaskProvider<T> = context.project.registerToolTask(toolTaskName(postfix), type) {
+    ): TaskProvider<T> = context.project.tasks.registerToolTask(toolTaskName(postfix), type) {
         val checksumFile = project.checksumFile(name.dashCased())
         val checksumInputs = project.objects.fileCollection()
 
@@ -123,7 +123,7 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
      * Registers a task that always fails when executed.
      */
     protected fun registerUnsupportedTask(postfix: String): TaskProvider<*> {
-        return context.project.registerToolTask(toolTaskName(postfix), DefaultTask::class) {
+        return context.project.tasks.registerToolTask(toolTaskName(postfix), DefaultTask::class) {
             doLast {
                 throw UnsupportedHostException("Host is not supported")
             }

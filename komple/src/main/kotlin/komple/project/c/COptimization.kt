@@ -3,7 +3,7 @@ package komple.project.c
 /**
  * Optimization for a C compilation.
  */
-public enum class COptimization(internal val value: String) {
+public enum class COptimization(public val value: String) {
 
     /**
      * `-O0`.

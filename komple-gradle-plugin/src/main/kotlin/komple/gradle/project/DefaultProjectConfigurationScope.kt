@@ -23,13 +23,14 @@ import kotlin.reflect.KClass
 internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>(
     private val context: KompleToolConfigContext<Extension>,
     private val projectExtension: KompleProjectExtension,
-    override val configurator: ProjectConfigurator
+    override val configurator: ProjectConfigurator,
+    override val installDirectory: Provider<Directory>
 ) : ProjectConfigurationScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {
 
     override fun generatedDirectory(): Provider<Directory> {
-        return context.project.projectGeneratedOutputDir(
+        return context.project.layout.projectGeneratedOutputDir(
             projectName = configurator.project.name,
             subdirectory = context.toolName.dashCased()
         )
@@ -57,9 +58,12 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         type: KClass<T>,
         configure: (T.() -> Unit)?
     ): TaskProvider<T> {
-        val name = "${configurator.project.name}${context.toolName.pascalCased()}$postfix"
+        val name = projectTaskName(
+            projectName = configurator.project.name,
+            postfix = "${context.toolName}${postfix.pascalCased()}"
+        )
 
-        return context.project.tasks.register(name, type.java) {
+        return context.project.tasks.registerProjectTask(name, type) {
             configure?.invoke(this)
         }
     }

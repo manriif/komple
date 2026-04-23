@@ -18,8 +18,8 @@ internal class DefaultCProjectConfigurator(private val extension: CProjectExtens
     override fun <Task : CCompileTask<*, *>> registerCompileTask(
         klass: KClass<out Task>,
         configure: (Task.() -> Unit)?,
-        filter: (Platform) -> Boolean
+        platformFilter: (Platform) -> Boolean
     ) {
-        extension.
+        extension.compileTaskFactories.add(CCompileTaskFactory(klass, configure, platformFilter))
     }
 }

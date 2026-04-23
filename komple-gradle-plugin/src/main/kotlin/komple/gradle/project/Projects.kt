@@ -1,10 +1,12 @@
 package komple.gradle.project
 
 import komple.gradle.util.camelCased
-import org.gradle.api.Project
+import komple.gradle.util.pascalCased
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
 
@@ -17,30 +19,28 @@ private const val KOMPLE_PROJECTS_TASK_GROUP = "komple projects"
 /**
  * Returns a directory where to store project generated files.
  */
-internal fun Project.projectGeneratedOutputDir(
+internal fun ProjectLayout.projectGeneratedOutputDir(
     projectName: String,
     subdirectory: String
 ): Provider<Directory> {
-    return layout.buildDirectory.dir(
-        "generated/komple/projects/${projectName}/$subdirectory"
-    )
+    return buildDirectory.dir("generated/komple/projects/${projectName}/$subdirectory")
 }
 
 /**
  * Returns a conventional name for a task and for the project.
  */
 internal fun projectTaskName(projectName: String, postfix: String): String {
-    return "${projectName.camelCased()}$postfix"
+    return "${projectName.camelCased()}${postfix.pascalCased()}"
 }
 
 /**
  * Registers a project task and applies default configuration.
  */
-internal fun <T : Task> Project.registerProjectTask(
+internal fun <T : Task> TaskContainer.registerProjectTask(
     name: String,
     type: KClass<T>,
     configure: T.() -> Unit
-): TaskProvider<T> = tasks.register(name, type.java) {
+): TaskProvider<T> = register(name, type.java) {
     group = KOMPLE_PROJECTS_TASK_GROUP
     configure(this)
 }

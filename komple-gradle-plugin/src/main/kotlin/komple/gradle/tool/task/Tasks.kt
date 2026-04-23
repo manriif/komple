@@ -8,6 +8,7 @@ import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import java.io.File
 import kotlin.reflect.KClass
@@ -32,11 +33,11 @@ internal fun toolTaskName(toolName: String, postfix: String): String {
 /**
  * Registers tool task and applies default configuration.
  */
-internal fun <T : Task> Project.registerToolTask(
+internal fun <T : Task> TaskContainer.registerToolTask(
     name: String,
     type: KClass<T>,
     configure: T.() -> Unit
-): TaskProvider<T> = tasks.register(name, type.java) {
+): TaskProvider<T> = register(name, type.java) {
     group = KOMPLE_TOOLS_TASK_GROUP
     configure(this)
 }

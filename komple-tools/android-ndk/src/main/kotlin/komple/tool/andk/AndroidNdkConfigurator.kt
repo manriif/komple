@@ -7,7 +7,11 @@ import komple.platform.Host
 import komple.platform.OperatingSystem
 import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
+import komple.project.createExtension
 import komple.project.registerCompileTask
+import komple.tool.andk.compile.AndroidNativeCompilationParams
+import komple.tool.andk.compile.AndroidNdkCCompileTask
+import komple.tool.andk.compile.configureConventions
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
@@ -21,6 +25,7 @@ import komple.tool.task.dmg
 import komple.tool.task.unzip
 import komple.tool.task.url
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import javax.inject.Inject
 
 /**
@@ -105,19 +110,35 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     }
 
     override fun ProjectConfigurationScope<AndroidNdkExtension>.configureProject() {
+        if (!supportHost(host)) {
+            return
+        }
+
         when (val configurator = configurator) {
             is CProjectConfigurator -> {
-                val parameters =
-                configurator.registerCompileTask(
+                val cParams = createExtension<AndroidNativeCompilationParams>("android").apply {
+                    configureConventions()
+                }
+
+                val hostTag = when (host.operatingSystem) {
+                    OperatingSystem.Linux -> "linux-x86_64"
+                    OperatingSystem.MacOS -> "darwin-x86_64"
+                    OperatingSystem.Windows -> "windows-x86_64"
+                }
+
+                val toolchainDir = installDirectory.map { directory ->
+                    directory.dir("toolchains/llvm/prebuilt/$hostTag")
+                }
+
+                configurator.registerCompileTask<AndroidNdkCCompileTask>(
                     configure = {
-
+                        this.toolchainDirectory = toolchainDir
+                        this.params = cParams
                     },
-                    filter = {
-
+                    platformFilter = { platform ->
+                        platform.operatingSystem == OperatingSystem.Android
                     }
                 )
-
-                TODO()
             }
         }
     }

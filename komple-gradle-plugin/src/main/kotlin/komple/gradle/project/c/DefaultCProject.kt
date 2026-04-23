@@ -43,11 +43,18 @@ internal abstract class DefaultCProject internal constructor(
     /**
      * Returns all the compiler options for the specified [platform].
      */
-    fun compilerOptions(platform: Platform): Provider<List<String>> {
-        return compilerOptions.zip(
-            platformCompilerOptions.map { it[platform].orEmpty() },
-            List<String>::plus
-        )
+    override fun compilerOptions(platform: Platform): Provider<List<String>> {
+        val optimizationOption = optimization.map { "-O${it.value}" }
+        val platformOptions = platformCompilerOptions.map { it[platform].orEmpty() }
+
+        val defineOptions = defines.map { entries ->
+            entries.map { "-D${it.key}=${it.value}" }
+        }
+
+        return compilerOptions
+            .zip(platformOptions, List<String>::plus)
+            .zip(defineOptions, List<String>::plus)
+            .zip(optimizationOption, List<String>::plus)
     }
 
     override fun linkerOptions(
@@ -60,11 +67,9 @@ internal abstract class DefaultCProject internal constructor(
     /**
      * Returns all the linker options for the specified [platform].
      */
-    fun linkerOptions(platform: Platform): Provider<List<String>> {
-        return linkerOptions.zip(
-            platformLinkerOptions.map { it[platform].orEmpty() },
-            List<String>::plus
-        )
+    override fun linkerOptions(platform: Platform): Provider<List<String>> {
+        val platformOptions = platformLinkerOptions.map { it[platform].orEmpty() }
+        return linkerOptions.zip(platformOptions, List<String>::plus)
     }
 }
 
