@@ -39,9 +39,7 @@ public val Zsh: CommandInterpreter = CommandInterpreter { args ->
  * Builds a [CommandLine] interpreted by `this` [CommandInterpreter].
  */
 public operator fun CommandInterpreter.invoke(vararg args: Any): CommandLine {
-    return CommandBuilder(*args)
-        .build()
-        .interpret(this)
+    return Command(*args).interpret(this)
 }
 
 /**
@@ -51,8 +49,5 @@ public inline operator fun CommandInterpreter.invoke(
     vararg args: Any,
     block: CommandBuilder.() -> Unit
 ): CommandLine {
-    return CommandBuilder(*args)
-        .apply(block)
-        .build()
-        .interpret(this)
+    return Command(*args, build = block).interpret(this)
 }

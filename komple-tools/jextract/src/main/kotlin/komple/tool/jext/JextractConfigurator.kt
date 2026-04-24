@@ -2,9 +2,7 @@ package komple.tool.jext
 
 import komple.exec.ExecEnvironmentBuilderScope
 import komple.exec.path
-import komple.platform.Architecture
 import komple.platform.Host
-import komple.platform.OperatingSystem
 import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
@@ -37,10 +35,10 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
     DefaultKompleToolConfigurator<JextractExtension>(name) {
 
     override fun supportHost(host: Host): Boolean = when (host.operatingSystem) {
-        OperatingSystem.MacOS, OperatingSystem.Linux -> true
-        OperatingSystem.Windows -> when (host.architecture) {
-            Architecture.Arm64 -> false
-            Architecture.X64 -> true
+        MacOS, Linux -> true
+        Windows -> when (host.architecture) {
+            Arm64 -> false
+            X64 -> true
         }
     }
 
@@ -48,7 +46,7 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
         return createExtension {
             extension.run {
                 version.convention(kompleProperty("jextract.version"))
-                jdkVersion.convention(JavaVersion.toVersion(kompleProperty("jextract.version")))
+                jdkVersion.convention(JavaVersion.toVersion(kompleProperty("jextract.jdkVersion")))
 
                 checksums.convention(
                     JextractChecksums(
@@ -65,17 +63,17 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
 
     override fun DownloadTaskRegistrationScope<JextractExtension>.registerDownloadTask(): TaskProvider<*> {
         val platform = when (host.operatingSystem) {
-            OperatingSystem.Linux -> when (host.architecture) {
-                Architecture.Arm64 -> "linux-aarch64"
-                Architecture.X64 -> "linux-x64"
+            Linux -> when (host.architecture) {
+                Arm64 -> "linux-aarch64"
+                X64 -> "linux-x64"
             }
 
-            OperatingSystem.MacOS -> when (host.architecture) {
-                Architecture.Arm64 -> "macos-aarch64"
-                Architecture.X64 -> "macos-x64"
+            MacOS -> when (host.architecture) {
+                Arm64 -> "macos-aarch64"
+                X64 -> "macos-x64"
             }
 
-            OperatingSystem.Windows -> "windows-x64"
+            Windows -> "windows-x64"
         }
 
         return url(extension.version.zip(extension.jdkVersion) { jextractVersion, javaVersion ->
@@ -90,17 +88,17 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
         return extension.checksums.run {
             checksum(
                 checksum = when (host.operatingSystem) {
-                    OperatingSystem.Linux -> when (host.architecture) {
-                        Architecture.Arm64 -> map(JextractChecksums::linuxAarch64)
-                        Architecture.X64 -> map(JextractChecksums::linuxX64)
+                    Linux -> when (host.architecture) {
+                        Arm64 -> map(JextractChecksums::linuxAarch64)
+                        X64 -> map(JextractChecksums::linuxX64)
                     }
 
-                    OperatingSystem.MacOS -> when (host.architecture) {
-                        Architecture.Arm64 -> map(JextractChecksums::macosAarch64)
-                        Architecture.X64 -> map(JextractChecksums::macosX64)
+                    MacOS -> when (host.architecture) {
+                        Arm64 -> map(JextractChecksums::macosAarch64)
+                        X64 -> map(JextractChecksums::macosX64)
                     }
 
-                    OperatingSystem.Windows -> map(JextractChecksums::windowsX64)
+                    Windows -> map(JextractChecksums::windowsX64)
                 },
                 algorithm = Algorithm.SHA_256
             )

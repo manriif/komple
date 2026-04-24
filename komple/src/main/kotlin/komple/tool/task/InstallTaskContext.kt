@@ -5,7 +5,7 @@ import org.gradle.api.file.Directory
 /**
  * Context for extracted file(s) installation.
  */
-public interface InstallTaskContext : TaskContext {
+public interface InstallTaskContext : ExecTaskContext {
 
     /**
      * Directory containing extracted file(s).

@@ -4,6 +4,7 @@ import komple.exec.Command
 import komple.exec.CommandInterpreter
 import komple.exec.ExecService
 import komple.exec.commandLine
+import komple.exec.execOutput
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
@@ -54,6 +55,16 @@ internal abstract class DefaultExecService @Inject constructor(
         command: Command,
         workingDirectory: File?
     ): ExecResult = execOperations.exec {
+        configure(
+            mainCommand = command,
+            workingDirectory = workingDirectory
+        )
+    }
+
+    override fun executeWithOutput(
+        command: Command,
+        workingDirectory: File?
+    ): String = execOperations.execOutput {
         configure(
             mainCommand = command,
             workingDirectory = workingDirectory

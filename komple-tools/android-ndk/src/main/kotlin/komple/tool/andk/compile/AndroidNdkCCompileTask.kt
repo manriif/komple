@@ -16,19 +16,19 @@ import kotlin.reflect.KClass
  */
 @CacheableTask
 internal abstract class AndroidNdkCCompileTask :
-    CCompileTask<AndroidNativeCCompileWorkAction.Parameters, AndroidNativeCCompileWorkAction>() {
+    CCompileTask<AndroidNdkCCompileWorkAction.Parameters, AndroidNdkCCompileWorkAction>() {
 
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val toolchainDirectory: DirectoryProperty
 
     @get:Nested
-    abstract val params: Property<AndroidNativeCompilationParams>
+    abstract val params: Property<AndroidNdkCompilationParams>
 
-    override val workActionClass: KClass<AndroidNativeCCompileWorkAction>
-        get() = AndroidNativeCCompileWorkAction::class
+    override val workActionClass: KClass<AndroidNdkCCompileWorkAction>
+        get() = AndroidNdkCCompileWorkAction::class
 
-    override fun AndroidNativeCCompileWorkAction.Parameters.configure() {
+    override fun AndroidNdkCCompileWorkAction.Parameters.configure() {
         this@AndroidNdkCCompileTask.let { task ->
             this.toolchainDirectory = task.toolchainDirectory
             this.params = task.params

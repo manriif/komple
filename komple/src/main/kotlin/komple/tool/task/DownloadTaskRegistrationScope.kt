@@ -24,6 +24,11 @@ public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> 
         klass: KClass<T>,
         configure: T.(context: DownloadTaskContext) -> Unit
     ): TaskProvider<T>
+
+    /**
+     * Registers a task that skips download, assuming the tool is already available on host.
+     */
+    override fun skip(): TaskProvider<*>
 }
 
 ///////////////////////////////////////////////////////////////////////////

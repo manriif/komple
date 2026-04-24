@@ -1,6 +1,7 @@
 package komple.tool.task
 
 import komple.exec.Bash
+import komple.exec.Command
 import komple.exec.execOutput
 import komple.exec.invoke
 import komple.tool.extension.KompleToolExtension
@@ -40,7 +41,7 @@ public interface ExtractTaskRegistrationScope<Extension : KompleToolExtension> :
      * Registers a task that skips extraction, causing downloaded files to be used as extracted
      * files.
      */
-    public fun skipExtraction(): TaskProvider<*>
+    override fun skip(): TaskProvider<*>
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -66,9 +67,9 @@ public inline fun <reified T : Task> ExtractTaskRegistrationScope<*>.register(
  * If [enclosedContent] is `true` then the contents inside the root directory is moved to the root
  * and the root directory is excluded.
  */
-private inline fun ExtractTaskRegistrationScope<*>.extractFileTree(
+private fun ExtractTaskRegistrationScope<*>.extractFileTree(
     enclosedContent: Boolean,
-    crossinline createTree: ArchiveOperations.(Provider<RegularFile>) -> FileTree
+    createTree: ArchiveOperations.(Provider<RegularFile>) -> FileTree
 ) = register<DefaultTask> { context ->
     val archiveOperations = project.serviceOf<ArchiveOperations>()
     val fileTree = archiveOperations.createTree(context.downloadDirectory.singleFile)
@@ -181,5 +182,24 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
                 commandLine("hdiutil", "detach", mountPoint)
             }
         }
+    }
+}
+
+/**
+ * Registers a task that execute a command supplied by [buildCommand] and returns that registered
+ * task.
+ *
+ * The working directory is created first and is set to the tool download directory.
+ */
+public fun ExtractTaskRegistrationScope<*>.command(
+    buildCommand: ExtractTaskContext.() -> Command
+): TaskProvider<*> = register<DefaultTask> { context ->
+    context.doLastWhenOutputChanged {
+        context.outputDirectory.asFile.mkdirs()
+
+        context.execServiceProvider.get().execute(
+            command = buildCommand(context),
+            workingDirectory = context.downloadDirectory.directory.get().asFile
+        )
     }
 }

@@ -14,6 +14,7 @@ fun KotlinJvmProjectExtension.configureKotlin() {
             add("-Xreturn-value-checker=full")
             add("-Xexplicit-backing-fields")
             add("-Xcontext-parameters")
+            add("-Xcontext-sensitive-resolution")
         }
     }
 

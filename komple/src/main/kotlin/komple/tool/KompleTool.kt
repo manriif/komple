@@ -19,4 +19,13 @@ public interface KompleTool : Named {
      * Directory where the tool is installed.
      */
     public val installDirectory: Provider<Directory>
+
+    /**
+     * Makes this tool depends on [other].
+     *
+     * This implies that:
+     * - [other] is installed when `this` tool is required.
+     * - [other] contributes to the environment of `this` tool.
+     */
+    public fun dependsOn(other: KompleTool)
 }

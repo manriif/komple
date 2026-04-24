@@ -1,5 +1,7 @@
 package komple.tool.task
 
+import komple.exec.ExecService
+import komple.platform.HasHost
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
@@ -30,6 +32,17 @@ public interface TaskContext {
      * installation being performed unnecessarily.
      */
     public val outputChanged: Provider<Boolean>
+}
+
+/**
+ * Task context providing access to [ExecService].
+ */
+public interface ExecTaskContext : TaskContext, HasHost {
+
+    /**
+     * Provider of the [ExecService] giving access to dependent tools.
+     */
+    public val execServiceProvider: Provider<ExecService>
 }
 
 ///////////////////////////////////////////////////////////////////////////

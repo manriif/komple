@@ -27,4 +27,9 @@ public interface TaskRegistrationScope<Extension : KompleToolExtension> :
      * Returns a task that always fails when executed.
      */
     public fun unsupported(): TaskProvider<*>
+
+    /**
+     * Returns a task that skips the operation.
+     */
+    public fun skip(): TaskProvider<*>
 }

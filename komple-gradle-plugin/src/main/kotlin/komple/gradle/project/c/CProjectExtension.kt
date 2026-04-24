@@ -71,8 +71,8 @@ public abstract class CProjectExtension @Inject internal constructor(
 
         val (libraryPrefix, librarySuffix) = platform.operatingSystem.library.run {
             when (type) {
-                CLibraryType.Shared -> sharedPrefix to sharedSuffix
-                CLibraryType.Static -> staticPrefix to staticSuffix
+                Shared -> sharedPrefix to sharedSuffix
+                Static -> staticPrefix to staticSuffix
             }
         }
 

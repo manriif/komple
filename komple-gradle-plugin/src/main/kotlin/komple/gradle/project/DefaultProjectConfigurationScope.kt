@@ -1,9 +1,11 @@
 package komple.gradle.project
 
+import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
 import komple.gradle.util.pascalCased
+import komple.platform.Host
 import komple.project.ProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.tool.extension.ExtensionScope
@@ -28,6 +30,9 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
 ) : ProjectConfigurationScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {
+
+    override val host: Host
+        get() = notClosed { CurrentHost }
 
     override fun generatedDirectory(): Provider<Directory> {
         return context.project.layout.projectGeneratedOutputDir(
@@ -57,7 +62,7 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         postfix: String,
         type: KClass<T>,
         configure: (T.() -> Unit)?
-    ): TaskProvider<T> {
+    ): TaskProvider<T>  = notClosed {
         val name = projectTaskName(
             projectName = configurator.project.name,
             postfix = "${context.toolName}${postfix.pascalCased()}"

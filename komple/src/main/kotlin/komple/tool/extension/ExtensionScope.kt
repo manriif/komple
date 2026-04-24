@@ -1,6 +1,7 @@
 package komple.tool.extension
 
 import komple.KompleInternalApi
+import komple.kompleProperty
 import org.gradle.api.Project
 import org.gradle.internal.extensions.core.extra
 
@@ -32,21 +33,5 @@ public interface ExtensionScope<Extension : Any> {
  */
 @KompleInternalApi
 public fun ExtensionScope<*>.kompleProperty(name: String): String {
-    val propertyName = "komple.$name"
-
-    if (!project.extra.has(propertyName)) {
-        throw NullPointerException("Property $propertyName does not exist")
-    }
-
-    val value = project.extra.get(propertyName)
-        ?: throw NullPointerException("Value of property $propertyName is null")
-
-    if (value !is String) {
-        throw ClassCastException(
-            "Value of property $propertyName is not a String " +
-                    "(${value::class})"
-        )
-    }
-
-    return value
+    return project.kompleProperty(name)
 }

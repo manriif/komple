@@ -28,3 +28,13 @@ public interface Command : Serializable {
 public fun Command(vararg args: Any): Command {
     return CommandBuilder(*args).build()
 }
+
+/**
+ * Builds and returns a command with [args].
+ */
+public inline fun Command(
+    vararg args: Any,
+    build: CommandBuilder.() -> Unit
+): Command {
+    return CommandBuilder(*args).apply(build).build()
+}

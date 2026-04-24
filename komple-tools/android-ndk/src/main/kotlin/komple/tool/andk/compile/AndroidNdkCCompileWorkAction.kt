@@ -1,17 +1,18 @@
 package komple.tool.andk.compile
 
-import komple.platform.Architecture
 import komple.project.c.CCompileWorkAction
-import komple.project.c.CLibraryType
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 
-internal abstract class AndroidNativeCCompileWorkAction :
-    CCompileWorkAction<AndroidNativeCCompileWorkAction.Parameters>() {
+/**
+ * Android Native [CCompileWorkAction].
+ */
+internal abstract class AndroidNdkCCompileWorkAction :
+    CCompileWorkAction<AndroidNdkCCompileWorkAction.Parameters>() {
 
     /**
      * Resolves [path] relatively to the Android NDK toolchain directory and returns the absolute
-     * path of the resolved file.
+     * path to the resolved file.
      */
     private fun toolchainPath(path: String): String {
         return parameters.toolchainDirectory.map { it.file(path) }.get().asFile.absolutePath
@@ -21,24 +22,24 @@ internal abstract class AndroidNativeCCompileWorkAction :
         val compilation = parameters.compilation.get()
 
         when (compilation.libraryType) {
-            CLibraryType.Shared -> throw UnsupportedOperationException(
+            Shared -> throw UnsupportedOperationException(
                 "Shared compilation for Android is not supported yet"
             )
 
-            CLibraryType.Static -> {
-                val targetTriple = when (compilation.platform.architecture) {
-                    Architecture.Arm64 -> "aarch64-linux-android"
-                    Architecture.Arm32 -> "armv7a-linux-androideabi"
-                    Architecture.X64 -> "x86_64-linux-android"
-                    Architecture.X86 -> "i686-linux-android"
-                }
-
+            Static -> {
                 val params = parameters.params.get()
+
+                val targetTriple = when (compilation.platform.architecture) {
+                    Arm64 -> "aarch64-linux-apple"
+                    Arm32 -> "armv7a-linux-appleeabi"
+                    X64 -> "x86_64-linux-apple"
+                    X86 -> "i686-linux-apple"
+                }
 
                 compileStatic(
                     compilerFlags = arrayOf(
                         toolchainPath("bin/clang"),
-                        "-target", "$targetTriple${params.minSdk}",
+                        "-target", "$targetTriple${params.minSdk.get()}",
                         "--sysroot=${toolchainPath("sysroot")}"
                     ),
                     archiverFlags = arrayOf(
@@ -53,9 +54,9 @@ internal abstract class AndroidNativeCCompileWorkAction :
     // Parameters
     ///////////////////////////////////////////////////////////////////////////
 
-    internal interface Parameters : CCompileWorkAction.Parameters {
+    interface Parameters : CCompileWorkAction.Parameters {
 
         val toolchainDirectory: DirectoryProperty
-        val params: Property<AndroidNativeCompilationParams>
+        val params: Property<AndroidNdkCompilationParams>
     }
 }

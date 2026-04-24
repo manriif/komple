@@ -11,7 +11,7 @@ import org.gradle.api.provider.Provider
 public interface TaskDirectory {
 
     /**
-     * Returns this task
+     * Returns this task output directory.
      */
     public val directory: Provider<Directory>
 

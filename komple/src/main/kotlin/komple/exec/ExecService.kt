@@ -16,6 +16,16 @@ public interface ExecService {
         command: Command,
         workingDirectory: File? = null
     ): ExecResult
+
+    /**
+     * Executes the [command], in an environment configured by registered tools and returns the
+     * output.
+     */
+    @IgnorableReturnValue
+    public fun executeWithOutput(
+        command: Command,
+        workingDirectory: File? = null
+    ): String
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -31,4 +41,16 @@ public fun ExecService.execute(
     workingDirectory: File? = null
 ): ExecResult {
     return execute(Command(*args), workingDirectory)
+}
+
+/**
+ * Executes the command built from [args], in an environment configured by registered tools and
+ * returns the output.
+ */
+@IgnorableReturnValue
+public fun ExecService.executeWithOutput(
+    vararg args: Any,
+    workingDirectory: File? = null
+): String {
+    return executeWithOutput(Command(*args), workingDirectory)
 }

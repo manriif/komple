@@ -2,15 +2,14 @@ package komple.tool.andk
 
 import komple.exec.ExecEnvironmentBuilderScope
 import komple.exec.variable
-import komple.platform.Architecture
 import komple.platform.Host
 import komple.platform.OperatingSystem
 import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
 import komple.project.registerCompileTask
-import komple.tool.andk.compile.AndroidNativeCompilationParams
 import komple.tool.andk.compile.AndroidNdkCCompileTask
+import komple.tool.andk.compile.AndroidNdkCompilationParams
 import komple.tool.andk.compile.configureConventions
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
@@ -26,6 +25,7 @@ import komple.tool.task.unzip
 import komple.tool.task.url
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
 /**
@@ -35,10 +35,10 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     DefaultKompleToolConfigurator<AndroidNdkExtension>(name) {
 
     override fun supportHost(host: Host): Boolean = when (host.operatingSystem) {
-        OperatingSystem.MacOS -> true
-        OperatingSystem.Linux, OperatingSystem.Windows -> when (host.architecture) {
-            Architecture.Arm64 -> false
-            Architecture.X64 -> true
+        MacOS -> true
+        Linux, Windows -> when (host.architecture) {
+            Arm64 -> false
+            X64 -> true
         }
     }
 
@@ -46,6 +46,12 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
         return createExtension {
             extension.run {
                 version.convention(kompleProperty("androidNdk.version"))
+
+                compilationParams.convention(
+                    project.objects.newInstance<AndroidNdkCompilationParams>().apply {
+                        configureConventions(project)
+                    }
+                )
 
                 checksums.convention(
                     AndroidNdkChecksums(
@@ -60,9 +66,9 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
 
     override fun DownloadTaskRegistrationScope<AndroidNdkExtension>.registerDownloadTask(): TaskProvider<*> {
         val (platform, fileExtension) = when (host.operatingSystem) {
-            OperatingSystem.MacOS -> "darwin" to "dmg"
-            OperatingSystem.Linux -> "linux" to "zip"
-            OperatingSystem.Windows -> "windows" to "zip"
+            MacOS -> "darwin" to "dmg"
+            Linux -> "linux" to "zip"
+            Windows -> "windows" to "zip"
         }
 
         return url(extension.version.map { version ->
@@ -76,9 +82,9 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
         return extension.checksums.run {
             checksum(
                 checksum = when (host.operatingSystem) {
-                    OperatingSystem.Linux -> map(AndroidNdkChecksums::linux)
-                    OperatingSystem.MacOS -> map(AndroidNdkChecksums::macos)
-                    OperatingSystem.Windows -> map(AndroidNdkChecksums::windows)
+                    Linux -> map(AndroidNdkChecksums::linux)
+                    MacOS -> map(AndroidNdkChecksums::macos)
+                    Windows -> map(AndroidNdkChecksums::windows)
                 },
                 algorithm = Algorithm.SHA1
             )
@@ -87,8 +93,8 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
 
     override fun ExtractTaskRegistrationScope<AndroidNdkExtension>.registerExtractTask(): TaskProvider<*> {
         return when (host.operatingSystem) {
-            OperatingSystem.Linux, OperatingSystem.Windows -> unzip(true)
-            OperatingSystem.MacOS -> {
+            Linux, Windows -> unzip(true)
+            MacOS -> {
                 val version = extension.version
 
                 dmg({ property("version", version) }) { mountPoint, extractDirectory ->
@@ -116,14 +122,14 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
 
         when (val configurator = configurator) {
             is CProjectConfigurator -> {
-                val cParams = createExtension<AndroidNativeCompilationParams>("android").apply {
-                    configureConventions()
+                val cParams = createExtension<AndroidNdkCompilationParams>("android").apply {
+                    configureConventions(extension.compilationParams)
                 }
 
                 val hostTag = when (host.operatingSystem) {
-                    OperatingSystem.Linux -> "linux-x86_64"
-                    OperatingSystem.MacOS -> "darwin-x86_64"
-                    OperatingSystem.Windows -> "windows-x86_64"
+                    Linux -> "linux-x86_64"
+                    MacOS -> "darwin-x86_64"
+                    Windows -> "windows-x86_64"
                 }
 
                 val toolchainDir = installDirectory.map { directory ->

@@ -5,7 +5,7 @@ import org.gradle.api.file.Directory
 /**
  * Context for downloaded file(s) extraction.
  */
-public interface ExtractTaskContext : TaskContext {
+public interface ExtractTaskContext : ExecTaskContext {
 
     /**
      * Directory containing file(s) getting downloaded.

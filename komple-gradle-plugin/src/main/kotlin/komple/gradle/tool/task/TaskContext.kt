@@ -1,6 +1,10 @@
 package komple.gradle.tool.task
 
+import komple.exec.ExecService
+import komple.gradle.platform.CurrentHost
+import komple.platform.Host
 import komple.tool.task.DownloadTaskContext
+import komple.tool.task.ExecTaskContext
 import komple.tool.task.ExtractTaskContext
 import komple.tool.task.InstallTaskContext
 import komple.tool.task.TaskContext
@@ -31,12 +35,31 @@ internal class DefaultDownloadTaskContext(
 /**
  * Default implementation of [ExtractTaskContext].
  */
-internal class DefaultExtractTaskContext(
-    override val downloadDirectory: TaskDirectory,
+internal abstract class DefaultExecTaskContext(
+    override val execServiceProvider: Provider<ExecService>,
     outputDirectory: Directory,
     outputChanged: Provider<Boolean>
-) : ExtractTaskContext,
+) : ExecTaskContext,
     DefaultTaskContext(
+        outputDirectory = outputDirectory,
+        outputChanged = outputChanged
+    ) {
+
+    override val host: Host
+        get() = CurrentHost
+}
+
+/**
+ * Default implementation of [ExtractTaskContext].
+ */
+internal class DefaultExtractTaskContext(
+    override val downloadDirectory: TaskDirectory,
+    execServiceProvider: Provider<ExecService>,
+    outputDirectory: Directory,
+    outputChanged: Provider<Boolean>,
+) : ExtractTaskContext,
+    DefaultExecTaskContext(
+        execServiceProvider = execServiceProvider,
         outputDirectory = outputDirectory,
         outputChanged = outputChanged
     )
@@ -46,10 +69,12 @@ internal class DefaultExtractTaskContext(
  */
 internal class DefaultInstallTaskContext(
     override val extractDirectory: TaskDirectory,
+    execServiceProvider: Provider<ExecService>,
     outputDirectory: Directory,
     outputChanged: Provider<Boolean>
 ) : InstallTaskContext,
-    DefaultTaskContext(
+    DefaultExecTaskContext(
+        execServiceProvider = execServiceProvider,
         outputDirectory = outputDirectory,
         outputChanged = outputChanged
     )

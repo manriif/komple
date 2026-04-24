@@ -1,5 +1,6 @@
 package komple.gradle.tool
 
+import komple.exec.ExecService
 import komple.gradle.KomplePlugin
 import komple.gradle.exec.ExecEnvironment
 import komple.gradle.extension.KompleRootProjectExtension
@@ -9,6 +10,7 @@ import komple.gradle.platform.UnsupportedHostException
 import komple.gradle.project.DefaultExecEnvironmentBuilderScope
 import komple.gradle.project.DefaultProjectConfigurationScope
 import komple.gradle.project.KompleProjectExtension
+import komple.gradle.tool.graph.ToolDependencyGraph
 import komple.gradle.tool.task.DefaultDownloadTaskRegistrationScope
 import komple.gradle.tool.task.DefaultExtractTaskRegistrationScope
 import komple.gradle.tool.task.DefaultInstallTaskRegistrationScope
@@ -19,6 +21,7 @@ import komple.project.ProjectConfigurator
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.resources.MissingResourceException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.extensions.core.extra
@@ -35,8 +38,14 @@ internal fun Project.configureTools(
 ) {
     loadToolsProperties()
 
+    val dependencyGraph = ToolDependencyGraph()
+
     extension.toolConfigurators.all {
-        configureTool(this@configureTools, extension, environment)
+        configureTool(this@configureTools, extension, environment, dependencyGraph)
+    }
+
+    afterEvaluate {
+        completeDependencies(dependencyGraph)
     }
 }
 
@@ -63,13 +72,20 @@ private fun Project.loadToolsProperties() {
     }
 }
 
+private fun Project.completeDependencies(
+    dependencyGraph: ToolDependencyGraph
+) {
+
+}
+
 /**
  * Configures a tool using `this` [KompleToolConfigurator].
  */
 private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureTool(
     project: Project,
     rootExtension: KompleRootProjectExtension,
-    environment: ExecEnvironment
+    environment: ExecEnvironment,
+    dependencyGraph: ToolDependencyGraph
 ) {
     val toolName = this.name
 
@@ -80,7 +96,7 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     ).use { it.configureExtension() }
 
     val context = KompleToolConfigContext(project, toolName, extension)
-    val installTaskProvider = createInstallTaskProvider(context)
+    val installTaskProvider = createInstallTaskProvider(context, rootExtension.execService)
 
     val installDirectory = project.layout
         .dir(installTaskProvider.map { it.outputs.files.singleFile })
@@ -94,10 +110,12 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         configurator = this,
         extension = context.extension,
         toolName = context.toolName,
+        dependencyGraph = dependencyGraph,
         installTaskProvider = installTaskProvider,
         installDirectory = installDirectory
     )
 
+    dependencyGraph.addTool(tool)
     rootExtension.tools.add(tool)
 }
 
@@ -105,12 +123,15 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
  * Creates the task responsible for installing the tool.
  */
 private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstallTaskProvider(
-    context: KompleToolConfigContext<Ext>
+    context: KompleToolConfigContext<Ext>,
+    execServiceProvider: Provider<ExecService>
 ): TaskProvider<*> = if (supportHost(CurrentHost)) {
     DefaultInstallTaskRegistrationScope(
         context = context,
+        execServiceProvider = execServiceProvider,
         extractTask = DefaultExtractTaskRegistrationScope(
             context = context,
+            execServiceProvider = execServiceProvider,
             integrityTask = DefaultIntegrityTaskRegistrationScope(
                 context = context,
                 downloadTask = DefaultDownloadTaskRegistrationScope(context)

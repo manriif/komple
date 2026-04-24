@@ -1,11 +1,13 @@
 package komple.gradle.tool.task
 
+import komple.exec.ExecService
 import komple.gradle.kompleToolsExtractsDirectory
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExtractTaskContext
 import komple.tool.task.ExtractTaskRegistrationScope
 import org.gradle.api.Task
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
 
@@ -14,6 +16,7 @@ import kotlin.reflect.KClass
  */
 internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtension>(
     context: KompleToolConfigContext<Extension>,
+    private val execServiceProvider: Provider<ExecService>,
     private val integrityTask: TaskProvider<*>
 ) : ExtractTaskRegistrationScope<Extension>,
     DefaultTaskRegistrationScope<Extension>(context) {
@@ -26,6 +29,7 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
 
         val extractContext = DefaultExtractTaskContext(
             downloadDirectory = integrityTask.outputDir(project.layout),
+            execServiceProvider = execServiceProvider,
             outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolName),
             outputChanged = outputChanged
         )
@@ -39,7 +43,7 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
         )
     }
 
-    override fun skipExtraction(): TaskProvider<*> {
+    override fun skip(): TaskProvider<*> {
         return integrityTask
     }
 

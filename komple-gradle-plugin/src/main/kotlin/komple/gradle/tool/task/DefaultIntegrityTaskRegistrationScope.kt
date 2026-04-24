@@ -36,7 +36,7 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
         )
     }
 
-    override fun skipIntegrityCheck(): TaskProvider<*> {
+    override fun skip(): TaskProvider<*> {
         return downloadTask
     }
 
