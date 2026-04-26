@@ -3,6 +3,7 @@ package komple.gradle.tool
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.extension.extensions
 import komple.gradle.util.ClosableScope
+import komple.gradle.util.camelCased
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.KompleToolExtension
@@ -26,7 +27,7 @@ internal class DefaultExtensionConfigurationScope<Extension : KompleToolExtensio
         configure: (ExtensionScope<Extension>.() -> Unit)?
     ): Extension = notClosed {
         rootExtension.extensions.create(
-            name = toolName,
+            name = toolName.camelCased(),
             type = type,
             constructionArguments = args
         ).also { extension ->

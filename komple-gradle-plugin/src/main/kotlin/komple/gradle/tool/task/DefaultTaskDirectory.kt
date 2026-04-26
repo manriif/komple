@@ -16,7 +16,7 @@ internal class DefaultTaskDirectory(override val directory: Provider<Directory>)
         get() = directory.map { directory ->
             val file = directory.asFile
                 .listFiles()
-                .singleOrNull(File::isFile)
+                ?.singleOrNull(File::isFile)
                 ?: throw FileNotFoundException(
                     "The directory contains no file, more than one file or the file present is a" +
                             " directory"

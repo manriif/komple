@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 package komple.project.c
 
 import komple.platform.Platform

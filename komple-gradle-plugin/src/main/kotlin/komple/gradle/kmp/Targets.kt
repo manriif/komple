@@ -1,31 +1,7 @@
 package komple.gradle.kmp
 
 import komple.platform.Platform
-import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.konan.target.KonanTarget
-
-/**
- * Identifier of the Kotlin Multiplatform Plugin.
- */
-private const val KMP_PLUGIN_ID = "org.jetbrains.kotlin.multiplatform"
-
-/**
- * Returns the [KotlinMultiplatformExtension] from `this` project.
- */
-internal val Project.kmpExtension: KotlinMultiplatformExtension
-    get() = kotlinExtension as KotlinMultiplatformExtension
-
-/**
- * Invokes [action] with the [KotlinMultiplatformExtension] passed as argument when the KMP plugin
- * is applied.
- */
-internal fun Project.withKmpPlugin(action: Project.(KotlinMultiplatformExtension) -> Unit) {
-    pluginManager.withPlugin(KMP_PLUGIN_ID) {
-        action(kmpExtension)
-    }
-}
 
 /**
  * Returns the [Platform] representing `this` [KonanTarget].

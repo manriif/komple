@@ -72,13 +72,12 @@ private fun ExtractTaskRegistrationScope<*>.extractFileTree(
     createTree: ArchiveOperations.(Provider<RegularFile>) -> FileTree
 ) = register<DefaultTask> { context ->
     val archiveOperations = project.serviceOf<ArchiveOperations>()
-    val fileTree = archiveOperations.createTree(context.downloadDirectory.singleFile)
     val fileOperations = project.serviceOf<FileSystemOperations>()
 
     if (enclosedContent) {
         context.doLastWhenOutputChanged {
             fileOperations.copy {
-                from(fileTree) {
+                from(archiveOperations.createTree(context.downloadDirectory.singleFile)) {
                     eachFile {
                         val segments = relativePath.segments
 
@@ -99,7 +98,7 @@ private fun ExtractTaskRegistrationScope<*>.extractFileTree(
     } else {
         context.doLastWhenOutputChanged {
             fileOperations.copy {
-                from(fileTree)
+                from(archiveOperations.createTree(context.downloadDirectory.singleFile))
                 into(context.outputDirectory)
             }
         }

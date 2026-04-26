@@ -99,9 +99,9 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     ).use { it.configureExtension() }
 
     val objects = project.objects
-    val commandInterpreter = rootExtension.commandInterpreter
     val execEnvironment = objects.newInstance<ExecEnvironment>()
     val execEnvironments = mutableListOf(execEnvironment)
+    val commandInterpreter = rootExtension.commandInterpreter
 
     val commandExecutor: Provider<CommandExecutor> = project.providers.provider {
         objects.newInstance<DefaultCommandExecutor>().apply {
@@ -119,12 +119,6 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     if (supportHost(CurrentHost)) {
         DefaultExecEnvironmentBuilderScope(context, execEnvironment, installDirectory)
             .use { it.configureEnvironment() }
-    }
-
-    execEnvironment.run {
-        commands.finalizeValue()
-        paths.finalizeValue()
-        variables.finalizeValue()
     }
 
     val tool = DefaultKompleTool(

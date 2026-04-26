@@ -41,6 +41,9 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
     override val toolName: String
         get() = context.toolName
 
+    override val toolNameCompat: String
+        get() = toolName.dashCased()
+
     /**
      * Returns a conventional name for a task and for the tool.
      */
@@ -72,7 +75,11 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
         doLast {
             checksumFile.asFile.run {
                 parentFile.mkdirs()
-                writeText(checksumProvider.get())
+                val freshChecksum = checksumInputs.files.filter(File::exists).sha256()
+
+                if (!checksumsEquals(checksumFile.asFile, freshChecksum)) {
+                    writeText(freshChecksum)
+                }
             }
         }
     }
@@ -104,7 +111,7 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
     ) {
         configureTask(
             context = context,
-            outputDirectory = project.providers.provider(context::outputDirectory),
+            outputDirectory = project.provider(context::outputDirectory),
             configurator = configurator
         )
 
@@ -122,11 +129,25 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
     /**
      * Registers a task that always fails when executed.
      */
-    protected fun registerUnsupportedTask(postfix: String): TaskProvider<*> {
+    protected fun registerFailureTask(
+        postfix: String,
+        raiseError: () -> Nothing
+    ): TaskProvider<*> {
         return context.project.tasks.registerToolTask(toolTaskName(postfix), DefaultTask::class) {
+            group = null
+
             doLast {
-                throw UnsupportedHostException("Host is not supported")
+                raiseError()
             }
+        }
+    }
+
+    /**
+     * Registers a task that always fails when executed with [UnsupportedHostException].
+     */
+    protected fun registerUnsupportedTask(postfix: String): TaskProvider<*> {
+        return registerFailureTask(postfix) {
+            throw UnsupportedHostException("Host is not supported")
         }
     }
 }

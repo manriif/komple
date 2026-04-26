@@ -19,17 +19,22 @@ public interface TaskRegistrationScope<Extension : KompleToolExtension> :
     public val toolName: String
 
     /**
+     * Name of the tool for maximum compatibility with file systems for example.
+     */
+    public val toolNameCompat: String
+
+    /**
      * Returns the project's [ProviderFactory].
      */
     public val providers: ProviderFactory
 
     /**
-     * Returns a task that always fails when executed.
-     */
-    public fun unsupported(): TaskProvider<*>
-
-    /**
      * Returns a task that skips the operation.
      */
     public fun skip(): TaskProvider<*>
+
+    /**
+     * Returns a task that always fails when executed.
+     */
+    public fun unsupported(): TaskProvider<*>
 }

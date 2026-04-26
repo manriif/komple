@@ -21,10 +21,10 @@ internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtens
         klass: KClass<T>,
         configure: T.(DownloadTaskContext) -> Unit
     ): TaskProvider<T> = registerTask(TASK_TOOL_DOWNLOAD_POSTFIX, klass) { outputChanged ->
-        description = "Download $toolName"
+        description = "Download the $toolName tool."
 
         val downloadContext = DefaultDownloadTaskContext(
-            outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolName),
+            outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolNameCompat),
             outputChanged = outputChanged
         )
 
@@ -33,6 +33,14 @@ internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtens
             configurator = configure,
             deleteFirst = false
         )
+    }
+
+    override fun skip(): TaskProvider<*> {
+        val toolName = toolName
+
+        return registerFailureTask(TASK_TOOL_DOWNLOAD_POSTFIX) {
+            throw UnsupportedOperationException("No file to download for tool $toolName")
+        }
     }
 
     override fun unsupported(): TaskProvider<*> =

@@ -3,6 +3,30 @@ plugins {
     alias(libs.plugins.conventions.common)
 }
 
+private val SplitRegex = Regex("""[^a-zA-Z0-9]""")
+
+private fun String.toPluginAlias(): String {
+    val prefix: String
+
+    val words = split(SplitRegex)
+        .also { prefix = it[0] }
+        .drop(1)
+
+    val alias = if (words.size == 1) words.first() else {
+        words
+            .mapIndexed { index, word ->
+                if (index == 0) {
+                    word.lowercase()
+                } else {
+                    word.replaceFirstChar(Char::titlecase)
+                }
+            }
+            .joinToString("")
+    }
+
+    return "$prefix-$alias"
+}
+
 catalog {
     versionCatalog {
         val komple = "komple"
@@ -13,7 +37,8 @@ catalog {
 
         rootProject.subprojects.forEach { project ->
             if (project.path.startsWith(":komple-tools:")) {
-                plugin(project.toolName, project.toolPluginId).versionRef(komple)
+                plugin(project.toolName.toPluginAlias(), project.toolPluginId)
+                    .versionRef(komple)
             }
         }
     }

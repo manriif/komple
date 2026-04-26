@@ -20,11 +20,11 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
     override fun <T : Task> register(
         klass: KClass<T>,
         configure: T.(directory: TaskDirectory) -> Unit
-    ): TaskProvider<T> = context.project.registerToolTask(
+    ): TaskProvider<T> = context.project.tasks.registerToolTask(
         name = toolTaskName(TASK_TOOL_INTEGRITY_POSTFIX),
         type = klass
     ) {
-        description = "Check $toolName integrity"
+        description = "Check the $toolName tool's integrity."
 
         val downloadDirectory = downloadTask.outputDir(project.layout)
         inputs.dir(downloadDirectory.directory)

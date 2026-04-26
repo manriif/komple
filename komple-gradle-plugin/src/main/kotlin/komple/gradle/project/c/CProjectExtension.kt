@@ -19,6 +19,7 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import javax.inject.Inject
@@ -111,7 +112,7 @@ public abstract class CProjectExtension @Inject internal constructor(
             }
 
             cinterops.register(cProject.name) {
-                val settings = DefaultCInteropSettings(this, project.objects)
+                val settings = project.objects.newInstance<DefaultCInteropSettings>(this)
                 configureInterop?.invoke(settings)
 
                 val cInteropDir = layout.projectGeneratedOutputDir(cProject.name, "cinterop")

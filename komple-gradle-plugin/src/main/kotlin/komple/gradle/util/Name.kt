@@ -103,9 +103,7 @@ internal fun String.camelCased(): String {
     val words = split(SplitRegex)
 
     val name = if (words.size == 1) {
-        words.first().replaceFirstChar { char ->
-            char.lowercaseChar()
-        }
+        words.first().lowercase()
     } else {
         words
             .mapIndexed { index, word ->
