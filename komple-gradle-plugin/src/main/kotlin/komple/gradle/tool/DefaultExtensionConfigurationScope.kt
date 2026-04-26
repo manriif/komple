@@ -1,5 +1,6 @@
 package komple.gradle.tool
 
+import komple.gradle.extension.DefaultExtensionScope
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.extension.extensions
 import komple.gradle.util.ClosableScope
@@ -31,20 +32,7 @@ internal class DefaultExtensionConfigurationScope<Extension : KompleToolExtensio
             type = type,
             constructionArguments = args
         ).also { extension ->
-            configure?.let { action ->
-                ExtensionScopeImpl(extension).use(action)
-            }
+            DefaultExtensionScope(project, extension, configure)
         }
-    }
-
-    /**
-     * Implementation of [ExtensionScope].
-     */
-    internal inner class ExtensionScopeImpl(override val extension: Extension) :
-        ExtensionScope<Extension>,
-        ClosableScope() {
-
-        override val project: Project
-            get() = notClosed { this@DefaultExtensionConfigurationScope.project }
     }
 }

@@ -3,7 +3,6 @@ package komple.tool.andk.compile
 import komple.kompleProperty
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 
 /**
@@ -29,7 +28,7 @@ internal fun AndroidNdkCompilationParams.configureConventions(project: Project) 
  * Configures convention values for [AndroidNdkCompilationParams].
  */
 internal fun AndroidNdkCompilationParams.configureConventions(
-    parent: Provider<AndroidNdkCompilationParams>
+    parent: AndroidNdkCompilationParams
 ) {
-    minSdk.convention(parent.flatMap(AndroidNdkCompilationParams::minSdk))
+    minSdk.convention(parent.minSdk)
 }

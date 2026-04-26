@@ -48,15 +48,15 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
                 version.convention(kompleProperty("jextract.version"))
                 jdkVersion.convention(JavaVersion.toVersion(kompleProperty("jextract.jdkVersion")))
 
-                checksums.convention(
-                    JextractChecksums(
-                        linuxAarch64 = kompleProperty("jextract.checksum.linux.aarch64"),
-                        linuxX64 = kompleProperty("jextract.checksum.linux.x64"),
-                        macosAarch64 = kompleProperty("jextract.checksum.macos.aarch64"),
-                        macosX64 = kompleProperty("jextract.checksum.macos.x64"),
-                        windowsX64 = kompleProperty("jextract.checksum.windows.x64"),
-                    )
-                )
+                add(JextractExtension::checksums) {
+                    extension.run {
+                        linuxAarch64 = kompleProperty("jextract.checksum.linux.aarch64")
+                        linuxX64 = kompleProperty("jextract.checksum.linux.x64")
+                        macosAarch64 = kompleProperty("jextract.checksum.macos.aarch64")
+                        macosX64 = kompleProperty("jextract.checksum.macos.x64")
+                        windowsX64 = kompleProperty("jextract.checksum.windows.x64")
+                    }
+                }
             }
         }
     }
@@ -89,16 +89,16 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
             checksum(
                 checksum = when (host.operatingSystem) {
                     Linux -> when (host.architecture) {
-                        Arm64 -> map(JextractChecksums::linuxAarch64)
-                        X64 -> map(JextractChecksums::linuxX64)
+                        Arm64 -> linuxAarch64
+                        X64 -> linuxX64
                     }
 
                     MacOS -> when (host.architecture) {
-                        Arm64 -> map(JextractChecksums::macosAarch64)
-                        X64 -> map(JextractChecksums::macosX64)
+                        Arm64 -> macosAarch64
+                        X64 -> macosX64
                     }
 
-                    Windows -> map(JextractChecksums::windowsX64)
+                    Windows -> windowsX64
                 },
                 algorithm = Algorithm.SHA_256
             )

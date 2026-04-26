@@ -1,18 +1,18 @@
 package komple.gradle.project
 
 import komple.exec.CommandExecutor
+import komple.gradle.extension.DefaultExtensionScope
 import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
 import komple.gradle.util.pascalCased
 import komple.platform.Host
-import komple.project.ProjectConfigurator
 import komple.project.ProjectConfigurationScope
+import komple.project.ProjectConfigurator
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
-import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
@@ -54,9 +54,7 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
             type = type,
             constructionArguments = args
         ).also { extension ->
-            configure?.let { action ->
-                ExtensionScopeImpl(extension).use(action)
-            }
+            DefaultExtensionScope(context.project, extension, configure)
         }
     }
 
@@ -64,7 +62,7 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         postfix: String,
         type: KClass<T>,
         configure: (T.() -> Unit)?
-    ): TaskProvider<T>  = notClosed {
+    ): TaskProvider<T> = notClosed {
         val name = projectTaskName(
             projectName = configurator.project.name,
             postfix = "${context.toolName}${postfix.pascalCased()}"
@@ -73,16 +71,5 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         return context.project.tasks.registerProjectTask(name, type) {
             configure?.invoke(this)
         }
-    }
-
-    /**
-     * Implementation of [ExtensionScope].
-     */
-    internal inner class ExtensionScopeImpl<E : Any>(override val extension: E) :
-        ExtensionScope<E>,
-        ClosableScope() {
-
-        override val project: Project
-            get() = notClosed { context.project }
     }
 }

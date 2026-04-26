@@ -4,6 +4,7 @@ import komple.KompleInternalApi
 import komple.kompleProperty
 import org.gradle.api.Project
 import org.gradle.internal.extensions.core.extra
+import kotlin.reflect.KProperty1
 
 /**
  * Extends [Extension] DSL.
@@ -19,6 +20,16 @@ public interface ExtensionScope<Extension : Any> {
      * Context extension.
      */
     public val extension: Extension
+
+    /**
+     * Adds the child extension [Child] already declared in [Extension] and optionally [configure]s
+     * it.
+     */
+    @IgnorableReturnValue
+    public fun <Child : Any> add(
+        property: KProperty1<Extension, Child>,
+        configure: (ExtensionScope<Child>.() -> Unit)? = null
+    ): Child
 }
 
 ///////////////////////////////////////////////////////////////////////////

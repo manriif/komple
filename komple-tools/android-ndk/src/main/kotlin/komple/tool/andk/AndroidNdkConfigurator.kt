@@ -25,7 +25,6 @@ import komple.tool.task.unzip
 import komple.tool.task.url
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
 /**
@@ -47,19 +46,17 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
             extension.run {
                 version.convention(kompleProperty("androidNdk.version"))
 
-                compilationParams.convention(
-                    project.objects.newInstance<AndroidNdkCompilationParams>().apply {
-                        configureConventions(project)
+                add(AndroidNdkExtension::checksums) {
+                    extension.run {
+                        linux = kompleProperty("androidNdk.checksum.linux")
+                        macos = kompleProperty("androidNdk.checksum.macos")
+                        windows = kompleProperty("androidNdk.checksum.windows")
                     }
-                )
+                }
 
-                checksums.convention(
-                    AndroidNdkChecksums(
-                        linux = kompleProperty("androidNdk.checksum.linux"),
-                        macos = kompleProperty("androidNdk.checksum.macos"),
-                        windows = kompleProperty("androidNdk.checksum.windows"),
-                    )
-                )
+                add(AndroidNdkExtension::compilationParams) {
+                    extension.configureConventions(project)
+                }
             }
         }
     }
@@ -82,9 +79,9 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
         return extension.checksums.run {
             checksum(
                 checksum = when (host.operatingSystem) {
-                    Linux -> map(AndroidNdkChecksums::linux)
-                    MacOS -> map(AndroidNdkChecksums::macos)
-                    Windows -> map(AndroidNdkChecksums::windows)
+                    Linux -> linux
+                    MacOS -> macos
+                    Windows -> windows
                 },
                 algorithm = Algorithm.SHA1
             )

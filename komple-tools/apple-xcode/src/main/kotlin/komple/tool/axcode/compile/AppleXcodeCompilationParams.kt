@@ -49,11 +49,9 @@ internal fun AppleXcodeCompilationParams.configureConventions(project: Project) 
 /**
  * Configures convention values for [AppleXcodeCompilationParams].
  */
-internal fun AppleXcodeCompilationParams.configureConventions(
-    parent: Provider<AppleXcodeCompilationParams>
-) {
-    versionMinMacos.convention(parent.flatMap(AppleXcodeCompilationParams::versionMinMacos))
-    versionMinIos.convention(parent.flatMap(AppleXcodeCompilationParams::versionMinIos))
-    versionMinTvos.convention(parent.flatMap(AppleXcodeCompilationParams::versionMinTvos))
-    versionMinWatchos.convention(parent.flatMap(AppleXcodeCompilationParams::versionMinWatchos))
+internal fun AppleXcodeCompilationParams.configureConventions(parent: AppleXcodeCompilationParams) {
+    versionMinMacos.convention(parent.versionMinMacos)
+    versionMinIos.convention(parent.versionMinIos)
+    versionMinTvos.convention(parent.versionMinTvos)
+    versionMinWatchos.convention(parent.versionMinWatchos)
 }

@@ -13,7 +13,6 @@ import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
 /**
@@ -29,11 +28,9 @@ public abstract class AppleXcodeConfigurator @Inject constructor(name: String) :
 
     override fun ExtensionConfigurationScope<AppleXcodeExtension>.configureExtension(): AppleXcodeExtension {
         return createExtension {
-            extension.compilationParams.convention(
-                project.objects.newInstance<AppleXcodeCompilationParams>().apply {
-                    configureConventions(project)
-                }
-            )
+            add(AppleXcodeExtension::compilationParams) {
+                extension.configureConventions(project)
+            }
         }
     }
 
