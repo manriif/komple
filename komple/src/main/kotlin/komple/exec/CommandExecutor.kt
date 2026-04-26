@@ -4,9 +4,9 @@ import org.gradle.process.ExecResult
 import java.io.File
 
 /**
- * Service for command execution in an environment where registered tools are available.
+ * Gives access to command execution in an environment where registered tools are available.
  */
-public interface ExecService {
+public interface CommandExecutor {
 
     /**
      * Executes the [command], in an environment configured by registered tools.
@@ -36,7 +36,7 @@ public interface ExecService {
  * Executes the command built from [args], in an environment configured by registered tools.
  */
 @IgnorableReturnValue
-public fun ExecService.execute(
+public fun CommandExecutor.execute(
     vararg args: Any,
     workingDirectory: File? = null
 ): ExecResult {
@@ -48,7 +48,7 @@ public fun ExecService.execute(
  * returns the output.
  */
 @IgnorableReturnValue
-public fun ExecService.executeWithOutput(
+public fun CommandExecutor.executeWithOutput(
     vararg args: Any,
     workingDirectory: File? = null
 ): String {

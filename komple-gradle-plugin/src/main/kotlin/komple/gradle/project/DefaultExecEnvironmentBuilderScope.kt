@@ -1,7 +1,7 @@
 package komple.gradle.project
 
 import komple.exec.Command
-import komple.gradle.exec.ExecEnvironment
+import komple.exec.ExecEnvironment
 import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope

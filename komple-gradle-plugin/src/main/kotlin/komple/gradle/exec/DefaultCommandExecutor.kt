@@ -1,13 +1,13 @@
 package komple.gradle.exec
 
 import komple.exec.Command
+import komple.exec.CommandExecutor
 import komple.exec.CommandInterpreter
-import komple.exec.ExecService
+import komple.exec.ExecEnvironment
 import komple.exec.commandLine
 import komple.exec.execOutput
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.services.BuildService
-import org.gradle.api.services.BuildServiceParameters
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
@@ -15,12 +15,22 @@ import java.io.File
 import javax.inject.Inject
 
 /**
- * Service for command execution in the context of compilation.
+ * Default implementation of [CommandExecutor].
  */
-internal abstract class DefaultExecService @Inject constructor(
-    private val execOperations: ExecOperations
-) : BuildService<DefaultExecService.Params>,
-    ExecService {
+public abstract class DefaultCommandExecutor @Inject internal constructor() : CommandExecutor {
+
+    @get:Inject
+    protected abstract val execOperations: ExecOperations
+
+    /**
+     * The [CommandInterpreter] to use for executing commands.
+     */
+    public abstract val commandInterpreter: Property<CommandInterpreter>
+
+    /**
+     * The environments used to populate the process.
+     */
+    public abstract val execEnvironments: ListProperty<ExecEnvironment>
 
     /**
      * Configures the execution environment and sets the final command line.
@@ -30,17 +40,29 @@ internal abstract class DefaultExecService @Inject constructor(
         workingDirectory: File?
     ) {
         workingDirectory?.let { workingDir = it }
-        val execEnvironment = parameters.environment.get()
 
-        execEnvironment.variables.orNull
-            ?.forEach(::environment)
+        val envs = execEnvironments.get()
 
-        execEnvironment.paths.orNull
-            ?.takeUnless(List<String>::isEmpty)
-            ?.fold(System.getenv(PATH)) { left, right -> "$right:$left" }
-            ?.let { environment(PATH, it) }
+        if (envs.isEmpty()) {
+            commandLine(line = mainCommand.interpret(commandInterpreter.get()))
+            return
+        }
 
-        val commands = execEnvironment.commands.get()
+        val commands = mutableListOf<Command>()
+        val paths = mutableListOf<String>()
+
+        envs.forEach { env ->
+            commands.addAll(env.commands.get())
+            paths.addAll(env.paths.get())
+
+            env.variables.get()
+                .forEach(::environment)
+        }
+
+        if (paths.isNotEmpty()) {
+            val path = paths.fold(System.getenv(PATH)) { left, right -> "$right:$left" }
+            environment(PATH, path)
+        }
 
         val command = if (commands.isEmpty()) mainCommand else {
             commands.fold(mainCommand) { left, right ->
@@ -48,7 +70,7 @@ internal abstract class DefaultExecService @Inject constructor(
             }
         }
 
-        commandLine(line = command.interpret(parameters.interpreter.get()))
+        commandLine(line = command.interpret(commandInterpreter.get()))
     }
 
     override fun execute(
@@ -69,16 +91,6 @@ internal abstract class DefaultExecService @Inject constructor(
             mainCommand = command,
             workingDirectory = workingDirectory
         )
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Parameters
-    ///////////////////////////////////////////////////////////////////////////
-
-    interface Params : BuildServiceParameters {
-
-        val interpreter: Property<CommandInterpreter>
-        val environment: Property<ExecEnvironment>
     }
 
     ///////////////////////////////////////////////////////////////////////////

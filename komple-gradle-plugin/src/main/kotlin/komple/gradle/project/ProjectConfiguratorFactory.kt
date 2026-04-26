@@ -1,5 +1,6 @@
 package komple.gradle.project
 
+import komple.gradle.tool.DefaultKompleTool
 import komple.project.ProjectConfigurator
 import kotlin.reflect.KClass
 
@@ -21,5 +22,8 @@ internal interface ProjectConfiguratorFactory<Extension : KompleProjectExtension
     /**
      * Returns a new [ProjectConfigurator].
      */
-    fun createConfigurator(extension: Extension): ProjectConfigurator
+    fun createConfigurator(
+        extension: Extension,
+        tool: DefaultKompleTool<*>,
+    ): ProjectConfigurator
 }

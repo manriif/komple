@@ -6,7 +6,7 @@ import komple.platform.Host
 import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
-import komple.project.registerTask
+import komple.project.registerExecTask
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
@@ -121,7 +121,7 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
                 ) { name ->
                     val options = project.objects.newInstance<JextractCommandLineOptions>()
 
-                    val task = registerTask<JextractGenerateBindingsTask>(
+                    val task = registerExecTask<JextractGenerateBindingsTask>(
                         postfix = "jextractGenerateBindings${name}"
                     ) {
                         cProject = configurator.project

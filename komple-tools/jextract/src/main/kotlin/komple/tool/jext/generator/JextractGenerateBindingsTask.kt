@@ -1,6 +1,7 @@
 package komple.tool.jext.generator
 
 import komple.exec.CommandBuilder
+import komple.exec.CommandExecutor
 import komple.exec.KompleExecTask
 import komple.project.c.CProject
 import org.gradle.api.file.DirectoryProperty
@@ -49,7 +50,7 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
             .append(project.headerFile.get().asFile.absolutePath)
             .build()
 
-        execService.get().execute(command)
+        commandExecutor.get().execute(command)
     }
 
     /**

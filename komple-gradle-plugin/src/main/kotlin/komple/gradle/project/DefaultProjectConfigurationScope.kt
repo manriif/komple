@@ -1,5 +1,6 @@
 package komple.gradle.project
 
+import komple.exec.CommandExecutor
 import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
@@ -26,7 +27,8 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
     private val context: KompleToolConfigContext<Extension>,
     private val projectExtension: KompleProjectExtension,
     override val configurator: ProjectConfigurator,
-    override val installDirectory: Provider<Directory>
+    override val installDirectory: Provider<Directory>,
+    override val commandExecutor: Provider<CommandExecutor>
 ) : ProjectConfigurationScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {

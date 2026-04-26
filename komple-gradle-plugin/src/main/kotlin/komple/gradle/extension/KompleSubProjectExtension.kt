@@ -1,14 +1,14 @@
 package komple.gradle.extension
 
-import komple.exec.ExecService
 import komple.gradle.project.KompleProjectExtension
 import komple.gradle.project.ProjectConfiguratorFactory
+import komple.gradle.tool.DefaultKompleTool
 import komple.gradle.tool.configureProject
 import komple.gradle.util.camelCased
-import komple.project.ProjectConfigurator
+import org.gradle.api.DomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
+import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.kotlin.dsl.create
 import javax.inject.Inject
 
@@ -17,12 +17,6 @@ import javax.inject.Inject
  * The extension is designed for registered tools and projects consumption.
  */
 public abstract class KompleSubProjectExtension @Inject constructor(objects: ObjectFactory) {
-
-    /**
-     * Command executor service which can be used to execute command in an environment populated and
-     * configured by registered tools.
-     */
-    public abstract val execService: Property<ExecService>
 
     /**
      * Configured projects.
@@ -48,14 +42,8 @@ internal fun Project.configureSubProjectExtension(
     extension: KompleSubProjectExtension,
     root: KompleRootProjectExtension
 ) {
-    extension.execService.set(root.execService)
-
-    root.projectConfiguratorFactories .all kProject@{
-        val (projectExtension, configurator) = createProjectConfigurator(extension, this)
-
-        root.tools.all {
-            configureProject(this@configureSubProjectExtension, projectExtension, configurator)
-        }
+    root.projectConfiguratorFactories.all {
+        configureProjectFromTools(this, extension.projects.extensions, root.tools)
     }
 
     root.tools.all kTool@{
@@ -63,15 +51,22 @@ internal fun Project.configureSubProjectExtension(
     }
 }
 
-private fun <Extension : KompleProjectExtension> createProjectConfigurator(
-    extension: KompleSubProjectExtension,
-    factory: ProjectConfiguratorFactory<Extension>
-): Pair<Extension, ProjectConfigurator> {
-    val projectExtension = extension.projects.extensions.create(
+private fun <Extension : KompleProjectExtension> Project.configureProjectFromTools(
+    factory: ProjectConfiguratorFactory<Extension>,
+    container: ExtensionContainer,
+    tools: DomainObjectCollection<DefaultKompleTool<*>>
+) {
+    val extension = container.create(
         factory.kProject.name.camelCased(),
         factory.extensionType,
         factory.kProject
     )
 
-    return projectExtension to factory.createConfigurator(projectExtension)
+    tools.all {
+        configureProject(
+            project = this@configureProjectFromTools,
+            projectExtension = extension,
+            projectConfigurator = factory.createConfigurator(extension, this)
+        )
+    }
 }

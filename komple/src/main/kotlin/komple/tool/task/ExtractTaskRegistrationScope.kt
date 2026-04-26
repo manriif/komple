@@ -197,7 +197,7 @@ public fun ExtractTaskRegistrationScope<*>.command(
     context.doLastWhenOutputChanged {
         context.outputDirectory.asFile.mkdirs()
 
-        context.execServiceProvider.get().execute(
+        context.commandExecutor.get().execute(
             command = buildCommand(context),
             workingDirectory = context.downloadDirectory.directory.get().asFile
         )

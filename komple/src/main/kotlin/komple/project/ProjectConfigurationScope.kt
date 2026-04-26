@@ -1,5 +1,7 @@
 package komple.project
 
+import komple.exec.HasCommandExecutorProvider
+import komple.exec.KompleExecTask
 import komple.platform.HasHost
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
@@ -8,6 +10,7 @@ import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import kotlin.reflect.KClass
 
 /**
@@ -15,6 +18,7 @@ import kotlin.reflect.KClass
  */
 public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     HasExtension<Extension>,
+    HasCommandExecutorProvider,
     HasHost {
 
     /**
@@ -35,6 +39,7 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     /**
      * Creates an extension of type [E], named after [name].
      * Arguments [args] are passed to [E] constructor.
+     *
      * The returned extension itself can be configured inside [configure].
      */
     @IgnorableReturnValue
@@ -47,7 +52,8 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
 
     /**
      * Creates a task of type [T], named after the project name postfixed by [postfix].
-     * The returned extension itself can be configured inside [configure].
+     *
+     * The returned task can be configured inside [configure].
      */
     @IgnorableReturnValue
     public fun <T : Task> registerTask(
@@ -64,6 +70,7 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
 /**
  * Creates an extension of type [E], named after [name].
  * Arguments [args] are passed to [E] constructor.
+ *
  * The returned extension itself can be configured inside [configure].
  */
 @IgnorableReturnValue
@@ -80,7 +87,8 @@ public inline fun <reified E : Any> ProjectConfigurationScope<*>.createExtension
 
 /**
  * Creates a task of type [T], named after the project name postfixed by [postfix].
- * The returned extension itself can be configured inside [configure].
+ *
+ * The returned task can be configured inside [configure].
  */
 @IgnorableReturnValue
 public inline fun <reified T : Task> ProjectConfigurationScope<*>.registerTask(
@@ -91,3 +99,19 @@ public inline fun <reified T : Task> ProjectConfigurationScope<*>.registerTask(
     type = T::class,
     configure = configure
 )
+
+/**
+ * Creates a task of type [T], named after the project name postfixed by [postfix].
+ *
+ * The returned task can be configured inside [configure].
+ */
+@IgnorableReturnValue
+public inline fun <reified T : KompleExecTask> ProjectConfigurationScope<*>.registerExecTask(
+    postfix: String,
+    noinline configure: (T.() -> Unit)? = null
+): TaskProvider<T> {
+    return registerTask<T>(postfix) {
+        this.commandExecutor = this@registerExecTask.commandExecutor
+        configure?.invoke(this)
+    }
+}

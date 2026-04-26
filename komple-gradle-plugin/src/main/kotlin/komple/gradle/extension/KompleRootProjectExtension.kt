@@ -3,17 +3,18 @@ package komple.gradle.extension
 import komple.KompleRootExtension
 import komple.exec.Bash
 import komple.exec.CommandInterpreter
-import komple.exec.ExecService
+import komple.gradle.exec.DefaultCommandExecutor
 import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.DefaultKompleTool
 import komple.project.KompleProject
 import komple.tool.configurator.KompleToolConfigurator
+import org.gradle.api.DomainObjectSet
+import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
-import org.gradle.kotlin.dsl.domainObjectSet
-import org.gradle.kotlin.dsl.polymorphicDomainObjectContainer
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
@@ -26,7 +27,6 @@ public abstract class KompleRootProjectExtension @Inject constructor(
 ) : KompleRootExtension {
 
     private val registeredToolClasses = mutableSetOf<KClass<*>>()
-    internal abstract val execService: Property<ExecService>
 
     /**
      * The interpreter to use for command execution.
@@ -35,16 +35,19 @@ public abstract class KompleRootProjectExtension @Inject constructor(
     public abstract val commandInterpreter: Property<CommandInterpreter>
 
     /**
+     * Command executors.
+     */
+    public abstract val commandExecutors: NamedDomainObjectContainer<DefaultCommandExecutor>
+
+    /**
      * Projects exposed as polymorphic container.
      */
-    internal val extensibleProjects =
-        objects.polymorphicDomainObjectContainer(KompleProject::class)
+    internal abstract val extensibleProjects: ExtensiblePolymorphicDomainObjectContainer<KompleProject>
 
     /**
      * Registered project configurators.
      */
-    internal val projectConfiguratorFactories =
-        objects.domainObjectSet(ProjectConfiguratorFactory::class)
+    internal abstract val projectConfiguratorFactories: DomainObjectSet<ProjectConfiguratorFactory<*>>
 
     /**
      * Komple projects.
@@ -55,13 +58,12 @@ public abstract class KompleRootProjectExtension @Inject constructor(
     /**
      * Registered tool configurators.
      */
-    internal val toolConfigurators =
-        objects.polymorphicDomainObjectContainer(KompleToolConfigurator::class)
+    internal abstract val toolConfigurators: ExtensiblePolymorphicDomainObjectContainer<KompleToolConfigurator<*>>
 
     /**
      * Configured tools.
      */
-    internal val tools = objects.domainObjectSet(DefaultKompleTool::class)
+    internal abstract val tools: DomainObjectSet<DefaultKompleTool<*>>
 
     override fun <Configurator : KompleToolConfigurator<*>> registerTool(
         name: String,

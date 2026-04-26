@@ -51,6 +51,7 @@ public abstract class CProjectExtension @Inject internal constructor(
         return tasks.registerProjectTask(taskName, factory.klass) {
             this.cProject = cProject
             this.compilations.add(compilation)
+            this.commandExecutor = factory.commandExecutor
 
             factory.configure?.invoke(this)
         }

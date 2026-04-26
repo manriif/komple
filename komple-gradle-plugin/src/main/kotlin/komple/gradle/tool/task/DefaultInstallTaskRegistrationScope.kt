@@ -1,6 +1,6 @@
 package komple.gradle.tool.task
 
-import komple.exec.ExecService
+import komple.exec.CommandExecutor
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
  */
 internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtension>(
     context: KompleToolConfigContext<Extension>,
-    private val execServiceProvider: Provider<ExecService>,
+    private val commandExecutor: Provider<CommandExecutor>,
     private val extractTask: TaskProvider<*>
 ) : InstallTaskRegistrationScope<Extension>,
     DefaultTaskRegistrationScope<Extension>(context) {
@@ -29,7 +29,7 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
 
         val installContext = DefaultInstallTaskContext(
             extractDirectory = extractTask.outputDir(project.layout),
-            execServiceProvider = execServiceProvider,
+            commandExecutor = commandExecutor,
             outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolName),
             outputChanged = outputChanged
         )

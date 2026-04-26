@@ -1,5 +1,6 @@
 package komple.tool
 
+import komple.exec.ExecEnvironment
 import org.gradle.api.Named
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
@@ -9,6 +10,11 @@ import org.gradle.api.tasks.TaskProvider
  * Configured Komple tool.
  */
 public interface KompleTool : Named {
+
+    /**
+     * Tool execution environment.
+     */
+    public val execEnvironment: ExecEnvironment
 
     /**
      * Provider of the task responsible for installing the tool.

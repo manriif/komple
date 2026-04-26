@@ -2,18 +2,10 @@ package komple.tool.task
 
 import komple.exec.Command
 import komple.tool.extension.KompleToolExtension
-import komple.tool.task.register
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.Directory
 import org.gradle.api.file.FileSystemOperations
-import org.gradle.api.file.FileTree
-import org.gradle.api.file.RegularFile
-import org.gradle.api.file.RelativePath
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.support.serviceOf
 import kotlin.reflect.KClass
 
@@ -76,7 +68,7 @@ public fun InstallTaskRegistrationScope<*>.command(
             into(context.outputDirectory)
         }
 
-        context.execServiceProvider.get().execute(
+        context.commandExecutor.get().execute(
             command = buildCommand(context),
             workingDirectory = context.outputDirectory.asFile
         )

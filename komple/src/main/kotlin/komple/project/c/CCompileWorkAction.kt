@@ -1,11 +1,10 @@
 package komple.project.c
 
-import komple.exec.ExecService
+import komple.exec.CommandExecutor
 import komple.exec.execute
 import org.gradle.api.provider.Property
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
-import javax.inject.Inject
 import kotlin.io.path.createTempFile
 
 /**
@@ -14,8 +13,8 @@ import kotlin.io.path.createTempFile
 public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters> :
     WorkAction<Params> {
 
-    @get:Inject
-    protected abstract val execService: ExecService
+    protected val commandExecutor: CommandExecutor
+        get() = parameters.commandExecutor.get()
 
     protected fun compileStatic(
         compilerFlags: Array<out Any>,
@@ -38,7 +37,7 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
             .toTypedArray()
 
         sourceFilesWithObjects.forEach { (sourceFile, objectFile) ->
-            execService.execute(
+            commandExecutor.execute(
                 *compilerFlags,
                 "-c",
                 sourceFile.absolutePath,
@@ -52,7 +51,7 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
             .map { it.absolutePath }
             .toTypedArray()
 
-        execService.execute(
+        commandExecutor.execute(
             *archiverFlags,
             "rcs",
             libraryFile.absolutePath,
@@ -74,7 +73,7 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
             .get()
             .toTypedArray()
 
-        execService.execute(
+        commandExecutor.execute(
             *compilerFlags,
             "-o",
             libraryFile.absolutePath,
@@ -91,5 +90,6 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
 
         public val cProject: Property<CProject>
         public val compilation: Property<CCompilation>
+        public val commandExecutor: Property<CommandExecutor>
     }
 }

@@ -42,6 +42,7 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
         let { task ->
             compilations.forEach { compilation ->
                 workQueue.submit(workActionClass.java) {
+                    this.commandExecutor = task.commandExecutor
                     this.cProject = task.cProject
                     this.compilation = compilation
                     configure()

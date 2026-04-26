@@ -1,8 +1,9 @@
 package komple.gradle.tool
 
-import komple.exec.ExecService
+import komple.exec.CommandExecutor
+import komple.exec.ExecEnvironment
 import komple.gradle.KomplePlugin
-import komple.gradle.exec.ExecEnvironment
+import komple.gradle.exec.DefaultCommandExecutor
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
@@ -25,6 +26,8 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.resources.MissingResourceException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.extensions.core.extra
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.newInstance
 import java.util.*
 
 private const val TOOLS_PROPERTIES = "tools.properties"
@@ -32,20 +35,27 @@ private const val TOOLS_PROPERTIES = "tools.properties"
 /**
  * Configures all tools.
  */
-internal fun Project.configureTools(
-    extension: KompleRootProjectExtension,
-    environment: ExecEnvironment
-) {
+internal fun Project.configureTools(extension: KompleRootProjectExtension) {
     loadToolsProperties()
 
     val dependencyGraph = ToolDependencyGraph()
 
     extension.toolConfigurators.all {
-        configureTool(this@configureTools, extension, environment, dependencyGraph)
+        configureTool(
+            project = this@configureTools,
+            rootExtension = extension,
+            dependencyGraph = dependencyGraph
+        )
     }
 
     afterEvaluate {
-        completeDependencies(dependencyGraph)
+        extension.tools.all {
+            val dependencies = dependencyGraph.getAllDependencies(this)
+
+            dependencies.forEach { dependency ->
+                execEnvironments.add(dependency.execEnvironment)
+            }
+        }
     }
 }
 
@@ -72,19 +82,12 @@ private fun Project.loadToolsProperties() {
     }
 }
 
-private fun Project.completeDependencies(
-    dependencyGraph: ToolDependencyGraph
-) {
-
-}
-
 /**
  * Configures a tool using `this` [KompleToolConfigurator].
  */
 private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureTool(
     project: Project,
     rootExtension: KompleRootProjectExtension,
-    environment: ExecEnvironment,
     dependencyGraph: ToolDependencyGraph
 ) {
     val toolName = this.name
@@ -95,15 +98,33 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         toolName = toolName
     ).use { it.configureExtension() }
 
+    val objects = project.objects
+    val commandInterpreter = rootExtension.commandInterpreter
+    val execEnvironment = objects.newInstance<ExecEnvironment>()
+    val execEnvironments = mutableListOf(execEnvironment)
+
+    val commandExecutor: Provider<CommandExecutor> = project.providers.provider {
+        objects.newInstance<DefaultCommandExecutor>().apply {
+            this.commandInterpreter = commandInterpreter
+            this.execEnvironments = execEnvironments
+        }
+    }
+
     val context = KompleToolConfigContext(project, toolName, extension)
-    val installTaskProvider = createInstallTaskProvider(context, rootExtension.execService)
+    val installTaskProvider = createInstallTaskProvider(context, commandExecutor)
 
     val installDirectory = project.layout
         .dir(installTaskProvider.map { it.outputs.files.singleFile })
 
     if (supportHost(CurrentHost)) {
-        DefaultExecEnvironmentBuilderScope(context, environment, installDirectory)
+        DefaultExecEnvironmentBuilderScope(context, execEnvironment, installDirectory)
             .use { it.configureEnvironment() }
+    }
+
+    execEnvironment.run {
+        commands.finalizeValue()
+        paths.finalizeValue()
+        variables.finalizeValue()
     }
 
     val tool = DefaultKompleTool(
@@ -111,6 +132,9 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         extension = context.extension,
         toolName = context.toolName,
         dependencyGraph = dependencyGraph,
+        execEnvironments = execEnvironments,
+        commandExecutor = commandExecutor,
+        execEnvironment = execEnvironment,
         installTaskProvider = installTaskProvider,
         installDirectory = installDirectory
     )
@@ -124,14 +148,14 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
  */
 private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstallTaskProvider(
     context: KompleToolConfigContext<Ext>,
-    execServiceProvider: Provider<ExecService>
+    commandExecutor: Provider<CommandExecutor>,
 ): TaskProvider<*> = if (supportHost(CurrentHost)) {
     DefaultInstallTaskRegistrationScope(
         context = context,
-        execServiceProvider = execServiceProvider,
+        commandExecutor = commandExecutor,
         extractTask = DefaultExtractTaskRegistrationScope(
             context = context,
-            execServiceProvider = execServiceProvider,
+            commandExecutor = commandExecutor,
             integrityTask = DefaultIntegrityTaskRegistrationScope(
                 context = context,
                 downloadTask = DefaultDownloadTaskRegistrationScope(context)
@@ -166,7 +190,8 @@ internal fun <Ext : KompleToolExtension> DefaultKompleTool<Ext>.configureProject
         context = context,
         projectExtension = projectExtension,
         configurator = projectConfigurator,
-        installDirectory = installDirectory
+        installDirectory = installDirectory,
+        commandExecutor = commandExecutor,
     )
 
     configurator.run {

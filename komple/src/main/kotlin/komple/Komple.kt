@@ -19,11 +19,6 @@ public const val KOMPLE_PLUGIN_ID: String = KOMPLE_GROUP
 public const val KOMPLE_EXTENSION_NAME: String = "komple"
 
 /**
- * Name of the [komple.exec.ExecService].
- */
-public const val KOMPLE_EXEC_SERVICE_NAME: String = "komple-exec-service"
-
-/**
  * Returns the value of the komple property [name] as a [String] using [extra].
  *
  * @throws ClassCastException if the returned value is not a [String].

@@ -19,7 +19,7 @@ internal abstract class AppleXcodeCCompileWorkAction :
         sdk: String,
         flag: String
     ): Array<String> {
-        val sdkPath = execService.executeWithOutput("xcrun", "--sdk", sdk, "--show-sdk-path")
+        val sdkPath = commandExecutor.executeWithOutput("xcrun", "--sdk", sdk, "--show-sdk-path")
         return arrayOf("-arch", arch, "-isysroot", sdkPath, flag)
     }
 
