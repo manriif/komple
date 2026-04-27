@@ -82,14 +82,13 @@ private fun ExtractTaskRegistrationScope<*>.extractFileTree(
                         val segments = relativePath.segments
 
                         if (segments.size > 1) {
-                            relativePath = RelativePath(
-                                true,
-                                *segments.drop(1).toTypedArray()
-                            )
+                            relativePath = RelativePath(true, *segments.drop(1).toTypedArray())
                         } else {
                             exclude()
                         }
                     }
+
+                    includeEmptyDirs = false
                 }
 
                 into(context.outputDirectory)

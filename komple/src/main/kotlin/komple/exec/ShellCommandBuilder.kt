@@ -104,6 +104,7 @@ internal class ShellCommandBuilder(command: Array<out Any>) : CommandBuilder {
      */
     private object ForwardInterpreter : CommandInterpreter {
 
+        @Suppress("unused")
         private fun readResolve(): Any = ForwardInterpreter
 
         override fun createCommandLine(args: Array<String>): CommandLine {

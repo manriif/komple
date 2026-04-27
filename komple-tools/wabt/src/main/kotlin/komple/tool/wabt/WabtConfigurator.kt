@@ -41,8 +41,9 @@ public abstract class WabtConfigurator @Inject constructor(name: String) :
     }
 
     override fun DownloadTaskRegistrationScope<WabtExtension>.registerDownloadTask(): TaskProvider<*> {
-        val version = extension.version.get()
-        return url("https://github.com/WebAssembly/wabt/releases/download/$version/wabt-$version.tar.xz")
+        return url(extension.version.map { version ->
+            "https://github.com/WebAssembly/wabt/releases/download/$version/wabt-$version.tar.xz"
+        })
     }
 
     override fun IntegrityTaskRegistrationScope<WabtExtension>.registerIntegrityTask(): TaskProvider<*> {
@@ -64,12 +65,11 @@ public abstract class WabtConfigurator @Inject constructor(name: String) :
     }
 
     override fun InstallTaskRegistrationScope<WabtExtension>.registerInstallTask(): TaskProvider<*> {
-        // TODO this assumes that cmake is installed, maybe create a new Komple tool for cmake
         return command {
             val buildDirectory = outputDirectory.dir("build").asFile
                 .apply(File::mkdirs)
 
-            Command("cmake", ".") {
+            Command("cmake", "-S", ".", "-B", buildDirectory.absolutePath) {
                 then("cmake", "--build", buildDirectory.absolutePath)
             }
         }

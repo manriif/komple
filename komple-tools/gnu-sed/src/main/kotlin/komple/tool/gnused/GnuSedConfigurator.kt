@@ -42,8 +42,9 @@ public abstract class GnuSedConfigurator @Inject constructor(name: String) :
     }
 
     override fun DownloadTaskRegistrationScope<GnuSedExtension>.registerDownloadTask(): TaskProvider<*> {
-        val version = extension.version.get()
-        return url("https://ftp.gnu.org/gnu/sed/sed-$version.tar.gz")
+        return url(extension.version.map { version ->
+            "https://ftp.gnu.org/gnu/sed/sed-$version.tar.gz"
+        })
     }
 
     override fun IntegrityTaskRegistrationScope<GnuSedExtension>.registerIntegrityTask(): TaskProvider<*> {

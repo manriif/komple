@@ -37,6 +37,7 @@ fun includeTool(name: String) {
 
 includeTool("android-ndk")
 includeTool("apple-xcode")
+includeTool("cmake")
 includeTool("emscripten")
 includeTool("gnu-sed")
 includeTool("jextract")

@@ -39,8 +39,9 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
     }
 
     override fun DownloadTaskRegistrationScope<EmscriptenExtension>.registerDownloadTask(): TaskProvider<*> {
-        val version = extension.version.get()
-        return url("https://github.com/emscripten-core/emsdk/archive/refs/tags/$version.zip")
+        return url(extension.version.map { version ->
+            "https://github.com/emscripten-core/emsdk/archive/refs/tags/$version.zip"
+        })
     }
 
     override fun IntegrityTaskRegistrationScope<EmscriptenExtension>.registerIntegrityTask(): TaskProvider<*> {

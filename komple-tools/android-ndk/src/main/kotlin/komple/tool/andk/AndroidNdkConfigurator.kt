@@ -62,15 +62,15 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     }
 
     override fun DownloadTaskRegistrationScope<AndroidNdkExtension>.registerDownloadTask(): TaskProvider<*> {
-        val (platform, fileExtension) = when (host.operatingSystem) {
-            MacOS -> "darwin" to "dmg"
-            Linux -> "linux" to "zip"
-            Windows -> "windows" to "zip"
+        val platformFile = when (host.operatingSystem) {
+            MacOS -> "darwin.dmg"
+            Linux -> "linux.zip"
+            Windows -> "windows.zip"
         }
 
         return url(extension.version.map { version ->
             val major = version.substringBefore('.')
-            val file = "android-ndk-${major}-$platform.$fileExtension"
+            val file = "android-ndk-${major}-$platformFile"
             "https://dl.google.com/android/repository/$file"
         })
     }

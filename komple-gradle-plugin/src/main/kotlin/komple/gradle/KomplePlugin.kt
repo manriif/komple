@@ -9,6 +9,7 @@ import komple.gradle.extension.configureConventions
 import komple.gradle.extension.configureSubProjectExtension
 import komple.gradle.project.registerProjectFactories
 import komple.gradle.tool.configureTools
+import komple.loadKompleProperties
 import komple.util.getExtensionByName
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -38,7 +39,11 @@ public class KomplePlugin : Plugin<Project> {
             project.registerProjectFactories(extensibleProjects, projectConfiguratorFactories)
         }
 
-        project.configureTools(extension)
+        project.run {
+            loadKompleProperties(KomplePlugin::class.java.classLoader)
+            configureTools(extension)
+        }
+
         configureCommandExecutors(extension)
     }
 

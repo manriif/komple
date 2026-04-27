@@ -2,7 +2,6 @@ package komple.gradle.tool
 
 import komple.exec.CommandExecutor
 import komple.exec.ExecEnvironment
-import komple.gradle.KomplePlugin
 import komple.gradle.deps.DependencyGraph
 import komple.gradle.exec.DefaultCommandExecutor
 import komple.gradle.extension.KompleRootProjectExtension
@@ -24,22 +23,15 @@ import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
-import org.gradle.api.resources.MissingResourceException
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.internal.extensions.core.extra
 import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.newInstance
-import java.util.*
-
-private const val TOOLS_PROPERTIES = "tools.properties"
 
 /**
  * Configures all tools.
  */
 internal fun Project.configureTools(extension: KompleRootProjectExtension) {
-    loadToolsProperties()
-
     val dependencyGraph = DependencyGraph<RootKompleTool>()
 
     extension.toolConfigurators.all {
@@ -60,30 +52,11 @@ internal fun Project.configureTools(extension: KompleRootProjectExtension) {
 
             dependencies.forEach { dependency ->
                 execEnvironments.add(dependency.execEnvironment)
+
+                installTaskProvider.configure {
+                    dependsOn(dependency.installTaskProvider)
+                }
             }
-        }
-    }
-}
-
-/**
- * Injects [TOOLS_PROPERTIES] into project.
- */
-private fun Project.loadToolsProperties() {
-    val resource = try {
-        KomplePlugin::class.java.classLoader.getResource(TOOLS_PROPERTIES)
-    } catch (cause: Throwable) {
-        throw MissingResourceException("File $TOOLS_PROPERTIES is missing", cause)
-    }
-
-    val properties = Properties().apply {
-        load(resource.openStream())
-    }
-
-    properties.forEach { (key, value) ->
-        val name = key.toString()
-
-        if (!extra.has(name)) {
-            extra.set(name, value?.toString())
         }
     }
 }

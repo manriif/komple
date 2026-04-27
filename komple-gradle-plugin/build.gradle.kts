@@ -32,7 +32,7 @@ gradlePlugin {
 tasks {
     // Include tools.properties at the root project root
     processResources {
-        from(rootProject.layout.projectDirectory.file("tools.properties")) {
+        from(rootProject.layout.projectDirectory.file("komple.properties")) {
             into(".")
         }
     }

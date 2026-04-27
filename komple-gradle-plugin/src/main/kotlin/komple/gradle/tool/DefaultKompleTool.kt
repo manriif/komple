@@ -32,4 +32,8 @@ internal class DefaultKompleTool<Extension : KompleToolExtension>(
     override fun dependsOn(other: RootKompleTool) {
         dependencyGraph.addDependency(this, other)
     }
+
+    override fun toString(): String {
+        return toolName
+    }
 }
