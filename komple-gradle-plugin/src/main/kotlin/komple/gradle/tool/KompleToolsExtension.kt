@@ -1,4 +1,4 @@
-package komple.gradle.extension
+package komple.gradle.tool
 
 import org.gradle.api.plugins.ExtensionAware
 

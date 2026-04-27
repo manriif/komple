@@ -3,18 +3,18 @@ package komple.gradle.extension
 import komple.KompleRootExtension
 import komple.exec.Bash
 import komple.exec.CommandInterpreter
-import komple.gradle.exec.DefaultCommandExecutor
 import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.DefaultKompleTool
+import komple.gradle.tool.KompleToolsExtension
 import komple.project.KompleProject
 import komple.tool.configurator.KompleToolConfigurator
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.create
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
@@ -24,7 +24,8 @@ import kotlin.reflect.KClass
  */
 public abstract class KompleRootProjectExtension @Inject constructor(
     private val objects: ObjectFactory
-) : KompleRootExtension {
+) : KompleExtension,
+    KompleRootExtension {
 
     private val registeredToolClasses = mutableSetOf<KClass<*>>()
 
@@ -33,11 +34,6 @@ public abstract class KompleRootProjectExtension @Inject constructor(
      * Default to [Bash].
      */
     public abstract val commandInterpreter: Property<CommandInterpreter>
-
-    /**
-     * Command executors.
-     */
-    public abstract val commandExecutors: NamedDomainObjectContainer<DefaultCommandExecutor>
 
     /**
      * Projects exposed as polymorphic container.
@@ -63,7 +59,10 @@ public abstract class KompleRootProjectExtension @Inject constructor(
     /**
      * Configured tools.
      */
-    internal abstract val tools: DomainObjectSet<DefaultKompleTool<*>>
+    internal abstract val configuredTools: DomainObjectSet<DefaultKompleTool<*>>
+
+    override val tools: KompleToolsExtension =
+        extensions.create("tools", KompleToolsExtension::class)
 
     override fun <Configurator : KompleToolConfigurator<*>> registerTool(
         name: String,
@@ -93,4 +92,9 @@ public abstract class KompleRootProjectExtension @Inject constructor(
  */
 internal fun KompleRootProjectExtension.configureConventions() {
     commandInterpreter.convention(Bash)
+
+    extensions.run {
+        add(::commandExecutors.name, commandExecutors)
+        add(::projects.name, projects)
+    }
 }

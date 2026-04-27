@@ -1,4 +1,4 @@
-package komple.gradle.tool.graph
+package komple.gradle.deps
 
 /**
  * Exception thrown when a cycle has been found on an attempt to create a dependency.

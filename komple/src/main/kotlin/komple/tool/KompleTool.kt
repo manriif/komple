@@ -1,6 +1,5 @@
 package komple.tool
 
-import komple.exec.ExecEnvironment
 import org.gradle.api.Named
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
@@ -12,11 +11,6 @@ import org.gradle.api.tasks.TaskProvider
 public interface KompleTool : Named {
 
     /**
-     * Tool execution environment.
-     */
-    public val execEnvironment: ExecEnvironment
-
-    /**
      * Provider of the task responsible for installing the tool.
      */
     public val installTaskProvider: TaskProvider<*>
@@ -25,13 +19,4 @@ public interface KompleTool : Named {
      * Directory where the tool is installed.
      */
     public val installDirectory: Provider<Directory>
-
-    /**
-     * Makes this tool depends on [other].
-     *
-     * This implies that:
-     * - [other] is installed when `this` tool is required.
-     * - [other] contributes to the environment of `this` tool.
-     */
-    public fun dependsOn(other: KompleTool)
 }

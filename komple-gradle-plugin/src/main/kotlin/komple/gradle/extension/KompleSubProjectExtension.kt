@@ -1,22 +1,25 @@
 package komple.gradle.extension
 
 import komple.gradle.project.KompleProjectExtension
+import komple.gradle.project.KompleProjectsExtension
 import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.DefaultKompleTool
+import komple.gradle.tool.KompleToolsExtension
 import komple.gradle.tool.configureProject
 import komple.gradle.util.camelCased
+import komple.tool.KompleTool
 import org.gradle.api.DomainObjectCollection
 import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionContainer
+import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.create
-import javax.inject.Inject
 
 /**
  * Komple extension for subproject.
  * The extension is designed for registered tools and projects consumption.
  */
-public abstract class KompleSubProjectExtension @Inject constructor(objects: ObjectFactory) {
+public abstract class KompleSubProjectExtension :
+    KompleExtension {
 
     /**
      * Configured projects.
@@ -27,7 +30,7 @@ public abstract class KompleSubProjectExtension @Inject constructor(objects: Obj
     /**
      * Registered tools.
      */
-    public val tools: KompleToolsExtension =
+    override val tools: KompleToolsExtension =
         extensions.create("tools", KompleToolsExtension::class)
 }
 
@@ -43,11 +46,18 @@ internal fun Project.configureSubProjectExtension(
     root: KompleRootProjectExtension
 ) {
     root.projectConfiguratorFactories.all {
-        configureProjectFromTools(this, extension.projects.extensions, root.tools)
+        configureProjectFromTools(this, extension.projects.extensions, root.configuredTools)
     }
 
-    root.tools.all kTool@{
-        extension.tools.extensions.add(this@kTool.name.camelCased(), this)
+    root.configuredTools.all kTool@{
+        extension.tools.extensions.add(KompleTool::class, this@kTool.name.camelCased(), this)
+    }
+
+    val sharedCommandExecutors = root.commandExecutors
+
+    extension.run {
+        extensions.add(::commandExecutors.name, commandExecutors)
+        commandExecutors.addAllLater(provider { sharedCommandExecutors })
     }
 }
 
