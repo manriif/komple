@@ -38,7 +38,7 @@ internal class ShellCommandBuilder(command: Array<out Any>) : CommandBuilder {
         command: Command
     ): CommandBuilder = insert(
         operator = operator,
-        args = ForwardInterpreter.invoke(command).args
+        args = command.interpret(ForwardInterpreter).args
     )
 
     ///////////////////////////////////////////////////////////////////////////
