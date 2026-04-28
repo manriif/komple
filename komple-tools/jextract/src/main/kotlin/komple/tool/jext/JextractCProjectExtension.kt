@@ -3,18 +3,15 @@ package komple.tool.jext
 import komple.tool.jext.generator.JextractBindingGenerator
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.model.ObjectFactory
-import org.gradle.kotlin.dsl.polymorphicDomainObjectContainer
 import javax.inject.Inject
 
 /**
  *
  * Jextract extension for C Project.
  */
-public abstract class JextractCProjectExtension @Inject constructor(objects: ObjectFactory) {
+public abstract class JextractCProjectExtension @Inject internal constructor() {
 
-    internal val extensibleBindingGenerators: ExtensiblePolymorphicDomainObjectContainer<JextractBindingGenerator> =
-        objects.polymorphicDomainObjectContainer(JextractBindingGenerator::class)
+    internal abstract val extensibleBindingGenerators: ExtensiblePolymorphicDomainObjectContainer<JextractBindingGenerator>
 
     /**
      * Bindings generators.

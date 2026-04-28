@@ -14,6 +14,7 @@ import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.create
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -95,6 +96,6 @@ internal fun KompleRootProjectExtension.configureConventions() {
 
     extensions.run {
         add(::commandExecutors.name, commandExecutors)
-        add(::projects.name, projects)
+        add<PolymorphicDomainObjectContainer<KompleProject>>(::projects.name, projects)
     }
 }

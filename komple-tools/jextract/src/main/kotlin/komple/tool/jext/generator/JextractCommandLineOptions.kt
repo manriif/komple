@@ -1,7 +1,7 @@
 package komple.tool.jext.generator
 
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Provider
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 
 /**
@@ -16,7 +16,7 @@ public interface JextractCommandLineOptions {
      * Default to a name derived from the main header file.
      */
     @get:Input
-    public val headerClassName: Provider<String>
+    public val headerClassName: Property<String>
 
     /**
      * Include functions of the given names in the generated bindings.

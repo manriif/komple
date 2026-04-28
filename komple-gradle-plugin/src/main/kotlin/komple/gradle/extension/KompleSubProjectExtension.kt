@@ -18,8 +18,7 @@ import org.gradle.kotlin.dsl.create
  * Komple extension for subproject.
  * The extension is designed for registered tools and projects consumption.
  */
-public abstract class KompleSubProjectExtension :
-    KompleExtension {
+public abstract class KompleSubProjectExtension : KompleExtension {
 
     /**
      * Configured projects.

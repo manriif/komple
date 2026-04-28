@@ -62,7 +62,7 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         postfix: String,
         type: KClass<T>,
         configure: (T.() -> Unit)?
-    ): TaskProvider<T> = notClosed {
+    ): TaskProvider<T> {
         val name = projectTaskName(
             projectName = configurator.project.name,
             postfix = "${context.toolName}${postfix.pascalCased()}"

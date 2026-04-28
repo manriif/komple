@@ -116,13 +116,15 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
     override fun ProjectConfigurationScope<JextractExtension>.configureProject() {
         when (val configurator = configurator) {
             is CProjectConfigurator -> createExtension<JextractCProjectExtension>("jextract") {
+                add(JextractCProjectExtension::bindingGenerators)
+
                 extension.extensibleBindingGenerators.registerFactory(
                     JextractBindingGenerator::class.java
                 ) { name ->
                     val options = project.objects.newInstance<JextractCommandLineOptions>()
 
-                    val task = registerExecTask<JextractGenerateBindingsTask>(
-                        postfix = "jextractGenerateBindings${name}"
+                    val taskProvider = registerExecTask<JextractGenerateBindingsTask>(
+                        postfix = "generateBindings${name}"
                     ) {
                         cProject = configurator.project
                         cliOptions = options
@@ -132,7 +134,12 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
                         }
                     }
 
-                    project.objects.newInstance<JextractBindingGeneratorImpl>(options, task)
+                    JextractBindingGeneratorImpl(
+                        generatorName = name,
+                        options = options,
+                        cProject = configurator.project,
+                        generateTaskProvider = taskProvider
+                    )
                 }
             }
         }

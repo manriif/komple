@@ -33,6 +33,7 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
         return createExtension {
             extension.run {
                 version.convention(kompleProperty("emsdk.version"))
+                emscriptenVersion.convention(version)
                 checksum.convention(kompleProperty("emsdk.checksum"))
             }
         }
@@ -53,14 +54,16 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
     }
 
     override fun InstallTaskRegistrationScope<EmscriptenExtension>.registerInstallTask(): TaskProvider<*> {
+        val emscriptenVersion = extension.emscriptenVersion
+
         return command {
             val emsdk = when (host.operatingSystem) {
                 MacOS, Linux -> "./emsdk"
                 Windows -> "emsdk.bat"
             }
 
-            Command(emsdk, "install", "latest") {
-                then(emsdk, "activate", "latest")
+            Command(emsdk, "install", emscriptenVersion.get()) {
+                then(emsdk, "activate", emscriptenVersion.get())
             }
         }
     }

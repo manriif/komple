@@ -3,7 +3,7 @@ package komple.tool.extension
 import org.gradle.api.provider.Property
 
 /**
- * Tools that supports versioning.
+ * Tool version can be supplied.
  */
 public interface HasVersionSupport {
 

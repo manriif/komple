@@ -11,11 +11,12 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import javax.inject.Inject
 
 /**
  * Implementation of [CProject].
  */
-internal abstract class DefaultCProject internal constructor(
+internal abstract class DefaultCProject @Inject internal constructor(
     projectName: String,
     private val objects: ObjectFactory
 ) : DefaultKompleProject(projectName),
