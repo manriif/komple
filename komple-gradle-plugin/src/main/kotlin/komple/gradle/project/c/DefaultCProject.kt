@@ -28,6 +28,12 @@ internal abstract class DefaultCProject @Inject internal constructor(
     @get:Input
     internal abstract val platformLinkerOptions: MapProperty<Platform, List<String>>
 
+    override fun definitions(): Provider<List<String>> {
+        return definitions.map { entries ->
+            entries.map { "-D${it.key}=${it.value}" }
+        }
+    }
+
     private fun list(configure: Action<in ListProperty<String>>): List<String> {
         val list = objects.listProperty(String::class.java)
         configure.execute(list)
@@ -48,13 +54,9 @@ internal abstract class DefaultCProject @Inject internal constructor(
         val optimizationOption = optimization.map { "-O${it.value}" }
         val platformOptions = platformCompilerOptions.map { it[platform].orEmpty() }
 
-        val defineOptions = defines.map { entries ->
-            entries.map { "-D${it.key}=${it.value}" }
-        }
-
         return compilerOptions
             .zip(platformOptions, List<String>::plus)
-            .zip(defineOptions, List<String>::plus)
+            .zip(definitions(), List<String>::plus)
             .zip(optimizationOption, List<String>::plus)
     }
 

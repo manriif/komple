@@ -3,6 +3,8 @@ package komple.tool.jext.generator
 import komple.project.c.CProject
 import org.gradle.api.Action
 import org.gradle.api.Named
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 /**
@@ -20,6 +22,12 @@ public interface JextractBindingGenerator : Named {
      * The returned task output files are the generated bindings files.
      */
     public val generateTaskProvider: TaskProvider<JextractGenerateBindingsTask>
+
+    /**
+     * Directory where the files are generated.
+     * This can be passed to a task input to create an implicit dependency on [generateTaskProvider].
+     */
+    public val generateDirectory: Provider<Directory>
 
     /**
      * Command line options for the jextract tool.

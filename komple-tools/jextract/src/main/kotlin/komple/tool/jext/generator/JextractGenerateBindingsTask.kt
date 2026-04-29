@@ -1,7 +1,6 @@
 package komple.tool.jext.generator
 
 import komple.exec.CommandBuilder
-import komple.exec.CommandExecutor
 import komple.exec.KompleExecTask
 import komple.project.c.CProject
 import org.gradle.api.file.DirectoryProperty
@@ -37,14 +36,14 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
             .append("--output", outputDirectory.get().asFile.absolutePath)
             .append("--target-package", project.packageName.get())
             .append("--header-class-name", options.headerClassName.get())
-            .appendValues("--include-dir", project.includeDirs, File::getAbsolutePath)
+            .appendValues("--include-dir", project.includeDirectories, File::getAbsolutePath)
             .appendValues("--include-function", options.includeFunctions.get())
             .appendValues("--include-constant", options.includeConstants.get())
             .appendValues("--include-struct", options.includeStructs.get())
             .appendValues("--include-union", options.includeUnions.get())
             .appendValues("--include-typedef", options.includeTypedefs.get())
             .appendValues("--include-var", options.includeVars.get())
-            .appendValues("--define-macro", project.defines.get().entries) { (key, value) ->
+            .appendValues("--define-macro", project.definitions.get().entries) { (key, value) ->
                 "$key=$value"
             }
             .append(project.headerFile.get().asFile.absolutePath)

@@ -56,12 +56,8 @@ public fun DownloadTaskRegistrationScope<*>.url(
 ): TaskProvider<*> = register<DefaultTask> { context ->
     inputs.property("url", url)
 
-    val fileExtension = url.map { url ->
-        url.substringAfterLast('/').substringAfter('.')
-    }
-
-    val fileName = fileExtension.map { extension ->
-        "${toolNameCompat}${extension.takeIf { it.isNotEmpty() }?.let { ".$it" }.orEmpty()}"
+    val fileName = url.map { link ->
+        link.substringAfterLast('/')
     }
 
     val destination = context.outputDirectory.file(fileName)

@@ -17,6 +17,7 @@ public interface KompleTool : Named {
 
     /**
      * Directory where the tool is installed.
+     * This can be passed to a task input to create an implicit dependency on [installTaskProvider].
      */
     public val installDirectory: Provider<Directory>
 }

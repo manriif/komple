@@ -47,7 +47,7 @@ public interface CProject : KompleProject {
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public val includeDirs: ConfigurableFileCollection
+    public val includeDirectories: ConfigurableFileCollection
 
     /**
      * Optimization level.
@@ -72,14 +72,19 @@ public interface CProject : KompleProject {
      * Pre-processor definitions.
      */
     @get:Input
-    public val defines: MapProperty<String, String>
+    public val definitions: MapProperty<String, String>
 
     /**
      * Adds a definition with the value `1`.
      */
-    public fun define(name: String) {
-        defines.put(name, "1")
+    public fun definition(name: String) {
+        definitions.put(name, "1")
     }
+
+    /**
+     * Returns the string definitions has a list of the form `key=value`.
+     */
+    public fun definitions(): Provider<List<String>>
 
     /**
      * Sets the compiler options for the specified [platform].
@@ -90,7 +95,7 @@ public interface CProject : KompleProject {
     )
 
     /**
-     * Returns all the compiler options, including [defines] and [optimization], for the specified
+     * Returns all the compiler options, including [definition] and [optimization], for the specified
      * [platform].
      */
     public fun compilerOptions(platform: Platform): Provider<List<String>>

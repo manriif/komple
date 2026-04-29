@@ -17,6 +17,12 @@ public interface CLibrary : CCompilation {
      * The generated library is the task output.
      */
     public val compileTaskProvider: TaskProvider<*>
+
+    /**
+     * Generated library file.
+     * This can be passed to a task input to create an implicit dependency on [compileTaskProvider].
+     */
+    override val libraryFile: Provider<RegularFile>
 }
 
 /**
@@ -32,7 +38,8 @@ internal class CCompilationImpl(
  * Implementation of [CLibrary].
  */
 internal class CLibraryImpl(
-    compilation: CCompilation,
-    override val compileTaskProvider: TaskProvider<*>
-) : CLibrary,
-    CCompilation by compilation
+    override val compileTaskProvider: TaskProvider<*>,
+    override val libraryFile: Provider<RegularFile>,
+    override val libraryType: CLibraryType,
+    override val platform: Platform
+) : CLibrary

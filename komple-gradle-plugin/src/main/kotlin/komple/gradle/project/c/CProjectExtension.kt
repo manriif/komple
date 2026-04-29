@@ -50,6 +50,8 @@ public abstract class CProjectExtension @Inject internal constructor(
         )
 
         return tasks.registerProjectTask(taskName, factory.klass) {
+            outputs.cacheIf { true }
+
             this.cProject = cProject
             this.compilations.add(compilation)
             this.commandExecutor = factory.commandExecutor
@@ -91,7 +93,14 @@ public abstract class CProjectExtension @Inject internal constructor(
         val compilation = CCompilationImpl(platform, type, libraryFile)
         val compileTaskProvider = createCompileTaskProvider(factory, compilation)
 
-        return CLibraryImpl(compilation, compileTaskProvider)
+        compileTaskProvider.configure {
+            outputs.file(libraryFile)
+        }
+
+        val implicitLibraryFile = layout
+            .file(compileTaskProvider.map { it.outputs.files.singleFile })
+
+        return CLibraryImpl(compileTaskProvider, implicitLibraryFile, type, platform)
     }
 
     /**
@@ -150,7 +159,7 @@ public abstract class CProjectExtension @Inject internal constructor(
                 }
 
                 definitionFile = defFile.asFile.get()
-                includeDirs(cProject.includeDirs)
+                includeDirs(cProject.includeDirectories)
             }
         }
 
