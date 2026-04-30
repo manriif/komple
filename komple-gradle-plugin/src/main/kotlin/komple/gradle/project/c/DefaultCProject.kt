@@ -51,9 +51,9 @@ internal abstract class DefaultCProject @Inject constructor(projectName: String)
         val platformOptions = platformCompilerOptions.map { it[platform].orEmpty() }
 
         return compilerOptions
+            .zip(optimizationOption, List<String>::plus)
             .zip(platformOptions, List<String>::plus)
             .zip(definitions(), List<String>::plus)
-            .zip(optimizationOption, List<String>::plus)
     }
 
     override fun linkerOptions(

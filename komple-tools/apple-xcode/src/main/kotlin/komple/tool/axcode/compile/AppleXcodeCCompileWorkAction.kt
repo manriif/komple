@@ -20,7 +20,7 @@ internal abstract class AppleXcodeCCompileWorkAction :
         flag: String
     ): Array<String> {
         val sdkPath = commandExecutor.executeWithOutput("xcrun", "--sdk", sdk, "--show-sdk-path")
-        return arrayOf("-arch", arch, "-isysroot", sdkPath, flag)
+        return arrayOf("clang", "-arch", arch, "-isysroot", sdkPath, flag)
     }
 
     override fun execute() {
@@ -71,7 +71,7 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             Device -> "iphoneos"
                             Simulator -> "iphonesimulator"
                         },
-                        flag = "-mios-version-min=${params.versionMinIos}"
+                        flag = "-mios-version-min=${params.versionMinIos.get()}"
                     )
 
                     is TvOS -> xcodeStaticCompilerFlags(

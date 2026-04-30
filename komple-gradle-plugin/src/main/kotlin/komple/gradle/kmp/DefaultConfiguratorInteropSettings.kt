@@ -1,5 +1,6 @@
 package komple.gradle.kmp
 
+import org.gradle.api.tasks.TaskProvider
 import javax.inject.Inject
 import org.jetbrains.kotlin.gradle.plugin.CInteropSettings as KmpCInteropSettings
 
@@ -7,7 +8,8 @@ import org.jetbrains.kotlin.gradle.plugin.CInteropSettings as KmpCInteropSetting
  * Wrapper for [KmpCInteropSettings].
  */
 internal abstract class DefaultCInteropSettings @Inject constructor(
-    private val settings: KmpCInteropSettings
+    private val settings: KmpCInteropSettings,
+    override val generateDefFileTaskProvider: TaskProvider<*>
 ) : CInteropSettings {
 
     override fun extraOpts(vararg values: Any) {

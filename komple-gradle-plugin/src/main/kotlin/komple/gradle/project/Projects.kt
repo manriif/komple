@@ -43,5 +43,6 @@ internal fun <T : Task> TaskContainer.registerProjectTask(
     configure: T.() -> Unit
 ): TaskProvider<T> = register(name, type.java) {
     group = KOMPLE_PROJECTS_TASK_GROUP
+    outputs.cacheIf { true }
     configure(this)
 }

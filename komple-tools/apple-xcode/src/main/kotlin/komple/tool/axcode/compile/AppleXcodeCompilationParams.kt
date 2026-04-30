@@ -3,7 +3,6 @@ package komple.tool.axcode.compile
 import komple.kompleProperty
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 
 /**

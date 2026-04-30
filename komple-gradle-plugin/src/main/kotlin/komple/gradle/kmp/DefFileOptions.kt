@@ -9,12 +9,12 @@ import org.gradle.api.provider.Provider
 internal data class DefFileOptions(
 
     /**
-     * Include functions of the given names in the generated bindings.
+     * Function names that should be ignored.
      */
     val excludedFunctions: Provider<List<String>>,
 
     /**
-     * Include functions of the given names in the generated bindings.
+     * Functions whose const char* parameters should not be auto-converted to Kotlin Strings.
      */
     val noStringConversion: Provider<List<String>>,
 

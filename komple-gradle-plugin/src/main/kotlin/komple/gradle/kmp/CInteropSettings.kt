@@ -9,6 +9,11 @@ import org.gradle.api.tasks.TaskProvider
 public interface CInteropSettings {
 
     /**
+     * Provider of the task responsible to generate the interop def file.
+     */
+    public val generateDefFileTaskProvider: TaskProvider<*>
+
+    /**
      * Include functions of the given names in the generated bindings.
      */
     public val excludedFunctions: ListProperty<String>
@@ -17,11 +22,6 @@ public interface CInteropSettings {
      * Include functions of the given names in the generated bindings.
      */
     public val noStringConversion: ListProperty<String>
-
-    /**
-     * Tasks contributing to the generation of sources files required for the cinterop tool.
-     */
-    public val sourcesTasks: ListProperty<TaskProvider<*>>
 
     /**
      * Adds additional options that are passed to the cinterop tool.
