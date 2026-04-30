@@ -2,7 +2,6 @@ package komple.gradle
 
 import komple.KOMPLE_EXTENSION_NAME
 import komple.KOMPLE_PLUGIN_ID
-import komple.gradle.exec.configureCommandExecutors
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.extension.KompleSubProjectExtension
 import komple.gradle.extension.configureConventions
@@ -43,8 +42,6 @@ public class KomplePlugin : Plugin<Project> {
             loadKompleProperties(KomplePlugin::class.java.classLoader)
             configureTools(extension)
         }
-
-        configureCommandExecutors(extension)
     }
 
     /**

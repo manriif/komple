@@ -1,8 +1,7 @@
 package komple.gradle.tool
 
-import komple.exec.CommandExecutor
-import komple.exec.ExecEnvironment
 import komple.gradle.deps.DependencyGraph
+import komple.gradle.exec.DefaultExecEnvironment
 import komple.tool.KompleTool
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
@@ -18,9 +17,7 @@ internal class DefaultKompleTool<Extension : KompleToolExtension>(
     val extension: Extension,
     val toolName: String,
     val dependencyGraph: DependencyGraph<RootKompleTool>,
-    val execEnvironments: MutableList<ExecEnvironment>,
-    val commandExecutor: Provider<CommandExecutor>,
-    override val execEnvironment: ExecEnvironment,
+    override val execEnvironment: DefaultExecEnvironment,
     override val installTaskProvider: TaskProvider<*>,
     override val installDirectory: Provider<Directory>
 ) : RootKompleTool {

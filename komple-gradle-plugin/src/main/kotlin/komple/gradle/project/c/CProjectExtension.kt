@@ -14,6 +14,7 @@ import komple.platform.Platform
 import komple.project.c.CCompilation
 import komple.project.c.CCompileTask
 import komple.project.c.CLibraryType
+import komple.project.c.CProject
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.TaskContainer
@@ -35,6 +36,9 @@ public abstract class CProjectExtension @Inject internal constructor(
 
     internal val compileTaskFactories = mutableListOf<CCompileTaskFactory<*>>()
 
+    override val kProject: CProject
+        get() = cProject
+
     /**
      * Registers a [Task] obtained from [factory] for [compilation] and returns a [TaskProvider] to
      * it.
@@ -50,11 +54,14 @@ public abstract class CProjectExtension @Inject internal constructor(
         )
 
         return tasks.registerProjectTask(taskName, factory.klass) {
+            description = "Generate a ${compilation.libraryType.name.lowercase()} library for " +
+                    "platform ${compilation.platform.name}"
+
             outputs.cacheIf { true }
 
-            this.cProject = cProject
+            this.cProject = kProject
             this.compilations.add(compilation)
-            this.commandExecutor = factory.commandExecutor
+            this.execEnvironment = factory.execEnvironment
 
             factory.configure?.invoke(this)
         }
@@ -100,7 +107,7 @@ public abstract class CProjectExtension @Inject internal constructor(
         val implicitLibraryFile = layout
             .file(compileTaskProvider.map { it.outputs.files.singleFile })
 
-        return CLibraryImpl(compileTaskProvider, implicitLibraryFile, type, platform)
+        return CLibraryImpl(compileTaskProvider, implicitLibraryFile, compilation)
     }
 
     /**

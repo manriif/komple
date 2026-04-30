@@ -1,11 +1,10 @@
 package komple.gradle.project.c
 
-import komple.exec.CommandExecutor
+import komple.exec.ExecEnvironment
 import komple.platform.Platform
 import komple.project.CProjectConfigurator
 import komple.project.c.CCompileTask
 import komple.project.c.CProject
-import org.gradle.api.provider.Provider
 import kotlin.reflect.KClass
 
 /**
@@ -13,7 +12,7 @@ import kotlin.reflect.KClass
  */
 internal class DefaultCProjectConfigurator(
     private val extension: CProjectExtension,
-    private val commandExecutor: Provider<CommandExecutor>
+    private val execEnvironment: ExecEnvironment
 ) : CProjectConfigurator {
 
     override val project: CProject
@@ -29,7 +28,7 @@ internal class DefaultCProjectConfigurator(
                 klass = klass,
                 configure = configure,
                 platformFilter = platformFilter,
-                commandExecutor = commandExecutor
+                execEnvironment = execEnvironment
             )
         )
     }

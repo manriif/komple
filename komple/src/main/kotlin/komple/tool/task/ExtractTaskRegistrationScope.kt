@@ -2,6 +2,7 @@ package komple.tool.task
 
 import komple.exec.Bash
 import komple.exec.Command
+import komple.exec.createCommandExecutor
 import komple.exec.execOutput
 import komple.exec.invoke
 import komple.tool.extension.KompleToolExtension
@@ -192,10 +193,12 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
 public fun ExtractTaskRegistrationScope<*>.command(
     buildCommand: ExtractTaskContext.() -> Command
 ): TaskProvider<*> = register<DefaultTask> { context ->
+    val execOperations = project.serviceOf<ExecOperations>()
+
     context.doLastWhenOutputChanged {
         context.outputDirectory.asFile.mkdirs()
 
-        context.commandExecutor.get().execute(
+        context.execEnvironment.createCommandExecutor(execOperations).execute(
             command = buildCommand(context),
             workingDirectory = context.downloadDirectory.directory.get().asFile
         )

@@ -49,7 +49,7 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
             .append(project.headerFile.get().asFile.absolutePath)
             .build()
 
-        commandExecutor.get().execute(command)
+        commandExecutor().execute(command)
     }
 
     /**

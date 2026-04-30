@@ -1,12 +1,14 @@
 package komple.tool.task
 
 import komple.exec.Command
+import komple.exec.createCommandExecutor
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import kotlin.reflect.KClass
 
 /**
@@ -61,6 +63,7 @@ public fun InstallTaskRegistrationScope<*>.command(
     buildCommand: InstallTaskContext.() -> Command
 ): TaskProvider<*> = register<DefaultTask> { context ->
     val fileOperations = project.serviceOf<FileSystemOperations>()
+    val execOperations = project.serviceOf<ExecOperations>()
 
     context.doLastWhenOutputChanged {
         fileOperations.copy {
@@ -68,7 +71,7 @@ public fun InstallTaskRegistrationScope<*>.command(
             into(context.outputDirectory)
         }
 
-        context.commandExecutor.get().execute(
+        context.execEnvironment.createCommandExecutor(execOperations).execute(
             command = buildCommand(context),
             workingDirectory = context.outputDirectory.asFile
         )

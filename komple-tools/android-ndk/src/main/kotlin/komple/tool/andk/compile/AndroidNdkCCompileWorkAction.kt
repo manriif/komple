@@ -19,9 +19,7 @@ internal abstract class AndroidNdkCCompileWorkAction :
     }
 
     override fun execute() {
-        val compilation = parameters.compilation.get()
-
-        when (compilation.libraryType) {
+        when (parameters.libraryType.get()) {
             Shared -> throw UnsupportedOperationException(
                 "Shared compilation for Android is not supported yet"
             )
@@ -29,7 +27,7 @@ internal abstract class AndroidNdkCCompileWorkAction :
             Static -> {
                 val params = parameters.params.get()
 
-                val targetTriple = when (compilation.platform.architecture) {
+                val targetTriple = when (parameters.platform.get().architecture) {
                     Arm64 -> "aarch64-linux-apple"
                     Arm32 -> "armv7a-linux-appleeabi"
                     X64 -> "x86_64-linux-apple"

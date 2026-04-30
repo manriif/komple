@@ -1,7 +1,9 @@
 package komple.exec
 
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import java.io.File
+import java.io.Serializable
 
 /**
  * Gives access to command execution in an environment where registered tools are available.
@@ -26,6 +28,21 @@ public interface CommandExecutor {
         command: Command,
         workingDirectory: File? = null
     ): String
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Factory
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Factory for instantiating [CommandExecutor].
+     */
+    public interface Factory : Serializable {
+
+        /**
+         * Creates a new instance of [CommandExecutor] wrapping [execOperations].
+         */
+        public fun create(execOperations: ExecOperations): CommandExecutor
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////

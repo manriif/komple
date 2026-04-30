@@ -3,6 +3,8 @@ package komple.gradle.extension
 import komple.KompleRootExtension
 import komple.exec.Bash
 import komple.exec.CommandInterpreter
+import komple.exec.ExtendableExecEnvironment
+import komple.gradle.exec.DefaultExecEnvironment
 import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.DefaultKompleTool
 import komple.gradle.tool.KompleToolsExtension
@@ -10,11 +12,13 @@ import komple.project.KompleProject
 import komple.tool.configurator.KompleToolConfigurator
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.add
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.create
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -35,6 +39,17 @@ public abstract class KompleRootProjectExtension @Inject constructor(
      * Default to [Bash].
      */
     public abstract val commandInterpreter: Property<CommandInterpreter>
+
+    /**
+     * Exec environments exposed as [DefaultExecEnvironment].
+     */
+    internal abstract val defaultExecEnvironments: NamedDomainObjectContainer<DefaultExecEnvironment>
+
+    /**
+     * Execution environments.
+     */
+    public val execEnvironments: NamedDomainObjectContainer<out ExtendableExecEnvironment>
+        get() = defaultExecEnvironments
 
     /**
      * Projects exposed as polymorphic container.
@@ -95,7 +110,18 @@ internal fun KompleRootProjectExtension.configureConventions() {
     commandInterpreter.convention(Bash)
 
     extensions.run {
-        add(::commandExecutors.name, commandExecutors)
-        add<PolymorphicDomainObjectContainer<KompleProject>>(::projects.name, projects)
+        add<NamedDomainObjectContainer<out ExtendableExecEnvironment>>(
+            name = ::execEnvironments.name,
+            extension = execEnvironments
+        )
+
+        add<PolymorphicDomainObjectContainer<KompleProject>>(
+            name = ::projects.name,
+            extension = projects
+        )
+    }
+
+    defaultExecEnvironments.configureEach {
+        commandInterpreter = this@configureConventions.commandInterpreter
     }
 }

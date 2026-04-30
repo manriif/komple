@@ -2,9 +2,14 @@ package komple.project.c
 
 import komple.exec.CommandExecutor
 import komple.exec.execute
+import komple.platform.Platform
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.process.ExecOperations
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
+import java.io.File
+import javax.inject.Inject
 import kotlin.io.path.createTempFile
 
 /**
@@ -13,28 +18,27 @@ import kotlin.io.path.createTempFile
 public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters> :
     WorkAction<Params> {
 
-    protected val commandExecutor: CommandExecutor
-        get() = parameters.commandExecutor.get()
+    @get:Inject
+    internal abstract val execOperations: ExecOperations
+
+    protected val commandExecutor: CommandExecutor by lazy {
+        parameters.commandExecutorFactory.get().create(execOperations)
+    }
 
     protected fun compileStatic(
         compilerFlags: Array<out Any>,
         archiverFlags: Array<out Any>,
     ) {
-        val project = parameters.cProject.get()
-        val compilation = parameters.compilation.get()
-        val libraryFile = compilation.libraryFile.get().asFile
+        val libraryFile = parameters.libraryFile.get()
 
-        val sourceFilesWithObjects = project.sourceFiles.files.associateWith { file ->
+        val sourceFilesWithObjects = parameters.sourceFiles.get().associateWith { file ->
             createTempFile(
-                prefix = "${project.libraryName}${file.nameWithoutExtension}",
+                prefix = file.nameWithoutExtension,
                 suffix = libraryFile.extension
             ).toFile()
         }
 
-        val compilerOptions = project
-            .compilerOptions(compilation.platform)
-            .get()
-            .toTypedArray()
+        val compilerOptions = parameters.compilerOptions.get().toTypedArray()
 
         sourceFilesWithObjects.forEach { (sourceFile, objectFile) ->
             commandExecutor.execute(
@@ -60,18 +64,13 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
     }
 
     protected fun compileShared(compilerFlags: Array<out Any>) {
-        val project = parameters.cProject.get()
-        val compilation = parameters.compilation.get()
-        val libraryFile = compilation.libraryFile.get().asFile
+        val libraryFile = parameters.libraryFile.get()
 
-        val sourceFiles = project.sourceFiles
+        val sourceFiles = parameters.sourceFiles.get()
             .map { it.absolutePath }
             .toTypedArray()
 
-        val compilerOptions = project
-            .compilerOptions(compilation.platform)
-            .get()
-            .toTypedArray()
+        val compilerOptions = parameters.compilerOptions.get().toTypedArray()
 
         commandExecutor.execute(
             *compilerFlags,
@@ -88,8 +87,11 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
 
     public interface Parameters : WorkParameters {
 
-        public val cProject: Property<CProject>
-        public val compilation: Property<CCompilation>
-        public val commandExecutor: Property<CommandExecutor>
+        public val commandExecutorFactory: Property<CommandExecutor.Factory>
+        public val platform: Property<Platform>
+        public val libraryFile: Property<File>
+        public val libraryType: Property<CLibraryType>
+        public val sourceFiles: ListProperty<File>
+        public val compilerOptions: ListProperty<String>
     }
 }

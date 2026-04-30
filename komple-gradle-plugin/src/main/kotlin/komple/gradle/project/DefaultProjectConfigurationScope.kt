@@ -1,6 +1,6 @@
 package komple.gradle.project
 
-import komple.exec.CommandExecutor
+import komple.exec.ExecEnvironment
 import komple.gradle.extension.DefaultExtensionScope
 import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
@@ -27,14 +27,16 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
     private val context: KompleToolConfigContext<Extension>,
     private val projectExtension: KompleProjectExtension,
     override val configurator: ProjectConfigurator,
-    override val installDirectory: Provider<Directory>,
-    override val commandExecutor: Provider<CommandExecutor>
+    override val installDirectory: Provider<Directory>
 ) : ProjectConfigurationScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {
 
     override val host: Host
         get() = notClosed { CurrentHost }
+
+    override val execEnvironment: ExecEnvironment
+        get() = context.execEnvironment
 
     override fun generatedDirectory(): Provider<Directory> {
         return context.project.layout.projectGeneratedOutputDir(

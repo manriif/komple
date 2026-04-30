@@ -18,6 +18,6 @@ internal class CProjectConfiguratorFactory(override val kProject: DefaultCProjec
         extension: CProjectExtension,
         tool: DefaultKompleTool<*>
     ): ProjectConfigurator {
-        return DefaultCProjectConfigurator(extension, tool.commandExecutor)
+        return DefaultCProjectConfigurator(extension, tool.execEnvironment)
     }
 }

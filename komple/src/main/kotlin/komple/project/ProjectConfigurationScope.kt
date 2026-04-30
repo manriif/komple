@@ -1,6 +1,6 @@
 package komple.project
 
-import komple.exec.HasCommandExecutorProvider
+import komple.exec.HasExecEnvironment
 import komple.exec.KompleExecTask
 import komple.platform.HasHost
 import komple.tool.extension.ExtensionScope
@@ -18,7 +18,7 @@ import kotlin.reflect.KClass
  */
 public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     HasExtension<Extension>,
-    HasCommandExecutorProvider,
+    HasExecEnvironment,
     HasHost {
 
     /**
@@ -111,7 +111,7 @@ public inline fun <reified T : KompleExecTask> ProjectConfigurationScope<*>.regi
     noinline configure: (T.() -> Unit)? = null
 ): TaskProvider<T> {
     return registerTask<T>(postfix) {
-        this.commandExecutor = this@registerExecTask.commandExecutor
+        this.execEnvironment = this@registerExecTask.execEnvironment
         configure?.invoke(this)
     }
 }

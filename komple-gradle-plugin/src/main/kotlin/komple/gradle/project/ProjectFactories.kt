@@ -23,8 +23,7 @@ internal fun Project.registerProjectFactories(
         projects = projects,
         factories = factories,
         configureConventions = DefaultCProject::configureConventions,
-        createFactory = ::CProjectConfiguratorFactory,
-        objects
+        createFactory = ::CProjectConfiguratorFactory
     )
 
     // Force all project creation for subproject DSL

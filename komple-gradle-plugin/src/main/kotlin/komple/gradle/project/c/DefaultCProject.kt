@@ -6,8 +6,6 @@ import komple.project.c.COptimization
 import komple.project.c.CProject
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -16,10 +14,8 @@ import javax.inject.Inject
 /**
  * Implementation of [CProject].
  */
-internal abstract class DefaultCProject @Inject internal constructor(
-    projectName: String,
-    private val objects: ObjectFactory
-) : DefaultKompleProject(projectName),
+internal abstract class DefaultCProject @Inject constructor(projectName: String) :
+    DefaultKompleProject(projectName),
     CProject {
 
     @get:Input
@@ -34,15 +30,15 @@ internal abstract class DefaultCProject @Inject internal constructor(
         }
     }
 
-    private fun list(configure: Action<in ListProperty<String>>): List<String> {
-        val list = objects.listProperty(String::class.java)
+    private fun list(configure: Action<MutableList<String>>): List<String> {
+        val list = mutableListOf<String>()
         configure.execute(list)
-        return list.get()
+        return list.toList()
     }
 
     override fun compilerOptions(
         platform: Platform,
-        configure: Action<in ListProperty<String>>
+        configure: Action<MutableList<String>>
     ) {
         platformCompilerOptions.put(platform, list(configure))
     }
@@ -62,7 +58,7 @@ internal abstract class DefaultCProject @Inject internal constructor(
 
     override fun linkerOptions(
         platform: Platform,
-        configure: Action<in ListProperty<String>>
+        configure: Action<MutableList<String>>
     ) {
         platformLinkerOptions.put(platform, list(configure))
     }

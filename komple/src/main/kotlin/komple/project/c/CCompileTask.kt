@@ -3,9 +3,11 @@ package komple.project.c
 import komple.exec.KompleExecTask
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.submit
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -25,6 +27,7 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
     @get:Nested
     public abstract val compilations: ListProperty<CCompilation>
 
+    @get:Internal
     protected abstract val workActionClass: KClass<A>
 
     protected abstract fun P.configure()
@@ -37,16 +40,19 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
             return
         }
 
+        val factory = execEnvironment.get().createCommandExecutorFactory()
         val workQueue = workerExecutor.noIsolation()
+        val cProject = cProject.get()
 
-        let { task ->
-            compilations.forEach { compilation ->
-                workQueue.submit(workActionClass.java) {
-                    this.commandExecutor = task.commandExecutor
-                    this.cProject = task.cProject
-                    this.compilation = compilation
-                    configure()
-                }
+        compilations.forEach { compilation ->
+            workQueue.submit(workActionClass) {
+                this.commandExecutorFactory = factory
+                this.platform = compilation.platform
+                this.libraryType = compilation.libraryType
+                this.libraryFile = compilation.libraryFile.get().asFile
+                this.sourceFiles = cProject.sourceFiles.files
+                this.compilerOptions = cProject.compilerOptions(compilation.platform)
+                configure()
             }
         }
     }

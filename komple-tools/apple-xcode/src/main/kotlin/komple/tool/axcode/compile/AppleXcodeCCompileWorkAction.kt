@@ -24,14 +24,13 @@ internal abstract class AppleXcodeCCompileWorkAction :
     }
 
     override fun execute() {
-        val compilation = parameters.compilation.get()
-        val (operatingSystem, architecture) = compilation.platform
+        val (operatingSystem, architecture) = parameters.platform.get()
 
         check(operatingSystem is OperatingSystem.Darwin) {
             "Unexpected non Darwin operating system: $operatingSystem"
         }
 
-        when (compilation.libraryType) {
+        when (parameters.libraryType.get()) {
             Shared -> when (operatingSystem) {
                 MacOS -> {
                     val arch = when (architecture) {

@@ -91,7 +91,7 @@ public interface CProject : KompleProject {
      */
     public fun compilerOptions(
         platform: Platform,
-        configure: Action<in ListProperty<String>>
+        configure: Action<MutableList<String>>
     )
 
     /**
@@ -105,7 +105,7 @@ public interface CProject : KompleProject {
      */
     public fun linkerOptions(
         platform: Platform,
-        configure: Action<in ListProperty<String>>
+        configure: Action<MutableList<String>>
     )
 
     /**

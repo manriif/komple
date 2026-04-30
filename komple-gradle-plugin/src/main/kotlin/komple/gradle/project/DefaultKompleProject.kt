@@ -12,6 +12,7 @@ import org.gradle.api.tasks.Internal
 internal abstract class DefaultKompleProject(@Internal private val projectName: String) :
     KompleProject {
 
+    @Internal
     override fun getName(): String {
         return projectName
     }
@@ -22,5 +23,4 @@ internal abstract class DefaultKompleProject(@Internal private val projectName: 
  */
 internal fun KompleProject.configureCommonConventions(project: Project) {
     packageName.convention(project.provider { "No package name was provided" })
-    sourceFiles.convention(project.provider { error("No source files were provided") })
 }

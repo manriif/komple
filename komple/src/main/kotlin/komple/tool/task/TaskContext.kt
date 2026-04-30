@@ -1,7 +1,6 @@
 package komple.tool.task
 
-import komple.exec.CommandExecutor
-import komple.exec.HasCommandExecutorProvider
+import komple.exec.HasExecEnvironment
 import komple.platform.HasHost
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -36,9 +35,9 @@ public interface TaskContext {
 }
 
 /**
- * Task context providing access to [CommandExecutor].
+ * Task context providing access to [komple.exec.ExecEnvironment].
  */
-public interface ExecTaskContext : TaskContext, HasHost, HasCommandExecutorProvider
+public interface ExecTaskContext : TaskContext, HasHost, HasExecEnvironment
 
 ///////////////////////////////////////////////////////////////////////////
 // Extensions

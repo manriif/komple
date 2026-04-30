@@ -1,6 +1,7 @@
 package komple.gradle.project
 
 import komple.gradle.util.camelCased
+import komple.gradle.util.dashCased
 import komple.gradle.util.pascalCased
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -23,7 +24,7 @@ internal fun ProjectLayout.projectGeneratedOutputDir(
     projectName: String,
     subdirectory: String
 ): Provider<Directory> {
-    return buildDirectory.dir("generated/komple/projects/${projectName}/$subdirectory")
+    return buildDirectory.dir("generated/komple/projects/${projectName.dashCased()}/$subdirectory")
 }
 
 /**

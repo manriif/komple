@@ -1,9 +1,7 @@
 package komple.gradle.tool
 
-import komple.exec.CommandExecutor
-import komple.exec.ExecEnvironment
 import komple.gradle.deps.DependencyGraph
-import komple.gradle.exec.DefaultCommandExecutor
+import komple.gradle.exec.DefaultExecEnvironment
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
@@ -22,7 +20,6 @@ import komple.project.ProjectConfigurator
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Project
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.assign
@@ -51,7 +48,7 @@ internal fun Project.configureTools(extension: KompleRootProjectExtension) {
             val dependencies = dependencyGraph.getDependencies(this)
 
             dependencies.forEach { dependency ->
-                execEnvironments.add(dependency.execEnvironment)
+                execEnvironment += dependency.execEnvironment
 
                 installTaskProvider.configure {
                     dependsOn(dependency.installTaskProvider)
@@ -78,19 +75,13 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     ).use { it.configureExtension() }
 
     val objects = project.objects
-    val execEnvironment = objects.newInstance<ExecEnvironment>()
-    val execEnvironments = mutableListOf(execEnvironment)
-    val commandInterpreter = rootExtension.commandInterpreter
 
-    val commandExecutor: Provider<CommandExecutor> = project.providers.provider {
-        objects.newInstance<DefaultCommandExecutor>().apply {
-            this.commandInterpreter = commandInterpreter
-            this.execEnvironments = execEnvironments
-        }
+    val execEnvironment = objects.newInstance<DefaultExecEnvironment>(toolName).apply {
+        commandInterpreter = rootExtension.commandInterpreter
     }
 
-    val context = KompleToolConfigContext(project, toolName, extension)
-    val installTaskProvider = createInstallTaskProvider(context, commandExecutor)
+    val context = KompleToolConfigContext(project, toolName, extension, execEnvironment)
+    val installTaskProvider = createInstallTaskProvider(context)
 
     val installDirectory = project.layout
         .dir(installTaskProvider.map { it.outputs.files.singleFile })
@@ -105,8 +96,6 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         extension = context.extension,
         toolName = context.toolName,
         dependencyGraph = dependencyGraph,
-        execEnvironments = execEnvironments,
-        commandExecutor = commandExecutor,
         execEnvironment = execEnvironment,
         installTaskProvider = installTaskProvider,
         installDirectory = installDirectory
@@ -119,15 +108,12 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
  * Creates the task responsible for installing the tool.
  */
 private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstallTaskProvider(
-    context: KompleToolConfigContext<Ext>,
-    commandExecutor: Provider<CommandExecutor>,
+    context: KompleToolConfigContext<Ext>
 ): TaskProvider<*> = if (supportHost(CurrentHost)) {
     DefaultInstallTaskRegistrationScope(
         context = context,
-        commandExecutor = commandExecutor,
         extractTask = DefaultExtractTaskRegistrationScope(
             context = context,
-            commandExecutor = commandExecutor,
             integrityTask = DefaultIntegrityTaskRegistrationScope(
                 context = context,
                 downloadTask = DefaultDownloadTaskRegistrationScope(context)
@@ -156,14 +142,13 @@ internal fun <Ext : KompleToolExtension> DefaultKompleTool<Ext>.configureProject
     projectExtension: KompleProjectExtension,
     projectConfigurator: ProjectConfigurator
 ) {
-    val context = KompleToolConfigContext(project, toolName, extension)
+    val context = KompleToolConfigContext(project, toolName, extension, execEnvironment)
 
     val scope = DefaultProjectConfigurationScope(
         context = context,
         projectExtension = projectExtension,
         configurator = projectConfigurator,
-        installDirectory = installDirectory,
-        commandExecutor = commandExecutor,
+        installDirectory = installDirectory
     )
 
     configurator.run {

@@ -10,7 +10,12 @@ import org.gradle.api.tasks.TaskProvider
 /**
  * C Library.
  */
-public interface CLibrary : CCompilation {
+public interface CLibrary {
+
+    /**
+     * Library related compilation.
+     */
+    public val compilation: CCompilation
 
     /**
      * Provider of the task responsible for compiling the library.
@@ -22,7 +27,7 @@ public interface CLibrary : CCompilation {
      * Generated library file.
      * This can be passed to a task input to create an implicit dependency on [compileTaskProvider].
      */
-    override val libraryFile: Provider<RegularFile>
+    public val libraryFile: Provider<RegularFile>
 }
 
 /**
@@ -40,6 +45,5 @@ internal class CCompilationImpl(
 internal class CLibraryImpl(
     override val compileTaskProvider: TaskProvider<*>,
     override val libraryFile: Provider<RegularFile>,
-    override val libraryType: CLibraryType,
-    override val platform: Platform
+    override val compilation: CCompilation
 ) : CLibrary

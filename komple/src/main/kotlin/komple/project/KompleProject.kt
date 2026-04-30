@@ -4,6 +4,9 @@ import org.gradle.api.Named
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 
 /**
  * Komple project.
@@ -19,6 +22,7 @@ public interface KompleProject : Named {
     /**
      * Sources files of the project.
      */
-    @get:Input
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public val sourceFiles: ConfigurableFileCollection
 }
