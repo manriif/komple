@@ -10,6 +10,7 @@ import komple.gradle.util.pascalCased
 import komple.platform.Host
 import komple.project.ProjectConfigurationScope
 import komple.project.ProjectConfigurator
+import komple.task.TaskContext
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
@@ -63,15 +64,16 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
     override fun <T : Task> registerTask(
         postfix: String,
         type: KClass<T>,
-        configure: (T.() -> Unit)?
+        cacheable: Boolean,
+        configure: (T.(TaskContext) -> Unit)?
     ): TaskProvider<T> {
         val name = projectTaskName(
             projectName = configurator.project.name,
             postfix = "${context.toolName}${postfix.pascalCased()}"
         )
 
-        return context.project.tasks.registerProjectTask(name, type) {
-            configure?.invoke(this)
+        return context.project.tasks.registerProjectTask(name, type, cacheable) { context ->
+            configure?.invoke(this, context)
         }
     }
 }

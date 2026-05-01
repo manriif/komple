@@ -22,6 +22,7 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
      */
     public fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean = false,
         configure: T.(directory: TaskDirectory) -> Unit
     ): TaskProvider<T>
 
@@ -45,9 +46,11 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
  * The task should only perform integrity checking against downloaded file(s).
  */
 public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
+    cacheable: Boolean = false,
     noinline configure: T.(directory: TaskDirectory) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
+    cacheable = cacheable,
     configure = configure
 )
 
@@ -59,8 +62,9 @@ public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
  */
 public fun IntegrityTaskRegistrationScope<*>.checksum(
     checksum: Provider<String>,
-    algorithm: Algorithm
-): TaskProvider<*> = register<DefaultTask> { directory ->
+    algorithm: Algorithm,
+    cacheable: Boolean = false,
+): TaskProvider<*> = register<DefaultTask>(cacheable) { directory ->
     val verify = VerifyAction(project.layout).apply {
         algorithm(algorithm.toMessageDigestConstant())
     }
@@ -83,8 +87,10 @@ public fun IntegrityTaskRegistrationScope<*>.checksum(
  */
 public fun IntegrityTaskRegistrationScope<*>.checksum(
     checksum: String,
-    algorithm: Algorithm
+    algorithm: Algorithm,
+    cacheable: Boolean = false,
 ): TaskProvider<*> = checksum(
     checksum = providers.provider { checksum },
-    algorithm = algorithm
+    algorithm = algorithm,
+    cacheable = cacheable
 )

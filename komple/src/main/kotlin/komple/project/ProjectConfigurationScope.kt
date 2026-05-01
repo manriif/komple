@@ -3,6 +3,7 @@ package komple.project
 import komple.exec.HasExecEnvironment
 import komple.exec.KompleExecTask
 import komple.platform.HasHost
+import komple.task.TaskContext
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
@@ -59,7 +60,8 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     public fun <T : Task> registerTask(
         postfix: String,
         type: KClass<T>,
-        configure: (T.() -> Unit)? = null
+        cacheable: Boolean = false,
+        configure: (T.(context: TaskContext) -> Unit)? = null
     ): TaskProvider<T>
 }
 
@@ -93,10 +95,12 @@ public inline fun <reified E : Any> ProjectConfigurationScope<*>.createExtension
 @IgnorableReturnValue
 public inline fun <reified T : Task> ProjectConfigurationScope<*>.registerTask(
     postfix: String,
-    noinline configure: (T.() -> Unit)? = null
+    cacheable: Boolean = false,
+    noinline configure: (T.(context: TaskContext) -> Unit)? = null
 ): TaskProvider<T> = registerTask(
     postfix = postfix,
     type = T::class,
+    cacheable = cacheable,
     configure = configure
 )
 
@@ -108,10 +112,11 @@ public inline fun <reified T : Task> ProjectConfigurationScope<*>.registerTask(
 @IgnorableReturnValue
 public inline fun <reified T : KompleExecTask> ProjectConfigurationScope<*>.registerExecTask(
     postfix: String,
-    noinline configure: (T.() -> Unit)? = null
+    cacheable: Boolean = false,
+    noinline configure: (T.(context: TaskContext) -> Unit)? = null
 ): TaskProvider<T> {
-    return registerTask<T>(postfix) {
+    return registerTask<T>(postfix, cacheable) { context ->
         this.execEnvironment = this@registerExecTask.execEnvironment
-        configure?.invoke(this)
+        configure?.invoke(this, context)
     }
 }

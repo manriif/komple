@@ -5,6 +5,7 @@ import komple.exec.Command
 import komple.exec.createCommandExecutor
 import komple.exec.execOutput
 import komple.exec.invoke
+import komple.task.doLastWhenOutputChanged
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
@@ -35,6 +36,7 @@ public interface ExtractTaskRegistrationScope<Extension : KompleToolExtension> :
      */
     public fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean = false,
         configure: T.(context: ExtractTaskContext) -> Unit
     ): TaskProvider<T>
 
@@ -56,9 +58,11 @@ public interface ExtractTaskRegistrationScope<Extension : KompleToolExtension> :
  * can be obtained from the [ExtractTaskContext] passed to [configure].
  */
 public inline fun <reified T : Task> ExtractTaskRegistrationScope<*>.register(
+    cacheable: Boolean = false,
     noinline configure: T.(context: ExtractTaskContext) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
+    cacheable = cacheable,
     configure = configure
 )
 
@@ -70,8 +74,9 @@ public inline fun <reified T : Task> ExtractTaskRegistrationScope<*>.register(
  */
 private fun ExtractTaskRegistrationScope<*>.extractFileTree(
     enclosedContent: Boolean,
+    cacheable: Boolean,
     createTree: ArchiveOperations.(Provider<RegularFile>) -> FileTree
-) = register<DefaultTask> { context ->
+) = register<DefaultTask>(cacheable) { context ->
     val archiveOperations = project.serviceOf<ArchiveOperations>()
     val fileOperations = project.serviceOf<FileSystemOperations>()
 
@@ -112,9 +117,17 @@ private fun ExtractTaskRegistrationScope<*>.extractFileTree(
  * and the root directory is excluded.
  *
  * It is assumed that a single file has been downloaded and that downloaded file is a valid `.zip`.
+ *
+ * Note that the task is [cacheable] by default.
  */
-public fun ExtractTaskRegistrationScope<*>.unzip(enclosedContent: Boolean = false): TaskProvider<*> =
-    extractFileTree(enclosedContent) { zipTree(it) }
+public fun ExtractTaskRegistrationScope<*>.unzip(
+    enclosedContent: Boolean = false,
+    cacheable: Boolean = true
+): TaskProvider<*> = extractFileTree(
+    enclosedContent = enclosedContent,
+    cacheable = cacheable,
+    createTree = { zipTree(it) }
+)
 
 /**
  * Registers a task that untar downloaded file.
@@ -124,9 +137,17 @@ public fun ExtractTaskRegistrationScope<*>.unzip(enclosedContent: Boolean = fals
  *
  * It is assumed that a single file has been downloaded and that downloaded file is a valid
  * `.tar.gz`.
+ *
+ * Note that the task is [cacheable] by default.
  */
-public fun ExtractTaskRegistrationScope<*>.untarGzip(enclosedContent: Boolean = false): TaskProvider<*> =
-    extractFileTree(enclosedContent) { tarTree(gzip(it)) }
+public fun ExtractTaskRegistrationScope<*>.untarGzip(
+    enclosedContent: Boolean = false,
+    cacheable: Boolean = true
+): TaskProvider<*> = extractFileTree(
+    enclosedContent = enclosedContent,
+    cacheable = cacheable,
+    createTree = { tarTree(gzip(it)) }
+)
 
 /**
  * Registers a task extracts files from a DMG with the below steps:
@@ -142,14 +163,17 @@ public fun ExtractTaskRegistrationScope<*>.untarGzip(enclosedContent: Boolean = 
  * It is assumed that a single file has been downloaded and that downloaded file is a valid `.dmg`.
  *
  * Additional task inputs can be registered by supplying a [configureInputs].
+ *
+ * Note that the task is [cacheable] by default.
  */
 public fun ExtractTaskRegistrationScope<*>.dmg(
     configureInputs: (TaskInputs.(context: ExtractTaskContext) -> Unit)? = null,
+    cacheable: Boolean = true,
     extractContent: FileSystemOperations.(
         mountPoint: File,
         extractDirectory: File
     ) -> Unit
-): TaskProvider<*> = register<DefaultTask> { context ->
+): TaskProvider<*> = register<DefaultTask>(cacheable) { context ->
     val execOperations = project.serviceOf<ExecOperations>()
     val fileOperations = project.serviceOf<FileSystemOperations>()
 

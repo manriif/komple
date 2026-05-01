@@ -1,6 +1,7 @@
 package komple.project.c
 
 import komple.exec.KompleExecTask
+import komple.task.TaskContext
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
@@ -21,6 +22,9 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
     @get:Inject
     protected abstract val workerExecutor: WorkerExecutor
 
+    @get:Internal
+    public abstract val context: Property<TaskContext>
+
     @get:Nested
     public abstract val cProject: Property<CProject>
 
@@ -34,6 +38,10 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
 
     @TaskAction
     public fun compile() {
+        if (!context.get().outputChanged.get()) {
+            return
+        }
+
         val compilations = compilations.get()
 
         if (compilations.isEmpty()) {

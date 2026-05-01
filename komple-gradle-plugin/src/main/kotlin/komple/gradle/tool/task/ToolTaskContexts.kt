@@ -3,46 +3,47 @@ package komple.gradle.tool.task
 import komple.exec.ExecEnvironment
 import komple.gradle.platform.CurrentHost
 import komple.platform.Host
+import komple.task.TaskContext
 import komple.tool.task.DownloadTaskContext
-import komple.tool.task.ExecTaskContext
+import komple.tool.task.ExecToolTaskContext
 import komple.tool.task.ExtractTaskContext
 import komple.tool.task.InstallTaskContext
-import komple.tool.task.TaskContext
 import komple.tool.task.TaskDirectory
+import komple.tool.task.ToolTaskContext
 import org.gradle.api.file.Directory
-import org.gradle.api.provider.Provider
 
 /**
- * Base for implementors of [TaskContext].
+ * Base for implementors of [ToolTaskContext].
  */
 internal abstract class DefaultTaskContext(
+    context: TaskContext,
     override val outputDirectory: Directory,
-    override val outputChanged: Provider<Boolean>
-) : TaskContext
+) : ToolTaskContext,
+    TaskContext by context
 
 /**
  * Default implementation of [DownloadTaskContext].
  */
 internal class DefaultDownloadTaskContext(
-    outputDirectory: Directory,
-    outputChanged: Provider<Boolean>
+    context: TaskContext,
+    outputDirectory: Directory
 ) : DownloadTaskContext,
     DefaultTaskContext(
-        outputDirectory = outputDirectory,
-        outputChanged = outputChanged
+        context = context,
+        outputDirectory = outputDirectory
     )
 
 /**
  * Default implementation of [ExtractTaskContext].
  */
 internal abstract class DefaultExecTaskContext(
+    context: TaskContext,
     override val execEnvironment: ExecEnvironment,
-    outputDirectory: Directory,
-    outputChanged: Provider<Boolean>
-) : ExecTaskContext,
+    outputDirectory: Directory
+) : ExecToolTaskContext,
     DefaultTaskContext(
-        outputDirectory = outputDirectory,
-        outputChanged = outputChanged
+        context = context,
+        outputDirectory = outputDirectory
     ) {
 
     override val host: Host
@@ -53,28 +54,28 @@ internal abstract class DefaultExecTaskContext(
  * Default implementation of [ExtractTaskContext].
  */
 internal class DefaultExtractTaskContext(
+    context: TaskContext,
     override val downloadDirectory: TaskDirectory,
     execEnvironment: ExecEnvironment,
-    outputDirectory: Directory,
-    outputChanged: Provider<Boolean>,
+    outputDirectory: Directory
 ) : ExtractTaskContext,
     DefaultExecTaskContext(
+        context = context,
         execEnvironment = execEnvironment,
-        outputDirectory = outputDirectory,
-        outputChanged = outputChanged
+        outputDirectory = outputDirectory
     )
 
 /**
  * Default implementation of [InstallTaskContext].
  */
 internal class DefaultInstallTaskContext(
+    context: TaskContext,
     override val extractDirectory: TaskDirectory,
     execEnvironment: ExecEnvironment,
-    outputDirectory: Directory,
-    outputChanged: Provider<Boolean>
+    outputDirectory: Directory
 ) : InstallTaskContext,
     DefaultExecTaskContext(
+        context = context,
         execEnvironment = execEnvironment,
-        outputDirectory = outputDirectory,
-        outputChanged = outputChanged
+        outputDirectory = outputDirectory
     )

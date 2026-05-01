@@ -125,7 +125,8 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
                     val options = project.objects.newInstance<JextractCommandLineOptions>()
 
                     val taskProvider = registerExecTask<JextractGenerateBindingsTask>(
-                        postfix = "generateBindings${name}"
+                        postfix = "generateBindings${name}",
+                        cacheable = true
                     ) {
                         cProject = configurator.project
                         cliOptions = options

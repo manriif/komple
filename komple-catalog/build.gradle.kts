@@ -34,7 +34,9 @@ catalog {
 
         version(komple, libs.versions.komple.get())
         plugin(komple, group).versionRef(komple)
+
         library(komple, group, komple).versionRef(komple)
+        library("kompleGradlePlugin", group, "komple-gradle-plugin").versionRef(komple)
 
         rootProject.subprojects.forEach { project ->
             if (project.path.startsWith(":komple-tools:")) {

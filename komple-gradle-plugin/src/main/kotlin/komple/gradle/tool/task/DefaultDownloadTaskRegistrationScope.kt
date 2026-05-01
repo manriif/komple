@@ -19,13 +19,14 @@ internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtens
 
     override fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean,
         configure: T.(DownloadTaskContext) -> Unit
-    ): TaskProvider<T> = registerTask(TASK_TOOL_DOWNLOAD_POSTFIX, klass) { outputChanged ->
+    ): TaskProvider<T> = registerTask(TASK_TOOL_DOWNLOAD_POSTFIX, klass, cacheable) { context ->
         description = "Download the $toolName tool."
 
         val downloadContext = DefaultDownloadTaskContext(
-            outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolNameCompat),
-            outputChanged = outputChanged
+            context = context,
+            outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolNameCompat)
         )
 
         configureTask(

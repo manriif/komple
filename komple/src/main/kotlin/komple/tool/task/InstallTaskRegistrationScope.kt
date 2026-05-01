@@ -2,6 +2,7 @@ package komple.tool.task
 
 import komple.exec.Command
 import komple.exec.createCommandExecutor
+import komple.task.doLastWhenOutputChanged
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
@@ -25,6 +26,7 @@ public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
      */
     public fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean = false,
         configure: T.(context: InstallTaskContext) -> Unit
     ): TaskProvider<T>
 
@@ -46,9 +48,11 @@ public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
  * can be obtained from the [InstallTaskContext] passed to [configure].
  */
 public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
+    cacheable: Boolean = false,
     noinline configure: T.(context: InstallTaskContext) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
+    cacheable = cacheable,
     configure = configure
 )
 
@@ -58,10 +62,13 @@ public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
  *
  * The extracted content is first copied from extracted to install directory and the working
  * directory is set to the tool install directory.
+ *
+ * Note that the task is [cacheable] by default.
  */
 public fun InstallTaskRegistrationScope<*>.command(
+    cacheable: Boolean = true,
     buildCommand: InstallTaskContext.() -> Command
-): TaskProvider<*> = register<DefaultTask> { context ->
+): TaskProvider<*> = register<DefaultTask>(cacheable) { context ->
     val fileOperations = project.serviceOf<FileSystemOperations>()
     val execOperations = project.serviceOf<ExecOperations>()
 

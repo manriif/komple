@@ -56,12 +56,11 @@ public abstract class CProjectExtension @Inject internal constructor(
                     "Library${compilation.platform.altName.pascalCased()}"
         )
 
-        return tasks.registerProjectTask(taskName, factory.klass) {
+        return tasks.registerProjectTask(taskName, factory.klass, true) { context ->
             description = "Generate a ${compilation.libraryType.name.lowercase()} library for " +
                     "platform ${compilation.platform.name}"
 
-            outputs.cacheIf { true }
-
+            this.context = context
             this.cProject = kProject
             this.compilations.add(compilation)
             this.execEnvironment = factory.execEnvironment

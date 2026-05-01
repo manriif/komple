@@ -22,6 +22,7 @@ public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> 
      */
     public fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean = false,
         configure: T.(context: DownloadTaskContext) -> Unit
     ): TaskProvider<T>
 
@@ -42,9 +43,11 @@ public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> 
  * [DownloadTaskContext] passed to [configure].
  */
 public inline fun <reified T : Task> DownloadTaskRegistrationScope<*>.register(
+    cacheable: Boolean = false,
     noinline configure: T.(context: DownloadTaskContext) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
+    cacheable = cacheable,
     configure = configure
 )
 
@@ -52,8 +55,9 @@ public inline fun <reified T : Task> DownloadTaskRegistrationScope<*>.register(
  * Registers a download task downloading a single file at [url].
  */
 public fun DownloadTaskRegistrationScope<*>.url(
-    url: Provider<String>
-): TaskProvider<*> = register<DefaultTask> { context ->
+    url: Provider<String>,
+    cacheable: Boolean = false,
+): TaskProvider<*> = register<DefaultTask>(cacheable) { context ->
     inputs.property("url", url)
 
     val fileName = url.map { link ->

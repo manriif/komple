@@ -20,15 +20,16 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
 
     override fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean,
         configure: T.(context: ExtractTaskContext) -> Unit
-    ): TaskProvider<T> = registerTask(TASK_TOOL_EXTRACT_POSTFIX, klass) { outputChanged ->
+    ): TaskProvider<T> = registerTask(TASK_TOOL_EXTRACT_POSTFIX, klass, cacheable) { context ->
         description = "Extract the $toolName tool."
 
         val extractContext = DefaultExtractTaskContext(
+            context = context,
             downloadDirectory = integrityTask.outputDir(project.layout),
-            execEnvironment = context.execEnvironment,
-            outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolNameCompat),
-            outputChanged = outputChanged
+            execEnvironment = this@DefaultExtractTaskRegistrationScope.context.execEnvironment,
+            outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolNameCompat)
         )
 
         inputs.dir(extractContext.downloadDirectory.directory)

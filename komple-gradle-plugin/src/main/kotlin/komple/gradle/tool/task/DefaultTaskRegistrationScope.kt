@@ -5,13 +5,13 @@ import komple.gradle.platform.UnsupportedHostException
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
-import komple.gradle.util.sha256
 import komple.platform.Host
+import komple.task.TaskContext
+import komple.task.doFirstWhenOutputChanged
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
-import komple.tool.task.TaskContext
 import komple.tool.task.TaskRegistrationScope
-import komple.tool.task.doFirstWhenOutputChanged
+import komple.tool.task.ToolTaskContext
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -20,7 +20,6 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.support.serviceOf
-import java.io.File
 import kotlin.reflect.KClass
 
 /**
@@ -54,35 +53,17 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
     /**
      * Registers a task [T] and returns a provider to the registered task.
      */
-    protected inline fun <T : Task> registerTask(
+    protected fun <T : Task> registerTask(
         postfix: String,
         type: KClass<T>,
-        crossinline configure: T.(outputChanged: Provider<Boolean>) -> Unit
-    ): TaskProvider<T> = context.project.tasks.registerToolTask(toolTaskName(postfix), type) {
-        val checksumFile = project.checksumFile(name.dashCased())
-        val checksumInputs = project.objects.fileCollection()
-
-        val checksumProvider = project.provider {
-            checksumInputs.files.filter(File::exists).sha256()
-        }
-
-        configure(checksumProvider.map { checksum ->
-            !checksumsEquals(checksumFile.asFile, checksum)
-        })
-
-        checksumInputs.from(outputs.files)
-
-        doLast {
-            checksumFile.asFile.run {
-                parentFile.mkdirs()
-                val freshChecksum = checksumInputs.files.filter(File::exists).sha256()
-
-                if (!checksumsEquals(checksumFile.asFile, freshChecksum)) {
-                    writeText(freshChecksum)
-                }
-            }
-        }
-    }
+        cacheable: Boolean,
+        configure: T.(context: TaskContext) -> Unit
+    ): TaskProvider<T> = context.project.tasks.registerToolTask(
+        name = toolTaskName(postfix),
+        type = type,
+        cacheable = cacheable,
+        configure
+    )
 
     /**
      * Invokes [configurator] and ensures no output file(s) were registered for task.
@@ -104,7 +85,7 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
     /**
      * Invokes [configurator] and ensures no output file(s) were registered for task.
      */
-    protected inline fun <T : Task, C : TaskContext> T.configureTask(
+    protected inline fun <T : Task, C : ToolTaskContext> T.configureTask(
         context: C,
         configurator: T.(C) -> Unit,
         deleteFirst: Boolean
@@ -133,7 +114,11 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
         postfix: String,
         raiseError: () -> Nothing
     ): TaskProvider<*> {
-        return context.project.tasks.registerToolTask(toolTaskName(postfix), DefaultTask::class) {
+        return context.project.tasks.registerToolTask(
+            name = toolTaskName(postfix),
+            type = DefaultTask::class,
+            cacheable = false
+        ) {
             group = null
 
             doLast {

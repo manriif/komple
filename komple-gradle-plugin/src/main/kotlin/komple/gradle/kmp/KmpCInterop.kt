@@ -20,7 +20,8 @@ internal fun Project.registerGenerateCInteropDefTask(
     platform: Platform,
 ): TaskProvider<*> = tasks.registerProjectTask(
     name = projectTaskName(cProject.name, "generateCInteropDef${platform.altName.pascalCased()}"),
-    type = DefaultTask::class
+    type = DefaultTask::class,
+    cacheable = true
 ) {
     outputs.file(optionsProvider.flatMap { it.outputFile })
 

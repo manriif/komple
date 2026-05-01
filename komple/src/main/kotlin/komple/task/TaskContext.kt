@@ -1,21 +1,12 @@
-package komple.tool.task
+package komple.task
 
-import komple.exec.HasExecEnvironment
-import komple.platform.HasHost
 import org.gradle.api.Task
-import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 
 /**
- * Context for task that is expected to produce output files.
+ * Context for Gradle task.
  */
 public interface TaskContext {
-
-    /**
-     * The directory that must be used to write task produced file(s).
-     * The task output directory is used as input directory for the next task.
-     */
-    public val outputDirectory: Directory
 
     /**
      * Indicates whether there is changes in output files since last task execution.
@@ -33,11 +24,6 @@ public interface TaskContext {
      */
     public val outputChanged: Provider<Boolean>
 }
-
-/**
- * Task context providing access to [komple.exec.ExecEnvironment].
- */
-public interface ExecTaskContext : TaskContext, HasHost, HasExecEnvironment
 
 ///////////////////////////////////////////////////////////////////////////
 // Extensions

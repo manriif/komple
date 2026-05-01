@@ -19,10 +19,12 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
 
     override fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean,
         configure: T.(directory: TaskDirectory) -> Unit
     ): TaskProvider<T> = context.project.tasks.registerToolTask(
         name = toolTaskName(TASK_TOOL_INTEGRITY_POSTFIX),
-        type = klass
+        type = klass,
+        cacheable = cacheable,
     ) {
         description = "Check the $toolName tool's integrity."
 

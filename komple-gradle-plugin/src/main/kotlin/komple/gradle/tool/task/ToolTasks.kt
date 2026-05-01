@@ -1,16 +1,14 @@
 package komple.gradle.tool.task
 
-import komple.gradle.kompleChecksumsDirectory
+import komple.gradle.task.registerKompleTask
 import komple.gradle.util.camelCased
+import komple.task.TaskContext
 import komple.tool.task.TaskDirectory
-import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ProjectLayout
-import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
-import java.io.File
 import kotlin.reflect.KClass
 
 internal const val KOMPLE_TOOLS_TASK_GROUP = "komple tools"
@@ -36,11 +34,11 @@ internal fun toolTaskName(toolName: String, postfix: String): String {
 internal fun <T : Task> TaskContainer.registerToolTask(
     name: String,
     type: KClass<T>,
-    configure: T.() -> Unit
-): TaskProvider<T> = register(name, type.java) {
+    cacheable: Boolean,
+    configure: T.(context: TaskContext) -> Unit
+): TaskProvider<T> = registerKompleTask(name, type, cacheable) { context ->
     group = KOMPLE_TOOLS_TASK_GROUP
-    outputs.cacheIf { true }
-    configure(this)
+    configure(this, context)
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -52,40 +50,3 @@ internal fun <T : Task> TaskContainer.registerToolTask(
  */
 internal fun Provider<out Task>.outputDir(layout: ProjectLayout): TaskDirectory =
     DefaultTaskDirectory(layout.dir(map { it.outputs.files.singleFile }))
-
-///////////////////////////////////////////////////////////////////////////
-// Checksum
-///////////////////////////////////////////////////////////////////////////
-
-/**
- * Returns a file that can be used to store a checksum for task generated output(s).
- */
-internal fun Project.checksumFile(taskName: String): RegularFile {
-    var taskUniqueName = taskName
-    var parentProject: Project? = this
-
-    while (parentProject != null) {
-        taskUniqueName = "${parentProject.name}-$taskUniqueName"
-        parentProject = parentProject.parent
-    }
-
-    return gradle.kompleChecksumsDirectory.file(taskUniqueName.lowercase())
-}
-
-/**
- * Returns `true` if [checksumFile] exists and its value is equals to [checksum].
- */
-internal fun checksumsEquals(
-    checksumFile: File,
-    checksum: String,
-): Boolean {
-    if (checksumFile.exists()) {
-        val previous = checksumFile.readText()
-
-        if (checksum == previous) {
-            return true
-        }
-    }
-
-    return false
-}

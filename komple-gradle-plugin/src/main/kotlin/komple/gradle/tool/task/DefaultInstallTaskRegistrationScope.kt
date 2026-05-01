@@ -20,15 +20,16 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
 
     override fun <T : Task> register(
         klass: KClass<T>,
+        cacheable: Boolean,
         configure: T.(context: InstallTaskContext) -> Unit
-    ): TaskProvider<T> = registerTask(TASK_TOOL_INSTALL_POSTFIX, klass) { outputChanged ->
+    ): TaskProvider<T> = registerTask(TASK_TOOL_INSTALL_POSTFIX, klass, cacheable) { context ->
         description = "Install the $toolName tool."
 
         val installContext = DefaultInstallTaskContext(
+            context = context,
             extractDirectory = extractTask.outputDir(project.layout),
-            execEnvironment = context.execEnvironment,
-            outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolNameCompat),
-            outputChanged = outputChanged
+            execEnvironment = this@DefaultInstallTaskRegistrationScope.context.execEnvironment,
+            outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolNameCompat)
         )
 
         inputs.dir(installContext.extractDirectory.directory)
