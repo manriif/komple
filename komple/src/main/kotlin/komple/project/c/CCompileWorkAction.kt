@@ -30,6 +30,11 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
         archiverFlags: Array<out Any>,
     ) {
         val libraryFile = parameters.libraryFile.get()
+        val compilerOptions = parameters.compilerOptions.get().toTypedArray()
+
+        val includeDirectories = parameters.includeDirectories.get()
+            .map { "-I${it.absolutePath}"}
+            .toTypedArray()
 
         val sourceFilesWithObjects = parameters.sourceFiles.get().associateWith { file ->
             createTempFile(
@@ -38,11 +43,10 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
             ).toFile()
         }
 
-        val compilerOptions = parameters.compilerOptions.get().toTypedArray()
-
         sourceFilesWithObjects.forEach { (sourceFile, objectFile) ->
             commandExecutor.execute(
                 *compilerFlags,
+                *includeDirectories,
                 "-c",
                 sourceFile.absolutePath,
                 "-o",
@@ -65,15 +69,19 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
 
     protected fun compileShared(compilerFlags: Array<out Any>) {
         val libraryFile = parameters.libraryFile.get()
+        val compilerOptions = parameters.compilerOptions.get().toTypedArray()
+
+        val includeDirectories = parameters.includeDirectories.get()
+            .map { "-I${it.absolutePath}"}
+            .toTypedArray()
 
         val sourceFiles = parameters.sourceFiles.get()
             .map { it.absolutePath }
             .toTypedArray()
 
-        val compilerOptions = parameters.compilerOptions.get().toTypedArray()
-
         commandExecutor.execute(
             *compilerFlags,
+            *includeDirectories,
             "-o",
             libraryFile.absolutePath,
             *sourceFiles,
@@ -92,6 +100,7 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
         public val libraryFile: Property<File>
         public val libraryType: Property<CLibraryType>
         public val sourceFiles: ListProperty<File>
+        public val includeDirectories: ListProperty<File>
         public val compilerOptions: ListProperty<String>
     }
 }
