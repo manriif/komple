@@ -32,6 +32,8 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
         val project = cProject.get()
         val options = cliOptions.get()
 
+        outputDirectory.get().asFile.deleteRecursively()
+
         val command = CommandBuilder("jextract")
             .append("--output", outputDirectory.get().asFile.absolutePath)
             .append("--target-package", project.packageName.get())

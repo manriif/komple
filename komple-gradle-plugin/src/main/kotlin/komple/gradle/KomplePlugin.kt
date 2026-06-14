@@ -20,7 +20,7 @@ import org.gradle.kotlin.dsl.create
 public class KomplePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-        if (project.parent == null) {
+        if (project.rootProject == project) {
             applyRootProjectExtension(project)
         } else {
             applySubProjectExtension(project)
@@ -49,7 +49,7 @@ public class KomplePlugin : Plugin<Project> {
      * consumption.
      */
     private fun applySubProjectExtension(project: Project) {
-        val rootProject = checkNotNull(project.parent)
+        val rootProject = project.rootProject
 
         rootProject.pluginManager.withPlugin(KOMPLE_PLUGIN_ID) {
             val extension =
