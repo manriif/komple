@@ -28,10 +28,10 @@ internal abstract class AndroidNdkCCompileWorkAction :
                 val params = parameters.params.get()
 
                 val targetTriple = when (parameters.platform.get().architecture) {
-                    Arm64 -> "aarch64-linux-apple"
-                    Arm32 -> "armv7a-linux-appleeabi"
-                    X64 -> "x86_64-linux-apple"
-                    X86 -> "i686-linux-apple"
+                    Arm64 -> "aarch64-linux-android"
+                    Arm32 -> "armv7a-linux-androideabi"
+                    X64 -> "x86_64-linux-android"
+                    X86 -> "i686-linux-android"
                 }
 
                 compileStatic(

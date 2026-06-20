@@ -19,6 +19,9 @@ public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> 
      *
      * The directory where downloaded file(s) must be written to can be obtained from the
      * [DownloadTaskContext] passed to [configure].
+     *
+     * The task must not register any output and instead use the context directory to put all
+     * its files.
      */
     public fun <T : Task> register(
         klass: KClass<T>,

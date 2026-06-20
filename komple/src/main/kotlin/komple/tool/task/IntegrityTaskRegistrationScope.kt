@@ -19,6 +19,8 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
      * 
      * Downloaded file(s) lives in the [TaskDirectory] passed to [configure].
      * The task should only perform integrity checking against downloaded file(s).
+     *
+     * The task must not register any output.
      */
     public fun <T : Task> register(
         klass: KClass<T>,

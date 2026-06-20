@@ -2,11 +2,11 @@ package komple.gradle.project
 
 import komple.exec.Command
 import komple.exec.ExecEnvironment
+import komple.exec.ExecEnvironmentBuilderScope
 import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.platform.Host
-import komple.exec.ExecEnvironmentBuilderScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.file.Directory

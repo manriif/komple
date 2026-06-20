@@ -16,6 +16,7 @@ gradle-pluginPublish = "2.0.0"
 kotlin = "2.4.0"
 undercouch-download = "5.7.0"
 vanniktech-mavenPublish = "0.36.0"
+minisign4j = "1.0.0"
 
 [plugins]
 
@@ -34,3 +35,4 @@ dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", versi
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 undercouch-download = { module = "de.undercouch.download:de.undercouch.download.gradle.plugin", version.ref = "undercouch-download" }
 vanniktech-mavenPublish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-mavenPublish" }
+minisign4j = { module = "com.falsepattern:minisign4j", version.ref = "minisign4j" }

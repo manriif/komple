@@ -50,7 +50,7 @@ public abstract class AppleXcodeConfigurator @Inject constructor(name: String) :
                         this.params = cParams
                     },
                     platformFilter = { platform ->
-                        platform.operatingSystem is OperatingSystem.Darwin
+                        platform.operatingSystem is Darwin
                     }
                 )
             }

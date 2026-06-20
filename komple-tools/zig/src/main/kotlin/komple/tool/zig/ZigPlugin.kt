@@ -1,4 +1,4 @@
-package komple.tool.andk
+package komple.tool.zig
 
 import komple.KompleRootExtension
 import komple.registerTool
@@ -6,14 +6,14 @@ import komple.tool.KompleToolPlugin
 import org.gradle.api.Project
 
 /**
- * Android NDK plugin.
+ * Zig plugin.
  */
-public class AndroidNdkPlugin : KompleToolPlugin() {
+public class ZigPlugin : KompleToolPlugin() {
 
     override fun configure(
         project: Project,
         komple: KompleRootExtension
     ) {
-        komple.registerTool<AndroidNdkConfigurator>("Android NDK")
+        komple.registerTool<ZigConfigurator>("Zig")
     }
 }

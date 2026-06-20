@@ -5,7 +5,7 @@ import org.gradle.api.file.Directory
 /**
  * Context for files downloading.
  */
-public interface DownloadTaskContext : ToolTaskContext {
+public interface DownloadTaskContext : ExecToolTaskContext {
 
     /**
      * Directory where downloaded file(s) must be written to.

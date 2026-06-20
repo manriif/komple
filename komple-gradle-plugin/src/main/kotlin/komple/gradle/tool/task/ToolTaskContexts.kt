@@ -22,18 +22,6 @@ internal abstract class DefaultTaskContext(
     TaskContext by context
 
 /**
- * Default implementation of [DownloadTaskContext].
- */
-internal class DefaultDownloadTaskContext(
-    context: TaskContext,
-    outputDirectory: Directory
-) : DownloadTaskContext,
-    DefaultTaskContext(
-        context = context,
-        outputDirectory = outputDirectory
-    )
-
-/**
  * Default implementation of [ExtractTaskContext].
  */
 internal abstract class DefaultExecTaskContext(
@@ -50,6 +38,20 @@ internal abstract class DefaultExecTaskContext(
         get() = CurrentHost
 }
 
+
+/**
+ * Default implementation of [DownloadTaskContext].
+ */
+internal class DefaultDownloadTaskContext(
+    context: TaskContext,
+    execEnvironment: ExecEnvironment,
+    outputDirectory: Directory
+) : DownloadTaskContext,
+    DefaultExecTaskContext(
+        context = context,
+        execEnvironment = execEnvironment,
+        outputDirectory = outputDirectory
+    )
 /**
  * Default implementation of [ExtractTaskContext].
  */

@@ -40,7 +40,7 @@ public data class Platform(
             Platform(OperatingSystem.Android, Architecture.X86)
 
         public val iosArm64: Platform =
-            Platform(OperatingSystem.IOS.Device, Architecture.Arm64)
+            Platform(OperatingSystem.IOS.Default, Architecture.Arm64)
 
         public val iosSimulatorArm64: Platform =
             Platform(OperatingSystem.IOS.Simulator, Architecture.Arm64)
@@ -60,11 +60,14 @@ public data class Platform(
         public val macosX64: Platform =
             Platform(OperatingSystem.MacOS, Architecture.X64)
 
+        public val mingwArm64: Platform =
+            Platform(OperatingSystem.Windows, Architecture.Arm64)
+
         public val mingwX64: Platform =
             Platform(OperatingSystem.Windows, Architecture.X64)
 
         public val tvosArm64: Platform =
-            Platform(OperatingSystem.TvOS.Device, Architecture.Arm64)
+            Platform(OperatingSystem.TvOS.Default, Architecture.Arm64)
 
         public val tvosSimulatorArm64: Platform =
             Platform(OperatingSystem.TvOS.Simulator, Architecture.Arm64)
@@ -73,13 +76,13 @@ public data class Platform(
             Platform(OperatingSystem.TvOS.Simulator, Architecture.X64)
 
         public val watchosArm32: Platform =
-            Platform(OperatingSystem.WatchOS.Device, Architecture.Arm32)
+            Platform(OperatingSystem.WatchOS.Default, Architecture.Arm32)
 
         public val watchosArm64: Platform =
-            Platform(OperatingSystem.WatchOS.Device, Architecture.Arm64)
+            Platform(OperatingSystem.WatchOS.Default, Architecture.Arm64)
 
         public val watchosDeviceArm64: Platform =
-            Platform(OperatingSystem.WatchOS.DeviceGen2, Architecture.Arm64)
+            Platform(OperatingSystem.WatchOS.Device, Architecture.Arm64)
 
         public val watchosSimulatorArm64: Platform =
             Platform(OperatingSystem.WatchOS.Simulator, Architecture.Arm64)

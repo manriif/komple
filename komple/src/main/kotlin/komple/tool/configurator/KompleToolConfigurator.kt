@@ -1,8 +1,8 @@
 package komple.tool.configurator
 
+import komple.exec.ExecEnvironmentBuilderScope
 import komple.platform.Host
 import komple.project.ProjectConfigurationScope
-import komple.exec.ExecEnvironmentBuilderScope
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.DownloadTaskRegistrationScope
@@ -21,7 +21,7 @@ import org.gradle.api.tasks.TaskProvider
  * are never called. Inside the body of the previously enumerated functions, it is safe to assume
  * that the [Host] Komple was applied on is supported.
  * Anyway, it is always possible to return [TaskRegistrationScope.unsupported] on complex branch in
- * [registerDownloadTask], [registerIntegrityTask]; [registerExtractTask] and [registerInstallTask].
+ * [registerDownloadTask], [registerIntegrityTask], [registerExtractTask] and [registerInstallTask].
  */
 public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
 
@@ -69,8 +69,8 @@ public interface KompleToolConfigurator<Ext : KompleToolExtension> : Named {
     public fun ExtractTaskRegistrationScope<Ext>.registerExtractTask(): TaskProvider<*>
 
     /**
-     * Registers the task responsible for installing the extracted tool file(s) and returns a
-     * [TaskProvider] to the registered task.
+     * Registers the task responsible for installing the extracted tool and returns a [TaskProvider]
+     * to the registered task.
      *
      * The previously installed files are deleted first before the task action is executed.
      */

@@ -33,6 +33,9 @@ public interface ExtractTaskRegistrationScope<Extension : KompleToolExtension> :
      *
      * The directory where downloaded file(s) lives and where extracted file(s) must be written to
      * can be obtained from the [ExtractTaskContext] passed to [configure].
+     *
+     * The task must not register any output and instead use the context directory to put all
+     * its files.
      */
     public fun <T : Task> register(
         klass: KClass<T>,
@@ -75,6 +78,7 @@ public inline fun <reified T : Task> ExtractTaskRegistrationScope<*>.register(
 private fun ExtractTaskRegistrationScope<*>.extractFileTree(
     enclosedContent: Boolean,
     cacheable: Boolean,
+    fileProvider: TaskDirectory.() -> Provider<RegularFile>,
     createTree: ArchiveOperations.(Provider<RegularFile>) -> FileTree
 ) = register<DefaultTask>(cacheable) { context ->
     val archiveOperations = project.serviceOf<ArchiveOperations>()
@@ -83,7 +87,7 @@ private fun ExtractTaskRegistrationScope<*>.extractFileTree(
     if (enclosedContent) {
         context.doLastWhenOutputChanged {
             fileOperations.copy {
-                from(archiveOperations.createTree(context.downloadDirectory.singleFile)) {
+                from(archiveOperations.createTree(context.downloadDirectory.fileProvider())) {
                     eachFile {
                         val segments = relativePath.segments
 
@@ -103,7 +107,7 @@ private fun ExtractTaskRegistrationScope<*>.extractFileTree(
     } else {
         context.doLastWhenOutputChanged {
             fileOperations.copy {
-                from(archiveOperations.createTree(context.downloadDirectory.singleFile))
+                from(archiveOperations.createTree(context.downloadDirectory.fileProvider()))
                 into(context.outputDirectory)
             }
         }
@@ -116,16 +120,19 @@ private fun ExtractTaskRegistrationScope<*>.extractFileTree(
  * If [enclosedContent] is `true` then the contents inside the root directory is moved to the root
  * and the root directory is excluded.
  *
- * It is assumed that a single file has been downloaded and that downloaded file is a valid `.zip`.
+ * By default, and unless a [fileProvider] is supplied, it is assumed that a single file has been
+ * downloaded and that downloaded file is a valid `.zip`.
  *
  * Note that the task is [cacheable] by default.
  */
 public fun ExtractTaskRegistrationScope<*>.unzip(
     enclosedContent: Boolean = false,
-    cacheable: Boolean = true
+    cacheable: Boolean = true,
+    fileProvider: TaskDirectory.() -> Provider<RegularFile> = TaskDirectory::singleFile,
 ): TaskProvider<*> = extractFileTree(
     enclosedContent = enclosedContent,
     cacheable = cacheable,
+    fileProvider = fileProvider,
     createTree = { zipTree(it) }
 )
 
@@ -135,17 +142,19 @@ public fun ExtractTaskRegistrationScope<*>.unzip(
  * If [enclosedContent] is `true` then the contents inside the root directory is moved to the root
  * and the root directory is excluded.
  *
- * It is assumed that a single file has been downloaded and that downloaded file is a valid
- * `.tar.gz`.
+ * By default, and unless a [fileProvider] is supplied, it is assumed that a single file has been
+ * downloaded and that downloaded file is a valid `.tar.gz`.
  *
  * Note that the task is [cacheable] by default.
  */
 public fun ExtractTaskRegistrationScope<*>.untarGzip(
     enclosedContent: Boolean = false,
-    cacheable: Boolean = true
+    cacheable: Boolean = true,
+    fileProvider: TaskDirectory.() -> Provider<RegularFile> = TaskDirectory::singleFile,
 ): TaskProvider<*> = extractFileTree(
     enclosedContent = enclosedContent,
     cacheable = cacheable,
+    fileProvider = fileProvider,
     createTree = { tarTree(gzip(it)) }
 )
 
@@ -160,7 +169,8 @@ public fun ExtractTaskRegistrationScope<*>.untarGzip(
  * The second argument to [extractContent] is the directory where the extracted files must be
  * written.
  *
- * It is assumed that a single file has been downloaded and that downloaded file is a valid `.dmg`.
+ * By default, and unless a [fileProvider] is supplied, it is assumed that a single file has been
+ * downloaded and that downloaded file is a valid `.dmg`.
  *
  * Additional task inputs can be registered by supplying a [configureInputs].
  *
@@ -169,6 +179,7 @@ public fun ExtractTaskRegistrationScope<*>.untarGzip(
 public fun ExtractTaskRegistrationScope<*>.dmg(
     configureInputs: (TaskInputs.(context: ExtractTaskContext) -> Unit)? = null,
     cacheable: Boolean = true,
+    fileProvider: TaskDirectory.() -> Provider<RegularFile> = TaskDirectory::singleFile,
     extractContent: FileSystemOperations.(
         mountPoint: File,
         extractDirectory: File
@@ -180,7 +191,7 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
     configureInputs?.invoke(inputs, context)
 
     context.doLastWhenOutputChanged {
-        val dmgPath = context.downloadDirectory.singleFile.get().asFile.absoluteFile
+        val dmgPath = context.downloadDirectory.fileProvider().get().asFile.absoluteFile
 
         val mountPoint = execOperations.execOutput(
             Bash("hdiutil", "attach", dmgPath, "-nobrowse", "-plist") {

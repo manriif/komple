@@ -23,6 +23,9 @@ public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
      *
      * The directory where extracted file(s) lives and where installed file(s) must be written to
      * can be obtained from the [InstallTaskContext] passed to [configure].
+     *
+     * The task must not register any output and instead use the context directory to put all
+     * its files.
      */
     public fun <T : Task> register(
         klass: KClass<T>,

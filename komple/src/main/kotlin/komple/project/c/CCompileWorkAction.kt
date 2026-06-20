@@ -33,7 +33,7 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
         val compilerOptions = parameters.compilerOptions.get().toTypedArray()
 
         val includeDirectories = parameters.includeDirectories.get()
-            .map { "-I${it.absolutePath}"}
+            .map { "-I${it.absolutePath}" }
             .toTypedArray()
 
         val sourceFilesWithObjects = parameters.sourceFiles.get().associateWith { file ->
@@ -72,7 +72,7 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
         val compilerOptions = parameters.compilerOptions.get().toTypedArray()
 
         val includeDirectories = parameters.includeDirectories.get()
-            .map { "-I${it.absolutePath}"}
+            .map { "-I${it.absolutePath}" }
             .toTypedArray()
 
         val sourceFiles = parameters.sourceFiles.get()

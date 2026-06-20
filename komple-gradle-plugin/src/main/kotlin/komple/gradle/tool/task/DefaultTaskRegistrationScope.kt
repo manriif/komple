@@ -1,5 +1,6 @@
 package komple.gradle.tool.task
 
+import komple.exec.KompleExecTask
 import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
 import komple.gradle.tool.KompleToolConfigContext
@@ -10,6 +11,7 @@ import komple.task.TaskContext
 import komple.task.doFirstWhenOutputChanged
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
+import komple.tool.task.ExecToolTaskContext
 import komple.tool.task.TaskRegistrationScope
 import komple.tool.task.ToolTaskContext
 import org.gradle.api.DefaultTask
@@ -19,6 +21,7 @@ import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.support.serviceOf
 import kotlin.reflect.KClass
 
@@ -85,11 +88,16 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
     /**
      * Invokes [configurator] and ensures no output file(s) were registered for task.
      */
-    protected inline fun <T : Task, C : ToolTaskContext> T.configureTask(
+    protected inline fun <T : Task, C : ExecToolTaskContext> T.configureTask(
         context: C,
         configurator: T.(C) -> Unit,
         deleteFirst: Boolean
     ) {
+        // Convenience for task who aims to execute commands
+        if (this is KompleExecTask) {
+            execEnvironment = context.execEnvironment
+        }
+
         configureTask(
             context = context,
             outputDirectory = project.provider(context::outputDirectory),

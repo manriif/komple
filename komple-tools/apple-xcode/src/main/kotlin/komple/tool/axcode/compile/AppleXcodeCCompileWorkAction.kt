@@ -68,7 +68,7 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             else -> error("Unsupported iOS architecture: $architecture")
                         },
                         sdk = when (operatingSystem) {
-                            Device -> "iphoneos"
+                            Default -> "iphoneos"
                             Simulator -> "iphonesimulator"
                         },
                         flag = "-mios-version-min=${params.versionMinIos.get()}"
@@ -81,7 +81,7 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             else -> error("Unsupported tvOS architecture: $architecture")
                         },
                         sdk = when (operatingSystem) {
-                            Device -> "appletvos"
+                            Default -> "appletvos"
                             Simulator -> "appletvsimulator"
                         },
                         flag = "-mtvos-version-min=${params.versionMinTvos.get()}"
@@ -93,14 +93,14 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             X64 -> "x86_64"
 
                             Arm64 -> when (operatingSystem) {
-                                Device -> "arm64_32"
-                                DeviceGen2, Simulator -> "arm64"
+                                Default -> "arm64_32"
+                                Device, Simulator -> "arm64"
                             }
 
                             else -> error("Unsupported watchOS architecture: $architecture")
                         },
                         sdk = when (operatingSystem) {
-                            Device, DeviceGen2 -> "watchos"
+                            Default, Device -> "watchos"
                             Simulator -> "watchsimulator"
                         },
                         flag = "-mwatchos-version-min=${params.versionMinWatchos.get()}"

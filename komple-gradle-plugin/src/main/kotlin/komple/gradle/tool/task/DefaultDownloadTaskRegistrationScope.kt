@@ -26,6 +26,7 @@ internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtens
 
         val downloadContext = DefaultDownloadTaskContext(
             context = context,
+            execEnvironment = this@DefaultDownloadTaskRegistrationScope.context.execEnvironment,
             outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolNameCompat)
         )
 

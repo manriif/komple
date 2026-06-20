@@ -3,7 +3,6 @@ package komple.tool.andk
 import komple.exec.ExecEnvironmentBuilderScope
 import komple.exec.variable
 import komple.platform.Host
-import komple.platform.OperatingSystem
 import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
@@ -139,7 +138,7 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
                         this.params = cParams
                     },
                     platformFilter = { platform ->
-                        platform.operatingSystem == OperatingSystem.Android
+                        platform.operatingSystem == Android
                     }
                 )
             }

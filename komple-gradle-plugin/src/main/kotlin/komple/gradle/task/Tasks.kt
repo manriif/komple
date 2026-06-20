@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
  *
  * TODO SHA-256 is too slow on large file collection, replace with a faster solution
  */
-public fun <T: Task> T.configureWithContext(configure: T.(context: TaskContext) -> Unit) {
+public fun <T : Task> T.configureWithContext(configure: T.(context: TaskContext) -> Unit) {
     val checksumFile = project.checksumFile(name.dashCased())
     val checksumInputs = project.objects.fileCollection()
 

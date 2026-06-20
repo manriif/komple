@@ -50,47 +50,66 @@ public sealed interface OperatingSystem : Serializable {
 
     public sealed class IOS : Darwin() {
 
-        override val name: String
-            get() = "ios"
+        public data object Simulator : IOS() {
 
-        public data object Device : IOS() {
-            private fun readResolve(): Any = Device
+            override val name: String
+                get() = "ios-simulator"
+
+            private fun readResolve(): Any = Simulator
         }
 
-        public data object Simulator : IOS() {
-            private fun readResolve(): Any = Simulator
+        public companion object Default : IOS() {
+
+            override val name: String
+                get() = "ios"
+
+            private fun readResolve(): Any = Default
         }
     }
 
     public sealed class TvOS : Darwin() {
 
-        override val name: String
-            get() = "tvos"
+        public data object Simulator : TvOS() {
 
-        public data object Device : TvOS() {
-            private fun readResolve(): Any = Device
+            override val name: String
+                get() = "tvos-simulator"
+
+            private fun readResolve(): Any = Simulator
         }
 
-        public data object Simulator : TvOS() {
-            private fun readResolve(): Any = Simulator
+        public companion object Default : TvOS() {
+
+            override val name: String
+                get() = "tvos"
+
+            private fun readResolve(): Any = Default
         }
     }
 
     public sealed class WatchOS : Darwin() {
 
-        override val name: String
-            get() = "watchos"
-
         public data object Device : WatchOS() {
+
+            override val name: String
+                get() = "watchos-device"
+
             private fun readResolve(): Any = Device
         }
 
-        public data object DeviceGen2 : WatchOS() {
-            private fun readResolve(): Any = DeviceGen2
+        public data object Simulator : WatchOS() {
+
+            override val name: String
+                get() = "watchos-simulator"
+
+            private fun readResolve(): Any = Simulator
         }
 
-        public data object Simulator : WatchOS() {
-            private fun readResolve(): Any = Simulator
+        public companion object Default : WatchOS() {
+
+            override val name: String
+                get() = "watchos"
+
+            private fun readResolve(): Any = Default
         }
     }
 
