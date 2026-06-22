@@ -32,7 +32,7 @@ public abstract class UnarchiveExtractTask : ExtractTask() {
     protected abstract fun ArchiveOperations.createTree(inputDirectory: File): FileTree
 
     @TaskAction
-    public fun extract() {
+    internal fun extract() {
         val tracker = tracker.get()
 
         if (!tracker.hasChanged()) {

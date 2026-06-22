@@ -22,7 +22,7 @@ public abstract class CommandExtractTask : ExtractTask() {
     ): Command
 
     @TaskAction
-    public fun extract() {
+    internal fun extract() {
         val tracker = tracker.get()
 
         if (!tracker.hasChanged()) {

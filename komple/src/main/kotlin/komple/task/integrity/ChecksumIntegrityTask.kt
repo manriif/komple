@@ -27,7 +27,7 @@ public abstract class ChecksumIntegrityTask : IntegrityTask() {
     public abstract val algorithm: Property<DigestAlgorithm>
 
     @TaskAction
-    public fun integrity() {
+    internal fun integrity() {
         val inputFile = inputDirectory.get().asFile.singleFile
         val messageDigest = MessageDigest.getInstance(algorithm.get().toMessageDigestConstant())
         val expectedChecksum = checksum.get()

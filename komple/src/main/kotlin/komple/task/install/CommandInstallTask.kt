@@ -20,7 +20,7 @@ public abstract class CommandInstallTask : InstallTask() {
     protected abstract fun buildCommand(outputDirectory: File): Command
 
     @TaskAction
-    public fun install() {
+    internal fun install() {
         val tracker = tracker.get()
 
         if (!tracker.hasChanged()) {

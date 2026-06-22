@@ -80,9 +80,9 @@ internal class DefaultTaskStateTracker(
         return computeChecksum {
             files.forEach(::append)
 
-            properties.forEach { (name, value) ->
-                append(name)
-                appendInputValue(value)
+            properties.forEach { entry ->
+                append(entry.key)
+                appendInputValue(entry.value)
             }
         }
     }

@@ -27,7 +27,7 @@ public abstract class UrlDownloadTask : DownloadTask() {
     public abstract val url: Property<String>
 
     @TaskAction
-    public fun download() {
+    internal fun download() {
         val tracker = tracker.get()
 
         if (!tracker.hasChanged()) {

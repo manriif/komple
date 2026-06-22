@@ -1,6 +1,6 @@
 package komple.tool.task
 
-import komple.task.disableTracking
+import komple.task.enableTracking
 import komple.task.install.CommandInstallTask
 import komple.task.install.DefaultCommandInstallTask
 import komple.task.install.InstallCommandProvider
@@ -67,14 +67,14 @@ public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
  * The [InstallTask.execEnvironment], [InstallTask.tracker], [InstallTask.outputDirectory] and
  * [InstallTask.inputDirectory] properties are configured before [configure] is invoked.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  */
 public inline fun <reified T : InstallTask> InstallTaskRegistrationScope<*>.install(
     cacheable: Boolean = false,
     noinline configure: (T.(context: InstallTaskContext) -> Unit)? = null
 ): TaskProvider<T> = outputTool(cacheable) { context ->
     this.inputDirectory = context.inputDirectory
-    context.tracker.disableTracking()
+    context.tracker.enableTracking()
     configure?.invoke(this, context)
 }
 
@@ -85,7 +85,7 @@ public inline fun <reified T : InstallTask> InstallTaskRegistrationScope<*>.inst
  * [CommandInstallTask.outputDirectory] and [CommandInstallTask.inputDirectory] properties are
  * configured before [configure] is invoked.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  */
 public inline fun <reified T : CommandInstallTask> InstallTaskRegistrationScope<*>.command(
     cacheable: Boolean = false,
@@ -95,7 +95,7 @@ public inline fun <reified T : CommandInstallTask> InstallTaskRegistrationScope<
 /**
  * Registers a task configuring tool files using a command obtained via [provider].
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  * Note that the returned task is cacheable.
  */
 public fun InstallTaskRegistrationScope<*>.command(

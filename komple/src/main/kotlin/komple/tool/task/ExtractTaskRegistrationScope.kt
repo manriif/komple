@@ -1,6 +1,6 @@
 package komple.tool.task
 
-import komple.task.disableTracking
+import komple.task.enableTracking
 import komple.task.extract.CommandExtractTask
 import komple.task.extract.DefaultCommandExtractTask
 import komple.task.extract.DefaultDmgExtractTask
@@ -73,14 +73,14 @@ public inline fun <reified T : Task> ExtractTaskRegistrationScope<*>.register(
  * The [ExtractTask.execEnvironment], [ExtractTask.tracker], [ExtractTask.outputDirectory] and
  * [ExtractTask.inputDirectory] properties are configured before [configure] is invoked.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  */
 public inline fun <reified T : ExtractTask> ExtractTaskRegistrationScope<*>.extract(
     cacheable: Boolean = false,
     noinline configure: (T.(context: ExtractTaskContext) -> Unit)? = null
 ): TaskProvider<T> = outputTool(cacheable) { context ->
     this.inputDirectory = context.inputDirectory
-    context.tracker.disableTracking()
+    context.tracker.enableTracking()
     configure?.invoke(this, context)
 }
 
@@ -91,7 +91,7 @@ public inline fun <reified T : ExtractTask> ExtractTaskRegistrationScope<*>.extr
  * [UnarchiveExtractTask.outputDirectory], [UnarchiveExtractTask.inputDirectory] and
  * [UnarchiveExtractTask.enclosedContent] properties are configured before [configure] is invoked.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  */
 public inline fun <reified T : UnarchiveExtractTask> ExtractTaskRegistrationScope<*>.unarchive(
     enclosedContent: Boolean,
@@ -108,7 +108,7 @@ public inline fun <reified T : UnarchiveExtractTask> ExtractTaskRegistrationScop
  * The returned task assumes that a single file has been downloaded and that downloaded file is a
  * valid `.zip`.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  * Note that the returned task is cacheable.
  */
 public fun ExtractTaskRegistrationScope<*>.unzip(
@@ -125,7 +125,7 @@ public fun ExtractTaskRegistrationScope<*>.unzip(
  * The returned task assumes that a single file has been downloaded and that downloaded file is a
  * valid `.tar.gz`.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  * Note that the returned task is cacheable.
  */
 public fun ExtractTaskRegistrationScope<*>.untarGzip(
@@ -143,7 +143,7 @@ public fun ExtractTaskRegistrationScope<*>.untarGzip(
  * [DmgExtractTask.outputDirectory] and [DmgExtractTask.inputDirectory] properties are configured
  * before [configure] is invoked.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  */
 public inline fun <reified T : DmgExtractTask> ExtractTaskRegistrationScope<*>.dmg(
     cacheable: Boolean = false,
@@ -153,7 +153,7 @@ public inline fun <reified T : DmgExtractTask> ExtractTaskRegistrationScope<*>.d
 /**
  * Registers a task extracts files from a DMG using [extractor].
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  * Note that the returned task is cacheable.
  */
 public fun ExtractTaskRegistrationScope<*>.dmg(
@@ -171,7 +171,7 @@ public fun ExtractTaskRegistrationScope<*>.dmg(
  * [CommandExtractTask.outputDirectory] and [CommandExtractTask.inputDirectory] properties are
  * configured before [configure] is invoked.
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  */
 public inline fun <reified T : CommandExtractTask> ExtractTaskRegistrationScope<*>.command(
     cacheable: Boolean = false,
@@ -181,7 +181,7 @@ public inline fun <reified T : CommandExtractTask> ExtractTaskRegistrationScope<
 /**
  * Registers a task extracts files using a command provider by [provider].
  *
- * Tracking is disabled by default.
+ * Tracking is enabled by default.
  * Note that the returned task is cacheable.
  */
 public fun ExtractTaskRegistrationScope<*>.command(

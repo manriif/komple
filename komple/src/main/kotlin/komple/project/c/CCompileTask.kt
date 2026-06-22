@@ -2,7 +2,7 @@ package komple.project.c
 
 import komple.exec.KompleExecTask
 import komple.task.TaskStateTracker
-import komple.task.whenChanged
+import komple.task.hasChanged
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
@@ -38,11 +38,18 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
     protected abstract fun P.configure()
 
     @TaskAction
-    internal fun compile(): Unit = tracker.get().whenChanged {
+    internal fun compile() {
+        val tracker = tracker.get()
+
+        if (!tracker.hasChanged()) {
+            didWork = false
+            return logger.lifecycle("Reusing previously compiled libraries")
+        }
+
         val compilations = compilations.get()
 
         if (compilations.isEmpty()) {
-            return
+            return logger.lifecycle("No Library to compile")
         }
 
         val factory = execEnvironment.get().createCommandExecutorFactory()

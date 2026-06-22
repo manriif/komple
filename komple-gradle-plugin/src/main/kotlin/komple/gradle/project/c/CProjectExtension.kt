@@ -17,6 +17,7 @@ import komple.project.c.CCompilation
 import komple.project.c.CCompileTask
 import komple.project.c.CLibraryType
 import komple.project.c.CProject
+import komple.task.enableTracking
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.TaskContainer
@@ -66,6 +67,7 @@ public abstract class CProjectExtension @Inject internal constructor(
             this.execEnvironment = factory.execEnvironmentProvider.get()
 
             factory.configure?.invoke(this)
+            tracker.enableTracking()
         }
     }
 
