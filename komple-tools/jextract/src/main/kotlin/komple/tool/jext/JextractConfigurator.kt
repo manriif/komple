@@ -15,7 +15,7 @@ import komple.tool.jext.generator.JextractBindingGenerator
 import komple.tool.jext.generator.JextractBindingGeneratorImpl
 import komple.tool.jext.generator.JextractCommandLineOptions
 import komple.tool.jext.generator.JextractGenerateBindingsTask
-import komple.tool.task.Algorithm
+import komple.task.integrity.DigestAlgorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.IntegrityTaskRegistrationScope
@@ -100,7 +100,7 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
 
                     Windows -> windowsX64
                 },
-                algorithm = Algorithm.SHA_256
+                algorithm = DigestAlgorithm.SHA_256
             )
         }
     }

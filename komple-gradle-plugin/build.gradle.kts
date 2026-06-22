@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
     compileOnly(libs.kotlin.gradlePlugin)
+    implementation(libs.lz4java)
     api(projects.komple)
 }
 

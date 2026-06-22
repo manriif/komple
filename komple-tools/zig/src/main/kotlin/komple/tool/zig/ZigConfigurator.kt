@@ -1,6 +1,5 @@
 package komple.tool.zig
 
-import komple.exec.Command
 import komple.exec.ExecEnvironmentBuilderScope
 import komple.exec.path
 import komple.platform.Host
@@ -15,11 +14,10 @@ import komple.tool.extension.kompleProperty
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.command
-import komple.tool.task.register
-import komple.tool.task.unzip
+import komple.tool.task.download
+import komple.tool.task.unarchive
 import komple.tool.zig.compile.ZigCCompileTask
 import komple.tool.zig.compile.ZigCompilationParams
-import org.gradle.api.file.Directory
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 import javax.inject.Inject
@@ -60,8 +58,7 @@ public abstract class ZigConfigurator @Inject constructor(name: String) :
             "zig-$architectureName-$platformName-$version.$archiveExtension"
         }
 
-        return register<ZigDownloadTask>(false) { taskContext ->
-            outputDirectory = taskContext.outputDirectory
+        return download<ZigDownloadTask>(false) {
             version = extension.version
             publicKey = extension.publicKey
             archiveFileName = extension.archiveFileName
@@ -69,24 +66,15 @@ public abstract class ZigConfigurator @Inject constructor(name: String) :
     }
 
     override fun ExtractTaskRegistrationScope<ZigExtension>.registerExtractTask(): TaskProvider<*> {
-        val archiveFileName = extension.archiveFileName
-
         return when (host.operatingSystem) {
             // TODO this assumes that tar is installed, maybe create a new Komple tool for tar
-            MacOS, Linux -> command {
-                val archive = downloadDirectory.directory.zip(archiveFileName, Directory::file)
-
-                Command(
-                    "tar",
-                    "-xJf",
-                    archive.get().asFile.absolutePath,
-                    "-C",
-                    outputDirectory.asFile.absolutePath,
-                    "--strip-components=1"
-                )
+            MacOS, Linux -> command<ZigUntarXzExtractTask> {
+                archiveFileName = extension.archiveFileName
             }
 
-            Windows -> unzip(true) { directory.zip(archiveFileName, Directory::file) }
+            Windows -> unarchive<ZigUnzipExtractTask>(true) {
+                archiveFileName = extension.archiveFileName
+            }
         }
     }
 

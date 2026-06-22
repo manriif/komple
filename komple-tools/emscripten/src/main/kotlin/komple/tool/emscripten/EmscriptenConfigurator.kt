@@ -3,11 +3,11 @@ package komple.tool.emscripten
 import komple.exec.Command
 import komple.exec.ExecEnvironmentBuilderScope
 import komple.platform.Host
+import komple.task.integrity.DigestAlgorithm
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
 import komple.tool.extension.kompleProperty
-import komple.tool.task.Algorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.InstallTaskRegistrationScope
@@ -17,6 +17,7 @@ import komple.tool.task.command
 import komple.tool.task.unzip
 import komple.tool.task.url
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import javax.inject.Inject
 
 /**
@@ -46,7 +47,7 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
     }
 
     override fun IntegrityTaskRegistrationScope<EmscriptenExtension>.registerIntegrityTask(): TaskProvider<*> {
-        return checksum(extension.checksum, Algorithm.SHA_256)
+        return checksum(extension.checksum, DigestAlgorithm.SHA_256)
     }
 
     override fun ExtractTaskRegistrationScope<EmscriptenExtension>.registerExtractTask(): TaskProvider<*> {
@@ -54,16 +55,12 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
     }
 
     override fun InstallTaskRegistrationScope<EmscriptenExtension>.registerInstallTask(): TaskProvider<*> {
-        val emscriptenVersion = extension.emscriptenVersion
+        return command<EmscriptenInstallTask> {
+            emscriptenVersion = extension.emscriptenVersion
 
-        return command {
-            val emsdk = when (host.operatingSystem) {
+            emsdkExecutable = when (host.operatingSystem) {
                 MacOS, Linux -> "./emsdk"
                 Windows -> "emsdk.bat"
-            }
-
-            Command(emsdk, "install", emscriptenVersion.get()) {
-                then(emsdk, "activate", emscriptenVersion.get())
             }
         }
     }

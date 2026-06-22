@@ -7,6 +7,7 @@ import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
 import komple.project.registerCompileTask
+import komple.task.integrity.DigestAlgorithm
 import komple.tool.andk.compile.AndroidNdkCCompileTask
 import komple.tool.andk.compile.AndroidNdkCompilationParams
 import komple.tool.andk.compile.configureConventions
@@ -14,7 +15,6 @@ import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
 import komple.tool.extension.kompleProperty
-import komple.tool.task.Algorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.IntegrityTaskRegistrationScope
@@ -82,7 +82,7 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
                     MacOS -> macos
                     Windows -> windows
                 },
-                algorithm = Algorithm.SHA1
+                algorithm = DigestAlgorithm.SHA1
             )
         }
     }
@@ -90,18 +90,9 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     override fun ExtractTaskRegistrationScope<AndroidNdkExtension>.registerExtractTask(): TaskProvider<*> {
         return when (host.operatingSystem) {
             Linux, Windows -> unzip(true)
-            MacOS -> {
-                val version = extension.version
 
-                dmg({ property("version", version) }) { mountPoint, extractDirectory ->
-                    val build = version.get().split('.').last()
-                    val ndkDirectory = mountPoint.resolve("AndroidNDK$build.app/Contents/NDK")
-
-                    copy {
-                        from(ndkDirectory)
-                        into(extractDirectory)
-                    }
-                }
+            MacOS -> dmg<AndroidNdkDmgExtractTask> {
+                version = extension.version
             }
         }
     }

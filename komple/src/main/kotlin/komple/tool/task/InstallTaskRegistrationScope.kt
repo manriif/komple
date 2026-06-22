@@ -1,15 +1,13 @@
 package komple.tool.task
 
-import komple.exec.Command
-import komple.exec.createCommandExecutor
-import komple.task.doLastWhenOutputChanged
+import komple.task.install.CommandInstallTask
+import komple.task.install.DefaultCommandInstallTask
+import komple.task.install.InstallCommandProvider
+import komple.task.install.InstallTask
 import komple.tool.extension.KompleToolExtension
-import org.gradle.api.DefaultTask
 import org.gradle.api.Task
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.support.serviceOf
-import org.gradle.process.ExecOperations
+import org.gradle.kotlin.dsl.assign
 import kotlin.reflect.KClass
 
 /**
@@ -60,30 +58,35 @@ public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
 )
 
 /**
- * Registers a task that execute a command supplied by [buildCommand] and returns that registered
- * task.
+ * Registers a task of type [T] subclass of [InstallTask] and [configure]s it.
  *
- * The extracted content is first copied from extracted to install directory and the working
- * directory is set to the tool install directory.
+ * The [InstallTask.context] is configured before [configure] is invoked.
+ */
+public inline fun <reified T : InstallTask> InstallTaskRegistrationScope<*>.install(
+    cacheable: Boolean = false,
+    noinline configure: (T.() -> Unit)? = null
+): TaskProvider<T> = register<T>(cacheable) { context ->
+    this.context = context
+    configure?.invoke(this)
+}
+
+/**
+ * Registers a task of type [T] subclass of [CommandInstallTask] and [configure]s it.
  *
- * Note that the task is [cacheable] by default.
+ * The [CommandInstallTask.context] property is configured before [configure] is invoked.
+ */
+public inline fun <reified T : CommandInstallTask> InstallTaskRegistrationScope<*>.command(
+    cacheable: Boolean = false,
+    noinline configure: (T.() -> Unit)? = null
+): TaskProvider<T> = install<T>(cacheable, configure)
+
+/**
+ * Registers a task configuring tool files using a command obtained via [provider].
+ *
+ * Note that the returned task is cacheable.
  */
 public fun InstallTaskRegistrationScope<*>.command(
-    cacheable: Boolean = true,
-    buildCommand: InstallTaskContext.() -> Command
-): TaskProvider<*> = register<DefaultTask>(cacheable) { context ->
-    val fileOperations = project.serviceOf<FileSystemOperations>()
-    val execOperations = project.serviceOf<ExecOperations>()
-
-    context.doLastWhenOutputChanged {
-        fileOperations.copy {
-            from(context.extractDirectory.directory)
-            into(context.outputDirectory)
-        }
-
-        context.execEnvironment.createCommandExecutor(execOperations).execute(
-            command = buildCommand(context),
-            workingDirectory = context.outputDirectory.asFile
-        )
-    }
+    provider: InstallCommandProvider
+): TaskProvider<DefaultCommandInstallTask> = command(false) {
+    this.provider = provider
 }

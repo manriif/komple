@@ -29,18 +29,20 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
         description = "Check the $toolName tool's integrity."
 
         val downloadDirectory = downloadTask.outputDir(project.layout)
-        inputs.dir(downloadDirectory.directory)
 
         configureTask(
             context = downloadDirectory,
             outputDirectory = downloadDirectory.directory,
             configurator = configure
         )
+
+        if (inputs.files.isEmpty) {
+            logger.warn("Task $name did not registered an input directory, using download one")
+            inputs.dir(downloadDirectory.directory)
+        }
     }
 
-    override fun skip(): TaskProvider<*> {
-        return downloadTask
-    }
+    override fun skip(): TaskProvider<*> = downloadTask
 
     override fun unsupported(): TaskProvider<*> =
         registerUnsupportedTask(TASK_TOOL_INTEGRITY_POSTFIX)

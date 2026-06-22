@@ -25,9 +25,8 @@ public interface Command : Serializable {
 /**
  * Builds and returns a command with [args].
  */
-public fun Command(vararg args: Any): Command {
-    return CommandBuilder(*args).build()
-}
+public fun Command(vararg args: Any): Command =
+    CommandBuilder(*args).build()
 
 /**
  * Builds and returns a command with [args].
@@ -35,6 +34,4 @@ public fun Command(vararg args: Any): Command {
 public inline fun Command(
     vararg args: Any,
     build: CommandBuilder.() -> Unit
-): Command {
-    return CommandBuilder(*args).apply(build).build()
-}
+): Command = CommandBuilder(*args).apply(build).build()

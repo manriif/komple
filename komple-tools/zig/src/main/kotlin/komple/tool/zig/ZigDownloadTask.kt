@@ -3,12 +3,10 @@ package komple.tool.zig
 import com.falsepattern.minisign.lib.PublicKey
 import com.falsepattern.minisign.lib.Signature
 import komple.KOMPLE_GROUP
-import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
+import komple.task.download.DownloadTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URI
@@ -21,10 +19,7 @@ import java.net.http.HttpResponse
  * [mirrors guidelines](https://ziglang.org/download/community-mirrors/).
  */
 @CacheableTask
-internal abstract class ZigDownloadTask : DefaultTask() {
-
-    @get:Internal
-    abstract val outputDirectory: DirectoryProperty
+internal abstract class ZigDownloadTask : DownloadTask() {
 
     @get:Input
     abstract val version: Property<String>
@@ -55,18 +50,7 @@ internal abstract class ZigDownloadTask : DefaultTask() {
         mirror: String,
         file: File
     ) {
-        val fileUrl = "$mirror/${file.name}?source=${KOMPLE_GROUP}"
-
-        val fileRequest = HttpRequest
-            .newBuilder(URI.create(fileUrl))
-            .build()
-
-        val fileResponse = send(fileRequest, HttpResponse.BodyHandlers.ofFile(file.toPath()))
-        val statusCode = fileResponse.statusCode()
-
-        check(statusCode == 200) {
-            "Downloading of $fileUrl failed with status code $statusCode"
-        }
+        downloadFile(file, "$mirror/${file.name}?source=${KOMPLE_GROUP}")
     }
 
     /**
@@ -104,7 +88,7 @@ internal abstract class ZigDownloadTask : DefaultTask() {
 
     @TaskAction
     fun download() {
-        val outputDirectory = outputDirectory.get()
+        val outputDirectory = context.get().outputDirectory
         val tarballFileName = archiveFileName.get()
         val signatureFileName = "$tarballFileName.minisig"
         val tarballFile = outputDirectory.file(tarballFileName).asFile

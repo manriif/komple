@@ -1,11 +1,13 @@
 package komple.tool.task
 
-import de.undercouch.gradle.tasks.download.VerifyAction
+import komple.task.integrity.ChecksumIntegrityTask
+import komple.task.integrity.DigestAlgorithm
+import komple.task.integrity.IntegrityTask
 import komple.tool.extension.KompleToolExtension
-import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import kotlin.reflect.KClass
 
 /**
@@ -49,7 +51,7 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
  */
 public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
     cacheable: Boolean = false,
-    noinline configure: T.(directory: TaskDirectory) -> Unit
+    noinline configure: T.(inputDirectory: TaskDirectory) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
     cacheable = cacheable,
@@ -57,42 +59,48 @@ public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
 )
 
 /**
- * Registers a default integrity task that validate the file integrity against [checksum] using
- * [algorithm].
+ * Registers a task of type [T] subclass of [IntegrityTask] and [configure]s it.
  *
- * It is assumed that only a single file has been downloaded.
+ * The [IntegrityTask.inputDirectory] is configured before [configure] is invoked.
  */
-public fun IntegrityTaskRegistrationScope<*>.checksum(
-    checksum: Provider<String>,
-    algorithm: Algorithm,
+public inline fun <reified T : IntegrityTask> IntegrityTaskRegistrationScope<*>.integrity(
     cacheable: Boolean = false,
-): TaskProvider<*> = register<DefaultTask>(cacheable) { directory ->
-    val verify = VerifyAction(project.layout).apply {
-        algorithm(algorithm.toMessageDigestConstant())
-    }
-
-    doLast {
-        verify.apply {
-            src(directory.singleFile)
-            checksum(checksum.get())
-        }
-
-        verify.execute()
-    }
+    noinline configure: (T.() -> Unit)? = null
+): TaskProvider<T> = register<T>(cacheable) { inputDirectory ->
+    this.inputDirectory = inputDirectory
+    configure?.invoke(this)
 }
 
 /**
- * Registers a default integrity task that validate the file integrity against [checksum] using
+ * Registers an integrity task that validate the file integrity against [checksum] using
  * [algorithm].
  *
  * It is assumed that only a single file has been downloaded.
+ * Note that the returned task is cacheable.
+ */
+public fun IntegrityTaskRegistrationScope<*>.checksum(
+    checksum: Provider<String>,
+    algorithm: DigestAlgorithm,
+    configure: (ChecksumIntegrityTask.() -> Unit)? = null
+): TaskProvider<ChecksumIntegrityTask> = integrity {
+    this.checksum = checksum
+    this.algorithm = algorithm
+    configure?.invoke(this)
+}
+
+/**
+ * Registers an integrity task that validate the file integrity against [checksum] using
+ * [algorithm].
+ *
+ * It is assumed that only a single file has been downloaded.
+ * Note that the returned task is cacheable.
  */
 public fun IntegrityTaskRegistrationScope<*>.checksum(
     checksum: String,
-    algorithm: Algorithm,
-    cacheable: Boolean = false,
-): TaskProvider<*> = checksum(
+    algorithm: DigestAlgorithm,
+    configure: (ChecksumIntegrityTask.() -> Unit)? = null
+): TaskProvider<ChecksumIntegrityTask> = checksum(
     checksum = providers.provider { checksum },
     algorithm = algorithm,
-    cacheable = cacheable
+    configure = configure
 )

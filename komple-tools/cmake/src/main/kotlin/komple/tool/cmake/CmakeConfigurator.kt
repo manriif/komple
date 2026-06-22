@@ -7,7 +7,7 @@ import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
 import komple.tool.extension.kompleProperty
-import komple.tool.task.Algorithm
+import komple.task.integrity.DigestAlgorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.IntegrityTaskRegistrationScope
@@ -83,7 +83,7 @@ public abstract class CmakeConfigurator @Inject constructor(name: String) :
                         X64 -> windowsX64
                     }
                 },
-                algorithm = Algorithm.SHA_256
+                algorithm = DigestAlgorithm.SHA_256
             )
         }
     }

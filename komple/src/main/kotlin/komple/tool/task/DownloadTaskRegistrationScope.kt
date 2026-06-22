@@ -1,11 +1,12 @@
 package komple.tool.task
 
-import de.undercouch.gradle.tasks.download.DownloadAction
+import komple.task.download.DownloadTask
+import komple.task.download.UrlDownloadTask
 import komple.tool.extension.KompleToolExtension
-import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import kotlin.reflect.KClass
 
 /**
@@ -55,34 +56,44 @@ public inline fun <reified T : Task> DownloadTaskRegistrationScope<*>.register(
 )
 
 /**
- * Registers a download task downloading a single file at [url].
+ * Registers a task of type [T] subclass of [DownloadTask] and [configure]s it.
+ *
+ * The [DownloadTask.context] is configured before [configure] is invoked.
  */
-public fun DownloadTaskRegistrationScope<*>.url(
-    url: Provider<String>,
+public inline fun <reified T : DownloadTask> DownloadTaskRegistrationScope<*>.download(
     cacheable: Boolean = false,
-): TaskProvider<*> = register<DefaultTask>(cacheable) { context ->
-    inputs.property("url", url)
-
-    val fileName = url.map { link ->
-        link.substringAfterLast('/')
-    }
-
-    val destination = context.outputDirectory.file(fileName)
-
-    val download = DownloadAction(project, this).apply {
-        dest(destination)
-        src(url)
-        overwrite(false)
-        quiet(false)
-    }
-
-    doLast {
-        download.execute(true)
-    }
+    noinline configure: (T.() -> Unit)? = null
+): TaskProvider<T> = register<T>(cacheable) { context ->
+    this.context = context
+    configure?.invoke(this)
 }
 
 /**
- * Registers a download task downloading a single file at [url].
+ * Registers a download task downloading a single file named after [fileName] at [url].
+ *
+ * Note that the returned task is cacheable.
  */
-public fun DownloadTaskRegistrationScope<*>.url(url: String): TaskProvider<*> =
-    url(providers.provider { url })
+public fun DownloadTaskRegistrationScope<*>.url(
+    url: Provider<String>,
+    fileName: Provider<String> = url.map { it.substringAfterLast('/') },
+    configure: (UrlDownloadTask.() -> Unit)? = null
+): TaskProvider<UrlDownloadTask> = download {
+    this.url = url
+    this.fileName = fileName
+    configure?.invoke(this)
+}
+
+/**
+ * Registers a download task downloading a single file named after [fileName] at [url].
+ *
+ * Note that the returned task is cacheable.
+ */
+public fun DownloadTaskRegistrationScope<*>.url(
+    url: String,
+    fileName: String = url.substringAfterLast('/'),
+    configure: (UrlDownloadTask.() -> Unit)? = null
+): TaskProvider<UrlDownloadTask> = url(
+    url = providers.provider { url },
+    fileName = providers.provider { fileName },
+    configure = configure
+)

@@ -37,13 +37,10 @@ internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtens
         )
     }
 
-    override fun skip(): TaskProvider<*> {
-        val toolName = toolName
-
-        return registerFailureTask(TASK_TOOL_DOWNLOAD_POSTFIX) {
-            throw UnsupportedOperationException("No file to download for tool $toolName")
-        }
-    }
+    override fun skip(): TaskProvider<*> = registerFailureTask(
+        TASK_TOOL_DOWNLOAD_POSTFIX,
+        UnsupportedOperationException("No file to download for tool $toolName")
+    )
 
     override fun unsupported(): TaskProvider<*> =
         registerUnsupportedTask(TASK_TOOL_DOWNLOAD_POSTFIX)

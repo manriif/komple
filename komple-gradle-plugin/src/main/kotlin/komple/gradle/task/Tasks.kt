@@ -2,50 +2,44 @@ package komple.gradle.task
 
 import komple.gradle.kompleChecksumsDirectory
 import komple.gradle.util.dashCased
-import komple.gradle.util.sha256
 import komple.task.TaskContext
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.RegularFile
+import org.gradle.api.file.Directory
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
-import java.io.File
+import org.gradle.kotlin.dsl.assign
 import kotlin.reflect.KClass
 
 /**
- * Configures this task and invokes [configure] with a [TaskContext].
- *
- * The file changes detection for [TaskContext.outputChanged] applies on all the task's output
- * files.
- *
- * TODO SHA-256 is too slow on large file collection, replace with a faster solution
+ * Returns a file that can be used to store a checksum for task generated output(s).
  */
-public fun <T : Task> T.configureWithContext(configure: T.(context: TaskContext) -> Unit) {
-    val checksumFile = project.checksumFile(name.dashCased())
-    val checksumInputs = project.objects.fileCollection()
+private fun Project.checksumFile(taskName: String): Directory {
+    var taskUniqueName = taskName
+    var parentProject: Project? = this
 
-    val checksumProvider = project.provider {
-        checksumInputs.files.filter(File::exists).sha256()
+    while (parentProject != null) {
+        taskUniqueName = "${parentProject.name}-$taskUniqueName"
+        parentProject = parentProject.parent
     }
 
-    val context = DefaultTaskContext(checksumProvider.map { checksum ->
-        !checksumsEquals(checksumFile.asFile, checksum)
-    })
+    return gradle.kompleChecksumsDirectory.dir(taskUniqueName.lowercase())
+}
+
+/**
+ * Configures this task and invokes [configure] with a [TaskContext].
+ */
+public fun <T : Task> T.configureWithContext(configure: T.(context: TaskContext) -> Unit) {
+    val checksumDirectory = project.checksumFile(name.dashCased())
+    val context = DefaultTaskContext(checksumDirectory, logger, project.objects)
 
     configure(this, context)
-    checksumInputs.from(outputs.files)
 
-    if (!outputs.files.isEmpty) {
-        doLast {
-            checksumFile.asFile.run {
-                parentFile.mkdirs()
-                val freshChecksum = checksumInputs.files.filter(File::exists).sha256()
+    context.inputs = inputs
+    context.outputFiles = outputs.files
 
-                if (!checksumsEquals(checksumFile.asFile, freshChecksum)) {
-                    writeText(freshChecksum)
-                }
-            }
-        }
+    doLast {
+        context.updateChecksums()
     }
 }
 
@@ -63,41 +57,4 @@ internal fun <T : Task> TaskContainer.registerKompleTask(
     }
 
     configureWithContext(configure)
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Checksum
-///////////////////////////////////////////////////////////////////////////
-
-/**
- * Returns a file that can be used to store a checksum for task generated output(s).
- */
-internal fun Project.checksumFile(taskName: String): RegularFile {
-    var taskUniqueName = taskName
-    var parentProject: Project? = this
-
-    while (parentProject != null) {
-        taskUniqueName = "${parentProject.name}-$taskUniqueName"
-        parentProject = parentProject.parent
-    }
-
-    return gradle.kompleChecksumsDirectory.file(taskUniqueName.lowercase())
-}
-
-/**
- * Returns `true` if [checksumFile] exists and its value is equals to [checksum].
- */
-internal fun checksumsEquals(
-    checksumFile: File,
-    checksum: String,
-): Boolean {
-    if (checksumFile.exists()) {
-        val previous = checksumFile.readText()
-
-        if (checksum == previous) {
-            return true
-        }
-    }
-
-    return false
 }

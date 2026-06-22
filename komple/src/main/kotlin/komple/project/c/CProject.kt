@@ -12,6 +12,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 
@@ -50,41 +51,43 @@ public interface CProject : KompleProject {
     public val includeDirectories: ConfigurableFileCollection
 
     /**
-     * Optimization level.
-     * Default to [COptimization.Level2].
-     */
-    @get:Input
-    public val optimization: Property<COptimization>
-
-    /**
-     * Compiler options.
-     */
-    @get:Input
-    public val compilerOptions: ListProperty<String>
-
-    /**
-     * Linker options.
-     */
-    @get:Input
-    public val linkerOptions: ListProperty<String>
-
-    /**
-     * Pre-processor definitions.
+     * Pre-processor definitions for all the platforms.
      */
     @get:Input
     public val definitions: MapProperty<String, String>
 
     /**
-     * Adds a definition with the value `1`.
+     * Compiler options for all the platforms.
      */
-    public fun definition(name: String) {
-        definitions.put(name, "1")
-    }
+    @get:Input
+    public val compilerOptions: ListProperty<String>
 
     /**
-     * Returns the string definitions has a list of the form `key=value`.
+     * Linker options for all the platforms.
      */
-    public fun definitions(): Provider<List<String>>
+    @get:Input
+    public val linkerOptions: ListProperty<String>
+
+    /**
+     * Default optimization level.
+     */
+    @get:Input
+    @get:Optional
+    public val optimization: Property<COptimization>
+
+    /**
+     * Sets the pre-processor definitions for the specified [platform].
+     */
+    public fun definition(
+        platform: Platform,
+        configure: Action<MutableMap<String, String>>
+    )
+
+    /**
+     * Returns the string definitions has a list of the form `key=value` for the specified
+     * [platform].
+     */
+    public fun definitions(platform: Platform): Provider<List<String>>
 
     /**
      * Sets the compiler options for the specified [platform].
@@ -95,8 +98,8 @@ public interface CProject : KompleProject {
     )
 
     /**
-     * Returns all the compiler options, including [definition] and [optimization], for the specified
-     * [platform].
+     * Returns the compiler options, without [definition] and without [optimization], for the
+     * specified [platform].
      */
     public fun compilerOptions(platform: Platform): Provider<List<String>>
 
@@ -109,7 +112,33 @@ public interface CProject : KompleProject {
     )
 
     /**
-     * Returns all the linker options, for the specified [platform].
+     * Returns the linker options, for the specified [platform].
      */
     public fun linkerOptions(platform: Platform): Provider<List<String>>
+
+    /**
+     * Sets the [optimization] level for the specified [platform].
+     */
+    public fun optimization(
+        platform: Platform,
+        optimization: COptimization
+    )
+
+    /**
+     * Returns the optimization for the [platform].
+     */
+    public fun optimization(platform: Platform): Provider<String>
 }
+
+///////////////////////////////////////////////////////////////////////////
+// Extensions
+///////////////////////////////////////////////////////////////////////////
+
+/**
+ * Returns all the compiler options, including [definitions] and [optimization], for the specified
+ * [platform].
+ */
+public fun CProject.allCompilerOptions(platform: Platform): Provider<List<String>> =
+    compilerOptions(platform)
+        .zip(definitions(platform), List<String>::plus)
+        .zip(optimization(platform), List<String>::plus)

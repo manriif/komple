@@ -32,18 +32,19 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
             outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolNameCompat)
         )
 
-        inputs.dir(extractContext.downloadDirectory.directory)
-
         configureTask(
             context = extractContext,
             configurator = configure,
             deleteFirst = true
         )
+
+        if (inputs.files.isEmpty) {
+            logger.warn("Task $name did not registered an input directory, using download one")
+            inputs.dir(extractContext.downloadDirectory.directory)
+        }
     }
 
-    override fun skip(): TaskProvider<*> {
-        return integrityTask
-    }
+    override fun skip(): TaskProvider<*> = integrityTask
 
     override fun unsupported(): TaskProvider<*> =
         registerUnsupportedTask(TASK_TOOL_EXTRACT_POSTFIX)

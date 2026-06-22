@@ -42,6 +42,5 @@ public interface ExecEnvironment {
 /**
  * Returns a new [CommandExecutor] wrapping [execOperations].
  */
-public fun ExecEnvironment.createCommandExecutor(execOperations: ExecOperations): CommandExecutor {
-    return createCommandExecutorFactory().create(execOperations)
-}
+public fun ExecEnvironment.createCommandExecutor(execOperations: ExecOperations): CommandExecutor =
+    createCommandExecutorFactory().create(execOperations)

@@ -19,15 +19,32 @@ internal abstract class DefaultCProject @Inject constructor(projectName: String)
     CProject {
 
     @get:Input
+    internal abstract val platformDefinitions: MapProperty<Platform, Map<String, String>>
+
+    @get:Input
     internal abstract val platformCompilerOptions: MapProperty<Platform, List<String>>
 
     @get:Input
     internal abstract val platformLinkerOptions: MapProperty<Platform, List<String>>
 
-    override fun definitions(): Provider<List<String>> {
-        return definitions.map { entries ->
-            entries.map { "-D${it.key}=${it.value}" }
-        }
+    @get:Input
+    internal abstract val platformOptimizations: MapProperty<Platform, COptimization>
+
+    override fun definition(
+        platform: Platform,
+        configure: Action<MutableMap<String, String>>
+    ) {
+        val map = mutableMapOf<String, String>()
+        configure.execute(map)
+        platformDefinitions.put(platform, map.toMap())
+    }
+
+    override fun definitions(platform: Platform): Provider<List<String>> {
+        val platformDefinitions = platformDefinitions.map { it[platform].orEmpty() }
+
+        return definitions
+            .zip(platformDefinitions, Map<String, String>::plus)
+            .map { entries -> entries.map { "-D${it.key}=${it.value}" } }
     }
 
     private fun list(configure: Action<MutableList<String>>): List<String> {
@@ -47,13 +64,8 @@ internal abstract class DefaultCProject @Inject constructor(projectName: String)
      * Returns all the compiler options for the specified [platform].
      */
     override fun compilerOptions(platform: Platform): Provider<List<String>> {
-        val optimizationOption = optimization.map { "-O${it.value}" }
         val platformOptions = platformCompilerOptions.map { it[platform].orEmpty() }
-
-        return compilerOptions
-            .zip(optimizationOption, List<String>::plus)
-            .zip(platformOptions, List<String>::plus)
-            .zip(definitions(), List<String>::plus)
+        return compilerOptions.zip(platformOptions, List<String>::plus)
     }
 
     override fun linkerOptions(
@@ -70,7 +82,24 @@ internal abstract class DefaultCProject @Inject constructor(projectName: String)
         val platformOptions = platformLinkerOptions.map { it[platform].orEmpty() }
         return linkerOptions.zip(platformOptions, List<String>::plus)
     }
+
+    override fun optimization(
+        platform: Platform,
+        optimization: COptimization
+    ) {
+        platformOptimizations.put(platform, optimization)
+    }
+
+    override fun optimization(platform: Platform): Provider<String> {
+        return platformOptimizations
+            .zip(optimization) { platforms, default -> platforms[platform] ?: default }
+            .map { "-O${it.value}" }
+    }
 }
+
+///////////////////////////////////////////////////////////////////////////
+// Conventions
+///////////////////////////////////////////////////////////////////////////
 
 /**
  * Configures the convention values.
@@ -79,5 +108,4 @@ internal abstract class DefaultCProject @Inject constructor(projectName: String)
 internal fun DefaultCProject.configureConventions(project: Project) {
     headerFile.convention(project.provider { error("Main header file was not set") })
     headerFilters.convention(headerFile)
-    optimization.convention(COptimization.Level2)
 }

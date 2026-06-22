@@ -6,7 +6,7 @@ import komple.exec.path
 import komple.kompleProperty
 import komple.platform.Host
 import komple.tool.configurator.VersionedKompleToolConfigurator
-import komple.tool.task.Algorithm
+import komple.task.integrity.DigestAlgorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.InstallTaskRegistrationScope
@@ -43,7 +43,7 @@ public abstract class GnuSedConfigurator @Inject constructor(name: String) :
     }
 
     override fun IntegrityTaskRegistrationScope<Extension>.registerIntegrityTask(): TaskProvider<*> {
-        return checksum(extension.checksum, Algorithm.SHA_256)
+        return checksum(extension.checksum, DigestAlgorithm.SHA_256)
     }
 
     override fun ExtractTaskRegistrationScope<Extension>.registerExtractTask(): TaskProvider<*> {
@@ -51,8 +51,9 @@ public abstract class GnuSedConfigurator @Inject constructor(name: String) :
     }
 
     override fun InstallTaskRegistrationScope<Extension>.registerInstallTask(): TaskProvider<*> {
-        return command {
-            val buildDirectory = outputDirectory.dir("build").asFile
+        return command { outputDirectory ->
+            val buildDirectory = outputDirectory
+                .resolve("build")
                 .apply(File::mkdirs)
 
             Command(

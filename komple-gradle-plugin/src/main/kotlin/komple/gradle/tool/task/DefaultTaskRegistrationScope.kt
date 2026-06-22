@@ -8,12 +8,11 @@ import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
 import komple.platform.Host
 import komple.task.TaskContext
-import komple.task.doFirstWhenOutputChanged
+import komple.task.doFirstWhenInputsChanged
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.ExecToolTaskContext
 import komple.tool.task.TaskRegistrationScope
-import komple.tool.task.ToolTaskContext
 import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -78,11 +77,10 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
     ) {
         configurator(this, context)
 
-        check(outputs.files.isEmpty) {
-            "Task must not register output file(s)"
+        if (outputs.files.isEmpty) {
+            logger.warn("Task $name did not registered an output directory, using context one")
+            outputs.dir(outputDirectory)
         }
-
-        outputs.dir(outputDirectory)
     }
 
     /**
@@ -107,7 +105,7 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
         if (deleteFirst) {
             val fileOperations = project.serviceOf<FileSystemOperations>()
 
-            context.doFirstWhenOutputChanged {
+            context.doFirstWhenInputsChanged {
                 fileOperations.delete {
                     delete(context.outputDirectory)
                 }
@@ -120,27 +118,22 @@ internal abstract class DefaultTaskRegistrationScope<Extension : KompleToolExten
      */
     protected fun registerFailureTask(
         postfix: String,
-        raiseError: () -> Nothing
-    ): TaskProvider<*> {
-        return context.project.tasks.registerToolTask(
-            name = toolTaskName(postfix),
-            type = DefaultTask::class,
-            cacheable = false
-        ) {
-            group = null
+        exception: Exception,
+    ): TaskProvider<*> = context.project.tasks.registerToolTask(
+        name = toolTaskName(postfix),
+        type = DefaultTask::class,
+        cacheable = false
+    ) {
+        group = null
 
-            doLast {
-                raiseError()
-            }
+        doLast {
+            throw exception
         }
     }
 
     /**
      * Registers a task that always fails when executed with [UnsupportedHostException].
      */
-    protected fun registerUnsupportedTask(postfix: String): TaskProvider<*> {
-        return registerFailureTask(postfix) {
-            throw UnsupportedHostException("Host is not supported")
-        }
-    }
+    protected fun registerUnsupportedTask(postfix: String): TaskProvider<*> =
+        registerFailureTask(postfix, UnsupportedHostException("Host is not supported"))
 }
