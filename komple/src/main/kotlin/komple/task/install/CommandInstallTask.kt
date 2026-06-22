@@ -1,19 +1,15 @@
 package komple.task.install
 
 import komple.exec.Command
-import komple.exec.createCommandExecutor
+import komple.task.clearAndGetAsFile
+import komple.task.hasChanged
 import org.gradle.api.tasks.TaskAction
-import org.gradle.process.ExecOperations
 import java.io.File
-import javax.inject.Inject
 
 /**
  * Base for task configuring a tool using commandLine.
  */
 public abstract class CommandInstallTask : InstallTask() {
-
-    @get:Inject
-    protected abstract val execOperations: ExecOperations
 
     /**
      * Returns a command used to install the tool.
@@ -25,19 +21,24 @@ public abstract class CommandInstallTask : InstallTask() {
 
     @TaskAction
     public fun install() {
-        val context = context.get()
-        val outputDirectory = context.outputDirectory.asFile
+        val tracker = tracker.get()
 
-        fileOperations.copy {
-            from(context.extractDirectory.directory)
-            into(context.outputDirectory)
+        if (!tracker.hasChanged()) {
+            didWork = false
+            return logger.lifecycle("Skipping install command execution")
         }
 
-        context.execEnvironment
-            .createCommandExecutor(execOperations)
-            .execute(
-                command = buildCommand(outputDirectory),
-                workingDirectory = outputDirectory
-            )
+        val inputDirectory = inputDirectory.get().asFile
+        val outputDirectory = fileOperations.clearAndGetAsFile(outputDirectory)
+
+        fileOperations.copy {
+            from(inputDirectory)
+            into(outputDirectory)
+        }
+
+        newCommandExecutor().execute(
+            command = buildCommand(outputDirectory),
+            workingDirectory = outputDirectory
+        )
     }
 }

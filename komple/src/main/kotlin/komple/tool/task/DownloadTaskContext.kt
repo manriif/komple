@@ -1,16 +1,14 @@
 package komple.tool.task
 
 import org.gradle.api.file.Directory
-import org.gradle.api.tasks.OutputDirectory
 
 /**
- * Context for files downloading.
+ * Context for tool file(s) downloading.
  */
-public interface DownloadTaskContext : ExecToolTaskContext {
+public interface DownloadTaskContext : OutputToolTaskContext {
 
     /**
      * Directory where downloaded file(s) must be written to.
      */
-    @get:OutputDirectory
     override val outputDirectory: Directory
 }

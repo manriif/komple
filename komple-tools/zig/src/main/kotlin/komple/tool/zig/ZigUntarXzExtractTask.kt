@@ -2,7 +2,6 @@ package komple.tool.zig
 
 import komple.exec.Command
 import komple.task.extract.CommandExtractTask
-import komple.tool.task.TaskDirectory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -18,10 +17,10 @@ internal abstract class ZigUntarXzExtractTask : CommandExtractTask() {
     abstract val archiveFileName: Property<String>
 
     override fun buildCommand(
-        inputDirectory: TaskDirectory,
+        inputDirectory: File,
         outputDirectory: File
     ): Command {
-        val archive = inputDirectory.directory.get().asFile.resolve(archiveFileName.get())
+        val archive = inputDirectory.resolve(archiveFileName.get())
 
         return Command(
             "tar",

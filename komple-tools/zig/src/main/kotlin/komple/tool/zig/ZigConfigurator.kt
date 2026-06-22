@@ -1,6 +1,6 @@
 package komple.tool.zig
 
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.exec.path
 import komple.platform.Host
 import komple.project.CProjectConfigurator
@@ -78,7 +78,7 @@ public abstract class ZigConfigurator @Inject constructor(name: String) :
         }
     }
 
-    override fun ExecEnvironmentBuilderScope<ZigExtension>.configureEnvironment() {
+    override fun ShellEnvironmentBuilderScope<ZigExtension>.configureEnvironment() {
         path(installDirectory)
     }
 

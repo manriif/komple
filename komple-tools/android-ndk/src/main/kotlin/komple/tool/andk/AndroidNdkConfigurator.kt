@@ -1,6 +1,6 @@
 package komple.tool.andk
 
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.exec.variable
 import komple.platform.Host
 import komple.project.CProjectConfigurator
@@ -94,10 +94,16 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
             MacOS -> dmg<AndroidNdkDmgExtractTask> {
                 version = extension.version
             }
+        }.apply {
+            configure {
+                // NDK is huge and contains many files, skip caching as it has a significant impact
+                // on build time
+                outputs.cacheIf { false }
+            }
         }
     }
 
-    override fun ExecEnvironmentBuilderScope<AndroidNdkExtension>.configureEnvironment() {
+    override fun ShellEnvironmentBuilderScope<AndroidNdkExtension>.configureEnvironment() {
         variable("ANDROID_NDK_HOME", installDirectory)
         variable("ANDROID_NDK_ROOT", installDirectory)
     }

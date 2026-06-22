@@ -1,7 +1,7 @@
 package komple.tool.gnused
 
 import komple.exec.Command
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.exec.path
 import komple.kompleProperty
 import komple.platform.Host
@@ -68,7 +68,7 @@ public abstract class GnuSedConfigurator @Inject constructor(name: String) :
         }
     }
 
-    override fun ExecEnvironmentBuilderScope<Extension>.configureEnvironment() {
+    override fun ShellEnvironmentBuilderScope<Extension>.configureEnvironment() {
         path(installDirectory.map { it.dir("build/bin") })
     }
 }

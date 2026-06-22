@@ -1,5 +1,6 @@
 package komple.task.download
 
+import komple.task.clearAndGetAsFile
 import komple.task.hasChanged
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
@@ -27,27 +28,28 @@ public abstract class UrlDownloadTask : DownloadTask() {
 
     @TaskAction
     public fun download() {
-        val context = context.get()
+        val tracker = tracker.get()
 
-        if (!context.hasChanged()) {
-            didWork = true
-            return logger.lifecycle("Reusing cached $fileName")
+        if (!tracker.hasChanged()) {
+            didWork = false
+            return logger.lifecycle("Reusing previously downloaded file")
         }
 
-        val outputDirectory = context.outputDirectory.asFile
-        val url = url.get()
+        val outputDirectory = fileOperations.clearAndGetAsFile(outputDirectory)
         val fileName = fileName.get()
+        val url = url.get()
         val file = outputDirectory.resolve(fileName)
-        val client = HttpClient.newHttpClient()
+
+        val client = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build()
 
         logger.lifecycle("Downloading $fileName from $url")
 
         try {
             client.downloadFile(file, url)
-            didWork = true
             logger.lifecycle("Successfully downloaded file $fileName")
         } catch (exception: Throwable) {
-            didWork = false
             logger.error("Failed to download file $fileName", exception)
         }
     }

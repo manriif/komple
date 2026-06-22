@@ -1,7 +1,7 @@
 package komple.gradle.kmp
 
 import komple.gradle.project.c.DefaultCProject
-import komple.gradle.project.projectTaskName
+import komple.gradle.project.projectDerivedName
 import komple.gradle.project.registerProjectTask
 import komple.gradle.util.pascalCased
 import komple.platform.Platform
@@ -19,7 +19,10 @@ internal fun Project.registerGenerateCInteropDefTask(
     optionsProvider: Provider<DefFileOptions>,
     platform: Platform,
 ): TaskProvider<*> = tasks.registerProjectTask(
-    name = projectTaskName(cProject.name, "generateCInteropDef${platform.altName.pascalCased()}"),
+    name = projectDerivedName(
+        projectName = cProject.name,
+        postfix = "generateCInteropDef${platform.altName.pascalCased()}"
+    ),
     type = DefaultTask::class,
     cacheable = true
 ) {

@@ -14,27 +14,28 @@ import kotlin.reflect.KClass
  * Scope for integrity task registration.
  */
 public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension> :
-    TaskRegistrationScope<Extension> {
+    TaskRegistrationScope<Extension, IntegrityTaskContext> {
 
     /**
      * Registers a task of type [T], [configure]s it and returns it.
      * 
-     * Downloaded file(s) lives in the [TaskDirectory] passed to [configure].
-     * The task should only perform integrity checking against downloaded file(s).
+     * Downloaded file(s) lives in the [IntegrityTaskContext.inputDirectory] passed to [configure].
+     * The task should only perform integrity checking against downloaded file(s). That directory
+     * should eventually be registered as task's input.
      *
      * The task must not register any output.
      */
-    public fun <T : Task> register(
+    public override fun <T : Task> register(
         klass: KClass<T>,
-        cacheable: Boolean = false,
-        configure: T.(directory: TaskDirectory) -> Unit
+        cacheable: Boolean,
+        configure: T.(context: IntegrityTaskContext) -> Unit
     ): TaskProvider<T>
 
     /**
      * Returns a task that skips integrity checking, causing downloaded files to be considered safe.
      *
      * Note that skipping integrity check is discouraged if the tools is getting downloaded from an
-     * external source.
+     * external source. It is however possible to perform the check in the download task directly.
      */
     override fun skip(): TaskProvider<*>
 }
@@ -46,12 +47,15 @@ public interface IntegrityTaskRegistrationScope<Extension : KompleToolExtension>
 /**
  * Registers a task of type [T], [configure]s it and returns it.
  *
- * Downloaded file(s) lives in the [TaskDirectory] passed to [configure].
- * The task should only perform integrity checking against downloaded file(s).
+ * Downloaded file(s) lives in the [IntegrityTaskContext.inputDirectory] passed to [configure].
+ * The task should only perform integrity checking against downloaded file(s). That directory
+ * should eventually be registered as task's input.
+ *
+ * The task must not register any output.
  */
 public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
     cacheable: Boolean = false,
-    noinline configure: T.(inputDirectory: TaskDirectory) -> Unit
+    noinline configure: T.(context: IntegrityTaskContext) -> Unit
 ): TaskProvider<T> = register(
     klass = T::class,
     cacheable = cacheable,
@@ -61,14 +65,15 @@ public inline fun <reified T : Task> IntegrityTaskRegistrationScope<*>.register(
 /**
  * Registers a task of type [T] subclass of [IntegrityTask] and [configure]s it.
  *
- * The [IntegrityTask.inputDirectory] is configured before [configure] is invoked.
+ * The [IntegrityTask.execEnvironment] and [IntegrityTask.inputDirectory] properties are configured
+ * before [configure] is invoked.
  */
 public inline fun <reified T : IntegrityTask> IntegrityTaskRegistrationScope<*>.integrity(
     cacheable: Boolean = false,
-    noinline configure: (T.() -> Unit)? = null
-): TaskProvider<T> = register<T>(cacheable) { inputDirectory ->
-    this.inputDirectory = inputDirectory
-    configure?.invoke(this)
+    noinline configure: (T.(context: IntegrityTaskContext) -> Unit)? = null
+): TaskProvider<T> = tool(cacheable) { context ->
+    this.inputDirectory = context.inputDirectory
+    configure?.invoke(this, context)
 }
 
 /**
@@ -81,11 +86,11 @@ public inline fun <reified T : IntegrityTask> IntegrityTaskRegistrationScope<*>.
 public fun IntegrityTaskRegistrationScope<*>.checksum(
     checksum: Provider<String>,
     algorithm: DigestAlgorithm,
-    configure: (ChecksumIntegrityTask.() -> Unit)? = null
-): TaskProvider<ChecksumIntegrityTask> = integrity {
+    configure: (ChecksumIntegrityTask.(context: IntegrityTaskContext) -> Unit)? = null
+): TaskProvider<ChecksumIntegrityTask> = integrity { context ->
     this.checksum = checksum
     this.algorithm = algorithm
-    configure?.invoke(this)
+    configure?.invoke(this, context)
 }
 
 /**
@@ -98,7 +103,7 @@ public fun IntegrityTaskRegistrationScope<*>.checksum(
 public fun IntegrityTaskRegistrationScope<*>.checksum(
     checksum: String,
     algorithm: DigestAlgorithm,
-    configure: (ChecksumIntegrityTask.() -> Unit)? = null
+    configure: (ChecksumIntegrityTask.(context: IntegrityTaskContext) -> Unit)? = null
 ): TaskProvider<ChecksumIntegrityTask> = checksum(
     checksum = providers.provider { checksum },
     algorithm = algorithm,

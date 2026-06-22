@@ -1,20 +1,17 @@
 package komple.task.install
 
-import komple.tool.task.InstallTaskContext
-import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileSystemOperations
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Nested
-import javax.inject.Inject
+import komple.task.OutputToolTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 
 /**
  * Base for install task.
  */
-public abstract class InstallTask : DefaultTask() {
+public abstract class InstallTask : OutputToolTask() {
 
-    @get:Inject
-    protected abstract val fileOperations: FileSystemOperations
-
-    @get:Nested
-    public abstract val context: Property<InstallTaskContext>
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    public abstract val inputDirectory: DirectoryProperty
 }

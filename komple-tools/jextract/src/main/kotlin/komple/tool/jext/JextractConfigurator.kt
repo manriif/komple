@@ -1,6 +1,6 @@
 package komple.tool.jext
 
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.exec.path
 import komple.platform.Host
 import komple.project.CProjectConfigurator
@@ -109,7 +109,7 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
         return untarGzip(true)
     }
 
-    override fun ExecEnvironmentBuilderScope<JextractExtension>.configureEnvironment() {
+    override fun ShellEnvironmentBuilderScope<JextractExtension>.configureEnvironment() {
         path(installDirectory.map { it.dir("bin") })
     }
 

@@ -1,7 +1,6 @@
 package komple.task.extract
 
 import komple.exec.Command
-import komple.tool.task.TaskDirectory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
@@ -17,7 +16,7 @@ public abstract class DefaultCommandExtractTask : CommandExtractTask() {
     public abstract val provider: Property<ExtractCommandProvider>
 
     override fun buildCommand(
-        inputDirectory: TaskDirectory,
+        inputDirectory: File,
         outputDirectory: File
     ): Command = provider.get().createCommand(inputDirectory, outputDirectory)
 }

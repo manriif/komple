@@ -4,17 +4,12 @@ import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 
 /**
- * Context for extracted file(s) installation.
+ * Context for tool file(s) integrity.
  */
-public interface InstallTaskContext : OutputToolTaskContext {
+public interface IntegrityTaskContext : ToolTaskContext {
 
     /**
      * Directory containing previous step file(s).
      */
     public val inputDirectory: Provider<Directory>
-
-    /**
-     * Directory where installed file(s) must be written to.
-     */
-    override val outputDirectory: Directory
 }

@@ -4,7 +4,7 @@ import komple.gradle.task.registerKompleTask
 import komple.gradle.util.camelCased
 import komple.gradle.util.dashCased
 import komple.gradle.util.pascalCased
-import komple.task.TaskContext
+import komple.task.TaskStateTracker
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
@@ -30,9 +30,9 @@ internal fun ProjectLayout.projectGeneratedOutputDir(
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Returns a conventional name for a task and for the project.
+ * Returns a derived name for [projectName] including [postfix].
  */
-internal fun projectTaskName(projectName: String, postfix: String): String {
+internal fun projectDerivedName(projectName: String, postfix: String): String {
     return "${projectName.camelCased()}${postfix.pascalCased()}"
 }
 
@@ -43,7 +43,7 @@ internal fun <T : Task> TaskContainer.registerProjectTask(
     name: String,
     type: KClass<T>,
     cacheable: Boolean,
-    configure: T.(context: TaskContext) -> Unit
+    configure: T.(context: TaskStateTracker) -> Unit
 ): TaskProvider<T> = registerKompleTask(name, type, cacheable) { context ->
     group = KOMPLE_PROJECTS_TASK_GROUP
     configure(this, context)

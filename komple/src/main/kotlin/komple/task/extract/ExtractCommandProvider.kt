@@ -1,7 +1,6 @@
 package komple.task.extract
 
 import komple.exec.Command
-import komple.tool.task.TaskDirectory
 import java.io.File
 
 /**
@@ -15,7 +14,7 @@ public fun interface ExtractCommandProvider {
      * The working directory is set to [inputDirectory] before the command gets executed.
      */
     public fun createCommand(
-        inputDirectory: TaskDirectory,
+        inputDirectory: File,
         outputDirectory: File
     ): Command
 }

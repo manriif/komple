@@ -1,5 +1,6 @@
 package komple.tool.task
 
+import komple.task.disableTracking
 import komple.task.install.CommandInstallTask
 import komple.task.install.DefaultCommandInstallTask
 import komple.task.install.InstallCommandProvider
@@ -14,26 +15,26 @@ import kotlin.reflect.KClass
  * Scope for install task registration.
  */
 public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
-    TaskRegistrationScope<Extension> {
+    TaskRegistrationScope<Extension, InstallTaskContext> {
 
     /**
-     * Registers a task of type [T], [configure]s it and returns that registered task.
+     * Registers a task of type [T], [configure]s it and returns it.
      *
-     * The directory where extracted file(s) lives and where installed file(s) must be written to
-     * can be obtained from the [InstallTaskContext] passed to [configure].
-     *
-     * The task must not register any output and instead use the context directory to put all
-     * its files.
+     * The directory where extracted (or downloaded, if extraction was skipped) file(s) lives and
+     * where installed file(s) must be written to can be obtained from the
+     * [InstallTaskContext.inputDirectory] and [InstallTaskContext.outputDirectory] passed to
+     * [configure]. The input directory should eventually be registered as task's input. The output
+     * directory must be registered as the task's only output directory.
      */
-    public fun <T : Task> register(
+    public override fun <T : Task> register(
         klass: KClass<T>,
-        cacheable: Boolean = false,
+        cacheable: Boolean,
         configure: T.(context: InstallTaskContext) -> Unit
     ): TaskProvider<T>
 
     /**
-     * Registers a task that skips installation, causing extracted files to be used as installed
-     * files.
+     * Registers a task that skips installation, causing extracted (or downloaded, if extraction was
+     * skipped) file(s) to be used as installed files.
      */
     override fun skip(): TaskProvider<*>
 }
@@ -43,10 +44,13 @@ public interface InstallTaskRegistrationScope<Extension : KompleToolExtension> :
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Registers a task of type [T] and [configure]s it.
+ * Registers a task of type [T], [configure]s it and returns it.
  *
- * The directory where extracted file(s) lives and where installed file(s) must be written to
- * can be obtained from the [InstallTaskContext] passed to [configure].
+ * The directory where extracted (or downloaded, if extraction was skipped) file(s) lives and
+ * where installed file(s) must be written to can be obtained from the
+ * [InstallTaskContext.inputDirectory] and [InstallTaskContext.outputDirectory] passed to
+ * [configure]. The input directory should eventually be registered as task's input. The output
+ * directory must be registered as the task's only output directory.
  */
 public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
     cacheable: Boolean = false,
@@ -60,29 +64,38 @@ public inline fun <reified T : Task> InstallTaskRegistrationScope<*>.register(
 /**
  * Registers a task of type [T] subclass of [InstallTask] and [configure]s it.
  *
- * The [InstallTask.context] is configured before [configure] is invoked.
+ * The [InstallTask.execEnvironment], [InstallTask.tracker], [InstallTask.outputDirectory] and
+ * [InstallTask.inputDirectory] properties are configured before [configure] is invoked.
+ *
+ * Tracking is disabled by default.
  */
 public inline fun <reified T : InstallTask> InstallTaskRegistrationScope<*>.install(
     cacheable: Boolean = false,
-    noinline configure: (T.() -> Unit)? = null
-): TaskProvider<T> = register<T>(cacheable) { context ->
-    this.context = context
-    configure?.invoke(this)
+    noinline configure: (T.(context: InstallTaskContext) -> Unit)? = null
+): TaskProvider<T> = outputTool(cacheable) { context ->
+    this.inputDirectory = context.inputDirectory
+    context.tracker.disableTracking()
+    configure?.invoke(this, context)
 }
 
 /**
  * Registers a task of type [T] subclass of [CommandInstallTask] and [configure]s it.
  *
- * The [CommandInstallTask.context] property is configured before [configure] is invoked.
+ * The [CommandInstallTask.execEnvironment], [CommandInstallTask.tracker],
+ * [CommandInstallTask.outputDirectory] and [CommandInstallTask.inputDirectory] properties are
+ * configured before [configure] is invoked.
+ *
+ * Tracking is disabled by default.
  */
 public inline fun <reified T : CommandInstallTask> InstallTaskRegistrationScope<*>.command(
     cacheable: Boolean = false,
-    noinline configure: (T.() -> Unit)? = null
+    noinline configure: (T.(context: InstallTaskContext) -> Unit)? = null
 ): TaskProvider<T> = install<T>(cacheable, configure)
 
 /**
  * Registers a task configuring tool files using a command obtained via [provider].
  *
+ * Tracking is disabled by default.
  * Note that the returned task is cacheable.
  */
 public fun InstallTaskRegistrationScope<*>.command(

@@ -4,77 +4,79 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.Nested
 
 /**
- * [ExecEnvironment] which can be extended with other environments.
+ * [ExecEnvironment] that can be extended with other [ShellEnvironment]s.
  */
 public interface ExtendableExecEnvironment : ExecEnvironment {
 
     /**
-     * Extras [ExecEnvironment].
+     * Extras [ShellEnvironment]s.
      */
     @get:Nested
-    public val execEnvironments: ListProperty<ExecEnvironment>
+    public val shellEnvironments: ListProperty<ShellEnvironment>
+}
 
-    /**
-     * Adds [other] environment to this [ExecEnvironment].
-     */
-    @IgnorableReturnValue
-    public fun addEnvironment(other: ExecEnvironment): ExtendableExecEnvironment = apply {
-        execEnvironments.add(other)
-    }
+///////////////////////////////////////////////////////////////////////////
+// Extensions
+///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Adds [others] environments to this [ExecEnvironment].
-     */
-    @IgnorableReturnValue
-    public fun addEnvironments(vararg others: ExecEnvironment): ExtendableExecEnvironment =
-        apply {
-            execEnvironments.addAll(*others)
-        }
+/**
+ * Adds [other] environment to this [ExtendableExecEnvironment].
+ */
+@IgnorableReturnValue
+public fun ExtendableExecEnvironment.addEnvironment(other: ShellEnvironment) {
+    shellEnvironments.add(other)
+}
 
-    /**
-     * Adds [other]'s environment to this [ExecEnvironment].
-     */
-    @IgnorableReturnValue
-    public fun addEnvironment(other: HasExecEnvironment): ExtendableExecEnvironment = apply {
-        execEnvironments.add(other.execEnvironment)
-    }
+/**
+ * Adds [others] environments to this [ExtendableExecEnvironment].
+ */
+@IgnorableReturnValue
+public fun ExtendableExecEnvironment.addEnvironments(vararg others: ShellEnvironment) {
+    shellEnvironments.addAll(*others)
+}
 
-    /**
-     * Adds [others]'s environments to this [ExecEnvironment].
-     */
-    @IgnorableReturnValue
-    public fun addEnvironments(vararg others: HasExecEnvironment): ExtendableExecEnvironment =
-        apply {
-            execEnvironments.addAll(others.map { it.execEnvironment })
-        }
+/**
+ * Adds [other]'s environment to this [ExtendableExecEnvironment].
+ */
+@IgnorableReturnValue
+public fun ExtendableExecEnvironment.addEnvironment(other: HasShellEnvironment) {
+    shellEnvironments.add(other.shellEnvironment)
+}
 
-    /**
-     * Adds [other] environment to this [ExecEnvironment] and returns `this`.
-     */
-    @IgnorableReturnValue
-    public operator fun plus(other: ExecEnvironment): ExtendableExecEnvironment {
-        return addEnvironment(other)
-    }
+/**
+ * Adds [others]'s environments to this [ExtendableExecEnvironment].
+ */
+@IgnorableReturnValue
+public fun ExtendableExecEnvironment.addEnvironments(vararg others: HasShellEnvironment) {
+    shellEnvironments.addAll(others.map { it.shellEnvironment })
+}
 
-    /**
-     * Adds [other] environment to this [ExecEnvironment].
-     */
-    public operator fun plusAssign(other: ExecEnvironment) {
-        addEnvironment(other)
-    }
+/**
+ * Adds [other] environment to this [ExtendableExecEnvironment].
+ */
+@IgnorableReturnValue
+public operator fun ExtendableExecEnvironment.plus(other: ShellEnvironment) {
+    addEnvironment(other)
+}
 
-    /**
-     * Adds [other]'s environment to this [ExecEnvironment] and returns `this`.
-     */
-    @IgnorableReturnValue
-    public operator fun plus(other: HasExecEnvironment): ExtendableExecEnvironment {
-        return addEnvironment(other)
-    }
+/**
+ * Adds [other] environment to this [ExtendableExecEnvironment].
+ */
+public operator fun ExtendableExecEnvironment.plusAssign(other: ShellEnvironment) {
+    addEnvironment(other)
+}
 
-    /**
-     * Adds [other]'s environment to this [ExecEnvironment].
-     */
-    public operator fun plusAssign(other: HasExecEnvironment) {
-        addEnvironment(other)
-    }
+/**
+ * Adds [other]'s environment to this [ExtendableExecEnvironment].
+ */
+@IgnorableReturnValue
+public operator fun ExtendableExecEnvironment.plus(other: HasShellEnvironment) {
+    addEnvironment(other)
+}
+
+/**
+ * Adds [other]'s environment to this [ExtendableExecEnvironment].
+ */
+public operator fun ExtendableExecEnvironment.plusAssign(other: HasShellEnvironment) {
+    addEnvironment(other)
 }

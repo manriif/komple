@@ -17,7 +17,8 @@ internal class CProjectConfiguratorFactory(override val kProject: DefaultCProjec
     override fun createConfigurator(
         extension: CProjectExtension,
         tool: DefaultKompleTool<*>
-    ): ProjectConfigurator {
-        return DefaultCProjectConfigurator(extension, tool.execEnvironment)
-    }
+    ): ProjectConfigurator = DefaultCProjectConfigurator(
+        extension = extension,
+        execEnvironmentProvider = tool.usageExecEnvironmentProvider
+    )
 }

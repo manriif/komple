@@ -1,6 +1,6 @@
 package komple.gradle.project.c
 
-import komple.exec.ExecEnvironment
+import komple.gradle.exec.ExecEnvironmentProvider
 import komple.platform.Platform
 import komple.project.c.CCompileTask
 import kotlin.reflect.KClass
@@ -12,5 +12,5 @@ internal class CCompileTaskFactory<Task : CCompileTask<*, *>>(
     val klass: KClass<out Task>,
     val configure: (Task.() -> Unit)?,
     val platformFilter: (Platform) -> Boolean,
-    val execEnvironment: ExecEnvironment
+    val execEnvironmentProvider: ExecEnvironmentProvider
 )

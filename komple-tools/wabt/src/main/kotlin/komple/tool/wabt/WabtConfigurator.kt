@@ -1,12 +1,13 @@
 package komple.tool.wabt
 
 import komple.exec.Command
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.exec.path
 import komple.kompleProperty
 import komple.platform.Host
 import komple.tool.configurator.VersionedKompleToolConfigurator
 import komple.task.integrity.DigestAlgorithm
+import komple.task.singleFile
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.InstallTaskRegistrationScope
@@ -51,7 +52,7 @@ public abstract class WabtConfigurator @Inject constructor(name: String) :
             Command(
                 "tar",
                 "-xJf",
-                inputDirectory.singleFile.get().asFile.absolutePath,
+                inputDirectory.singleFile,
                 "-C",
                 outputDirectory.absolutePath,
                 "--strip-components=1"
@@ -71,7 +72,7 @@ public abstract class WabtConfigurator @Inject constructor(name: String) :
         }
     }
 
-    override fun ExecEnvironmentBuilderScope<Extension>.configureEnvironment() {
+    override fun ShellEnvironmentBuilderScope<Extension>.configureEnvironment() {
         path(installDirectory.map { it.dir("bin") })
     }
 }

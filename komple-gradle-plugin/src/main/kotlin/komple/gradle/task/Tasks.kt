@@ -2,7 +2,8 @@ package komple.gradle.task
 
 import komple.gradle.kompleChecksumsDirectory
 import komple.gradle.util.dashCased
-import komple.task.TaskContext
+import komple.task.TaskStateTracker
+import komple.task.disableTracking
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -27,12 +28,13 @@ private fun Project.checksumFile(taskName: String): Directory {
 }
 
 /**
- * Configures this task and invokes [configure] with a [TaskContext].
+ * Configures this task and invokes [configure] with a [TaskStateTracker].
  */
-public fun <T : Task> T.configureWithContext(configure: T.(context: TaskContext) -> Unit) {
+public fun <T : Task> T.configureWithContext(configure: T.(context: TaskStateTracker) -> Unit) {
     val checksumDirectory = project.checksumFile(name.dashCased())
-    val context = DefaultTaskContext(checksumDirectory, logger, project.objects)
+    val context = DefaultTaskStateTracker(checksumDirectory, logger, project.objects)
 
+    context.disableTracking()
     configure(this, context)
 
     context.inputs = inputs
@@ -50,7 +52,7 @@ internal fun <T : Task> TaskContainer.registerKompleTask(
     name: String,
     type: KClass<T>,
     cacheable: Boolean,
-    configure: T.(context: TaskContext) -> Unit,
+    configure: T.(context: TaskStateTracker) -> Unit,
 ): TaskProvider<T> = register(name, type.java) {
     if (cacheable) {
         outputs.cacheIf { true }

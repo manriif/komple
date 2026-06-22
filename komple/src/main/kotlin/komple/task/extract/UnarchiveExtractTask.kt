@@ -1,12 +1,14 @@
 package komple.task.extract
 
-import komple.tool.task.TaskDirectory
+import komple.task.clearAndGetAsFile
+import komple.task.hasChanged
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileTree
 import org.gradle.api.file.RelativePath
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 import javax.inject.Inject
 
 /**
@@ -27,15 +29,23 @@ public abstract class UnarchiveExtractTask : ExtractTask() {
     /**
      * Returns a [FileTree] containing all the files to extract.
      */
-    protected abstract fun ArchiveOperations.createTree(inputDirectory: TaskDirectory): FileTree
+    protected abstract fun ArchiveOperations.createTree(inputDirectory: File): FileTree
 
     @TaskAction
     public fun extract() {
-        val context = context.get()
+        val tracker = tracker.get()
+
+        if (!tracker.hasChanged()) {
+            didWork = false
+            return logger.lifecycle("Skipping archive extraction")
+        }
+
+        val inputDirectory = inputDirectory.get().asFile
+        val outputDirectory = fileOperations.clearAndGetAsFile(outputDirectory)
 
         if (enclosedContent.get()) {
             fileOperations.copy {
-                from(archiveOperations.createTree(context.downloadDirectory)) {
+                from(archiveOperations.createTree(inputDirectory)) {
                     eachFile {
                         val segments = relativePath.segments
 
@@ -49,12 +59,12 @@ public abstract class UnarchiveExtractTask : ExtractTask() {
                     includeEmptyDirs = false
                 }
 
-                into(context.outputDirectory)
+                into(outputDirectory)
             }
         } else {
             fileOperations.copy {
-                from(archiveOperations.createTree(context.downloadDirectory))
-                into(context.outputDirectory)
+                from(archiveOperations.createTree(inputDirectory))
+                into(outputDirectory)
             }
         }
     }

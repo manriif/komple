@@ -28,7 +28,7 @@ internal abstract class DefaultExecEnvironment
     }
 
     override fun createCommandExecutorFactory(): CommandExecutor.Factory {
-        val environments = execEnvironments.get().toMutableList().apply {
+        val environments = shellEnvironments.get().toMutableList().apply {
             add(this@DefaultExecEnvironment)
         }
 

@@ -15,33 +15,27 @@ import kotlin.reflect.KClass
 internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtension>(
     context: KompleToolConfigContext<Extension>
 ) : DownloadTaskRegistrationScope<Extension>,
-    DefaultTaskRegistrationScope<Extension>(context) {
+    DefaultTaskRegistrationScope<Extension, DownloadTaskContext>(context) {
+
+    override val taskPostfix: String
+        get() = TASK_TOOL_DOWNLOAD_POSTFIX
 
     override fun <T : Task> register(
         klass: KClass<T>,
         cacheable: Boolean,
         configure: T.(DownloadTaskContext) -> Unit
-    ): TaskProvider<T> = registerTask(TASK_TOOL_DOWNLOAD_POSTFIX, klass, cacheable) { context ->
+    ): TaskProvider<T> = registerToolTask(klass, cacheable) { tracker ->
         description = "Download the $toolName tool."
 
-        val downloadContext = DefaultDownloadTaskContext(
-            context = context,
-            execEnvironment = this@DefaultDownloadTaskRegistrationScope.context.execEnvironment,
-            outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolNameCompat)
-        )
-
-        configureTask(
-            context = downloadContext,
-            configurator = configure,
-            deleteFirst = false
+        configure(
+            DefaultDownloadTaskContext(
+                tracker = tracker,
+                outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolNameCompat),
+                execEnvironmentProvider = context.execEnvironmentProvider
+            )
         )
     }
 
-    override fun skip(): TaskProvider<*> = registerFailureTask(
-        TASK_TOOL_DOWNLOAD_POSTFIX,
-        UnsupportedOperationException("No file to download for tool $toolName")
-    )
-
-    override fun unsupported(): TaskProvider<*> =
-        registerUnsupportedTask(TASK_TOOL_DOWNLOAD_POSTFIX)
+    override fun skip(): TaskProvider<*> =
+        registerFailureTask(UnsupportedOperationException("No file to download for tool $toolName"))
 }

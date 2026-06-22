@@ -10,8 +10,8 @@ import org.gradle.api.provider.ProviderFactory
 /**
  * Scope for the execution environment building.
  */
-public interface ExecEnvironmentBuilderScope<Extension : KompleToolExtension> :
-    ExecEnvironmentBuilder,
+public interface ShellEnvironmentBuilderScope<Extension : KompleToolExtension> :
+    ShellEnvironmentBuilder,
     HasExtension<Extension>,
     HasHost {
 

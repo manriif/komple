@@ -2,7 +2,10 @@ package komple.gradle.util
 
 import net.jpountz.xxhash.StreamingXXHash64
 import net.jpountz.xxhash.XXHashFactory
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.ObjectOutputStream
+import java.io.Serializable
 
 private const val HASH_SEED = 0x9747b28cL
 private val HashFactory = XXHashFactory.fastestInstance()
@@ -48,6 +51,19 @@ internal fun StreamingXXHash64.append(file: File) {
  */
 internal fun StreamingXXHash64.append(value: String) {
     val bytes = value.toByteArray()
+    update(bytes, 0, bytes.size)
+}
+
+/**
+ * Append [value]'s content to this hasher.
+ */
+internal fun StreamingXXHash64.append(value: Serializable) {
+    val bytesStream = ByteArrayOutputStream()
+    val objectStream = ObjectOutputStream(bytesStream)
+
+    objectStream.writeObject(value)
+    val bytes = bytesStream.toByteArray()
+
     update(bytes, 0, bytes.size)
 }
 

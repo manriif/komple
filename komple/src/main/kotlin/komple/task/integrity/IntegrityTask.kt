@@ -1,15 +1,17 @@
 package komple.task.integrity
 
-import komple.tool.task.TaskDirectory
-import org.gradle.api.DefaultTask
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Nested
+import komple.task.ToolTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 
 /**
  * Base for integrity task.
  */
-public abstract class IntegrityTask : DefaultTask() {
+public abstract class IntegrityTask : ToolTask() {
 
-    @get:Nested
-    public abstract val inputDirectory: Property<TaskDirectory>
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    public abstract val inputDirectory: DirectoryProperty
 }

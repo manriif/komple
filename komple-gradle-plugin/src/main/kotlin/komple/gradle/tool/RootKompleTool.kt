@@ -1,12 +1,12 @@
 package komple.gradle.tool
 
-import komple.exec.HasExecEnvironment
+import komple.exec.HasShellEnvironment
 import komple.tool.KompleTool
 
 /**
  * Komple tool with extended properties available in root Gradle project.
  */
-public interface RootKompleTool : KompleTool, HasExecEnvironment {
+public interface RootKompleTool : KompleTool, HasShellEnvironment {
 
     /**
      * Makes this tool depends on [other].

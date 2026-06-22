@@ -23,7 +23,7 @@ public abstract class KompleExecTask : DefaultTask() {
     /**
      * Returns a new [CommandExecutor] instance.
      */
-    protected fun commandExecutor(): CommandExecutor {
+    protected fun newCommandExecutor(): CommandExecutor {
         return execEnvironment.get().createCommandExecutor(execOperations)
     }
 }

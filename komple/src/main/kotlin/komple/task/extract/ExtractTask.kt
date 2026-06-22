@@ -1,20 +1,17 @@
 package komple.task.extract
 
-import komple.tool.task.ExtractTaskContext
-import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileSystemOperations
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Nested
-import javax.inject.Inject
+import komple.task.OutputToolTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 
 /**
  * Base for extraction task.
  */
-public abstract class ExtractTask : DefaultTask() {
+public abstract class ExtractTask : OutputToolTask() {
 
-    @get:Inject
-    protected abstract val fileOperations: FileSystemOperations
-
-    @get:Nested
-    public abstract val context: Property<ExtractTaskContext>
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    public abstract val inputDirectory: DirectoryProperty
 }

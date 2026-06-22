@@ -1,6 +1,6 @@
 package komple.tool.cmake
 
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.exec.path
 import komple.platform.Host
 import komple.tool.configurator.DefaultKompleToolConfigurator
@@ -95,7 +95,7 @@ public abstract class CmakeConfigurator @Inject constructor(name: String) :
         }
     }
 
-    override fun ExecEnvironmentBuilderScope<CmakeExtension>.configureEnvironment() {
+    override fun ShellEnvironmentBuilderScope<CmakeExtension>.configureEnvironment() {
         path(
             when (host.operatingSystem) {
                 MacOS -> installDirectory.map { it.dir("CMake.app/Contents/bin") }

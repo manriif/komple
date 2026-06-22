@@ -2,9 +2,9 @@ package komple.gradle.tool.task
 
 import komple.gradle.task.registerKompleTask
 import komple.gradle.util.camelCased
-import komple.task.TaskContext
-import komple.tool.task.TaskDirectory
+import komple.task.TaskStateTracker
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskContainer
@@ -24,9 +24,8 @@ internal const val TASK_TOOL_INSTALL_POSTFIX = "Install"
 /**
  * Returns a conventional name for a task and for the tool.
  */
-internal fun toolTaskName(toolName: String, postfix: String): String {
-    return "${toolName.camelCased()}$postfix"
-}
+internal fun toolTaskName(toolName: String, postfix: String): String =
+    "${toolName.camelCased()}$postfix"
 
 /**
  * Registers tool task and applies default configuration.
@@ -35,7 +34,7 @@ internal fun <T : Task> TaskContainer.registerToolTask(
     name: String,
     type: KClass<T>,
     cacheable: Boolean,
-    configure: T.(context: TaskContext) -> Unit
+    configure: T.(context: TaskStateTracker) -> Unit
 ): TaskProvider<T> = registerKompleTask(name, type, cacheable) { context ->
     group = KOMPLE_TOOLS_TASK_GROUP
     configure(this, context)
@@ -46,7 +45,7 @@ internal fun <T : Task> TaskContainer.registerToolTask(
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Returns the outputs directory as [TaskDirectory] object.
+ * Returns a [Provider] to the output file of the task as a single directory.
  */
-internal fun Provider<out Task>.outputDir(layout: ProjectLayout): TaskDirectory =
-    DefaultTaskDirectory(layout.dir(map { it.outputs.files.singleFile }))
+internal fun Provider<out Task>.outputDirectory(layout: ProjectLayout): Provider<Directory> =
+    layout.dir(map { it.outputs.files.singleFile })

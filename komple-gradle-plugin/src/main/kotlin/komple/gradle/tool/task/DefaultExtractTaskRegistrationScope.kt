@@ -16,36 +16,27 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
     context: KompleToolConfigContext<Extension>,
     private val integrityTask: TaskProvider<*>
 ) : ExtractTaskRegistrationScope<Extension>,
-    DefaultTaskRegistrationScope<Extension>(context) {
+    DefaultTaskRegistrationScope<Extension, ExtractTaskContext>(context) {
+
+    override val taskPostfix: String
+        get() = TASK_TOOL_EXTRACT_POSTFIX
 
     override fun <T : Task> register(
         klass: KClass<T>,
         cacheable: Boolean,
         configure: T.(context: ExtractTaskContext) -> Unit
-    ): TaskProvider<T> = registerTask(TASK_TOOL_EXTRACT_POSTFIX, klass, cacheable) { context ->
+    ): TaskProvider<T> = registerToolTask(klass, cacheable) { tracker ->
         description = "Extract the $toolName tool."
 
-        val extractContext = DefaultExtractTaskContext(
-            context = context,
-            downloadDirectory = integrityTask.outputDir(project.layout),
-            execEnvironment = this@DefaultExtractTaskRegistrationScope.context.execEnvironment,
-            outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolNameCompat)
+        configure(
+            DefaultExtractTaskContext(
+                tracker = tracker,
+                outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolNameCompat),
+                inputDirectory = integrityTask.outputDirectory(project.layout),
+                execEnvironmentProvider = context.execEnvironmentProvider
+            )
         )
-
-        configureTask(
-            context = extractContext,
-            configurator = configure,
-            deleteFirst = true
-        )
-
-        if (inputs.files.isEmpty) {
-            logger.warn("Task $name did not registered an input directory, using download one")
-            inputs.dir(extractContext.downloadDirectory.directory)
-        }
     }
 
     override fun skip(): TaskProvider<*> = integrityTask
-
-    override fun unsupported(): TaskProvider<*> =
-        registerUnsupportedTask(TASK_TOOL_EXTRACT_POSTFIX)
 }

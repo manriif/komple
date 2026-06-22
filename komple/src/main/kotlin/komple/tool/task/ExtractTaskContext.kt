@@ -1,23 +1,20 @@
 package komple.tool.task
 
 import org.gradle.api.file.Directory
-import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.provider.Provider
 
 /**
  * Context for downloaded file(s) extraction.
  */
-public interface ExtractTaskContext : ExecToolTaskContext {
+public interface ExtractTaskContext : OutputToolTaskContext {
 
     /**
-     * Directory containing file(s) getting downloaded.
+     * Directory containing previous step file(s).
      */
-    @get:Nested
-    public val downloadDirectory: TaskDirectory
+    public val inputDirectory: Provider<Directory>
 
     /**
      * Directory where extracted file(s) must be written to.
      */
-    @get:OutputDirectory
     override val outputDirectory: Directory
 }

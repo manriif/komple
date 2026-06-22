@@ -10,7 +10,7 @@ import komple.gradle.util.pascalCased
 import komple.platform.Host
 import komple.project.ProjectConfigurationScope
 import komple.project.ProjectConfigurator
-import komple.task.TaskContext
+import komple.task.TaskStateTracker
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
@@ -28,7 +28,7 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
     private val context: KompleToolConfigContext<Extension>,
     private val projectExtension: KompleProjectExtension,
     override val configurator: ProjectConfigurator,
-    override val installDirectory: Provider<Directory>
+    override val installDirectory: Provider<Directory>,
 ) : ProjectConfigurationScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {
@@ -37,7 +37,7 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         get() = notClosed { CurrentHost }
 
     override val execEnvironment: ExecEnvironment
-        get() = context.execEnvironment
+        get() = context.execEnvironmentProvider.get()
 
     override fun generatedDirectory(): Provider<Directory> {
         return context.project.layout.projectGeneratedOutputDir(
@@ -65,9 +65,9 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
         postfix: String,
         type: KClass<T>,
         cacheable: Boolean,
-        configure: (T.(TaskContext) -> Unit)?
+        configure: (T.(TaskStateTracker) -> Unit)?
     ): TaskProvider<T> {
-        val name = projectTaskName(
+        val name = projectDerivedName(
             projectName = configurator.project.name,
             postfix = "${context.toolName}${postfix.pascalCased()}"
         )

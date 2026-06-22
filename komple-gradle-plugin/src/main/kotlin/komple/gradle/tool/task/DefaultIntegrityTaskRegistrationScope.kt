@@ -2,8 +2,8 @@ package komple.gradle.tool.task
 
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
+import komple.tool.task.IntegrityTaskContext
 import komple.tool.task.IntegrityTaskRegistrationScope
-import komple.tool.task.TaskDirectory
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
@@ -15,35 +15,30 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
     context: KompleToolConfigContext<Extension>,
     private val downloadTask: TaskProvider<*>
 ) : IntegrityTaskRegistrationScope<Extension>,
-    DefaultTaskRegistrationScope<Extension>(context) {
+    DefaultTaskRegistrationScope<Extension, IntegrityTaskContext>(context) {
+
+    override val taskPostfix: String
+        get() = TASK_TOOL_INTEGRITY_POSTFIX
 
     override fun <T : Task> register(
         klass: KClass<T>,
         cacheable: Boolean,
-        configure: T.(directory: TaskDirectory) -> Unit
-    ): TaskProvider<T> = context.project.tasks.registerToolTask(
-        name = toolTaskName(TASK_TOOL_INTEGRITY_POSTFIX),
-        type = klass,
-        cacheable = cacheable,
-    ) {
+        configure: T.(context: IntegrityTaskContext) -> Unit
+    ): TaskProvider<T> = registerToolTask(klass, cacheable) {
         description = "Check the $toolName tool's integrity."
+        val downloadDirectory = downloadTask.outputDirectory(project.layout)
 
-        val downloadDirectory = downloadTask.outputDir(project.layout)
+        configure(DefaultIntegrityTaskContext(
+            inputDirectory = downloadDirectory,
+            execEnvironmentProvider = context.execEnvironmentProvider
+        ))
 
-        configureTask(
-            context = downloadDirectory,
-            outputDirectory = downloadDirectory.directory,
-            configurator = configure
-        )
-
-        if (inputs.files.isEmpty) {
-            logger.warn("Task $name did not registered an input directory, using download one")
-            inputs.dir(downloadDirectory.directory)
+        check(outputs.files.isEmpty) {
+            "Integrity task must not register outputs file(s)"
         }
+
+        outputs.dir(downloadDirectory)
     }
 
     override fun skip(): TaskProvider<*> = downloadTask
-
-    override fun unsupported(): TaskProvider<*> =
-        registerUnsupportedTask(TASK_TOOL_INTEGRITY_POSTFIX)
 }

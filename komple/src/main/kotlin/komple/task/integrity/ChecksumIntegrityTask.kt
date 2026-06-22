@@ -1,5 +1,7 @@
 package komple.task.integrity
 
+import komple.task.singleFile
+import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -26,9 +28,10 @@ public abstract class ChecksumIntegrityTask : IntegrityTask() {
 
     @TaskAction
     public fun integrity() {
-        val inputFile = inputDirectory.get().singleFile.get().asFile
+        val inputFile = inputDirectory.get().asFile.singleFile
         val messageDigest = MessageDigest.getInstance(algorithm.get().toMessageDigestConstant())
-        val calculatedChecksum: String
+        val expectedChecksum = checksum.get()
+        val actualChecksum: String
 
         try {
             inputFile.inputStream().use { stream ->
@@ -39,19 +42,19 @@ public abstract class ChecksumIntegrityTask : IntegrityTask() {
                     messageDigest.update(buffer, 0, read)
                 }
 
-                calculatedChecksum = messageDigest.digest()
+                actualChecksum = messageDigest.digest()
                     .joinToString("") { "%02x".format(it) }
             }
         } catch (exception: Throwable) {
             didWork = false
-            return logger.warn("Failed to compute checksum", exception)
+            return logger.error("Failed to compute checksum", exception)
         }
 
-        if (calculatedChecksum == checksum.get()) {
+        if (actualChecksum == expectedChecksum) {
             didWork = true
         } else {
             didWork = false
-            logger.warn("Checksum differs")
+            throw GradleException("Checksum mismatch: $expectedChecksum vs $actualChecksum")
         }
     }
 }

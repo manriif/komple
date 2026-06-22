@@ -1,7 +1,7 @@
 package komple.tool.emscripten
 
 import komple.exec.Command
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.platform.Host
 import komple.task.integrity.DigestAlgorithm
 import komple.tool.configurator.DefaultKompleToolConfigurator
@@ -65,7 +65,7 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
         }
     }
 
-    override fun ExecEnvironmentBuilderScope<EmscriptenExtension>.configureEnvironment() {
+    override fun ShellEnvironmentBuilderScope<EmscriptenExtension>.configureEnvironment() {
         val (args, envScript) = when (host.operatingSystem) {
             MacOS, Linux -> arrayOf("source") to "emsdk_env.sh"
             Windows -> emptyArray<String>() to "emsdk_env.bat"

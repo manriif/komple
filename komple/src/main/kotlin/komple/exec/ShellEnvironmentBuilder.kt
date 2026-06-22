@@ -4,10 +4,9 @@ import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 
 /**
- * Environment for command execution.
- * The tools contribute to the environment by register
+ * Builder for populating a [ShellEnvironment].
  */
-public interface ExecEnvironmentBuilder {
+public interface ShellEnvironmentBuilder {
 
     /**
      * Registers a command line that will be executed first.
@@ -35,14 +34,14 @@ public interface ExecEnvironmentBuilder {
 /**
  * Adds [pathProvider] resolved absolute path to the environment path variable.
  */
-public fun ExecEnvironmentBuilder.path(pathProvider: Provider<out FileSystemLocation>) {
+public fun ShellEnvironmentBuilder.path(pathProvider: Provider<out FileSystemLocation>) {
     path(pathProvider.map { it.asFile.absolutePath })
 }
 
 /**
  * Defines [valueProvider] resolved absolute path as environment variable for [name].
  */
-public fun ExecEnvironmentBuilder.variable(
+public fun ShellEnvironmentBuilder.variable(
     name: String,
     valueProvider: Provider<out FileSystemLocation>
 ) {

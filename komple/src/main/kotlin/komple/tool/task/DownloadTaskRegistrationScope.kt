@@ -2,6 +2,7 @@ package komple.tool.task
 
 import komple.task.download.DownloadTask
 import komple.task.download.UrlDownloadTask
+import komple.task.enableTracking
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Task
 import org.gradle.api.provider.Provider
@@ -13,20 +14,18 @@ import kotlin.reflect.KClass
  * Scope for download task registration.
  */
 public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> :
-    TaskRegistrationScope<Extension> {
+    TaskRegistrationScope<Extension, DownloadTaskContext> {
 
     /**
-     * Registers a task of type [T], [configure]s it and returns that registered task.
+     * Registers a task of type [T], [configure]s it and returns it.
      *
      * The directory where downloaded file(s) must be written to can be obtained from the
-     * [DownloadTaskContext] passed to [configure].
-     *
-     * The task must not register any output and instead use the context directory to put all
-     * its files.
+     * [DownloadTaskContext.outputDirectory] passed to [configure]. That directory must be
+     * registered as the task's only output directory.
      */
-    public fun <T : Task> register(
+    public override fun <T : Task> register(
         klass: KClass<T>,
-        cacheable: Boolean = false,
+        cacheable: Boolean,
         configure: T.(context: DownloadTaskContext) -> Unit
     ): TaskProvider<T>
 
@@ -41,10 +40,11 @@ public interface DownloadTaskRegistrationScope<Extension : KompleToolExtension> 
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Registers a task of type [T], [configure]s it and returns that registered task.
+ * Registers a task of type [T], [configure]s it and returns it.
  *
  * The directory where downloaded file(s) must be written to can be obtained from the
- * [DownloadTaskContext] passed to [configure].
+ * [DownloadTaskContext.outputDirectory] passed to [configure]. That directory must be
+ * registered as the task's only output directory.
  */
 public inline fun <reified T : Task> DownloadTaskRegistrationScope<*>.register(
     cacheable: Boolean = false,
@@ -58,40 +58,45 @@ public inline fun <reified T : Task> DownloadTaskRegistrationScope<*>.register(
 /**
  * Registers a task of type [T] subclass of [DownloadTask] and [configure]s it.
  *
- * The [DownloadTask.context] is configured before [configure] is invoked.
+ * The [DownloadTask.execEnvironment], [DownloadTask.tracker] and [DownloadTask.outputDirectory]
+ * properties are configured before [configure] is invoked.
+ *
+ * Tracking is enabled by default.
  */
 public inline fun <reified T : DownloadTask> DownloadTaskRegistrationScope<*>.download(
     cacheable: Boolean = false,
-    noinline configure: (T.() -> Unit)? = null
-): TaskProvider<T> = register<T>(cacheable) { context ->
-    this.context = context
-    configure?.invoke(this)
+    noinline configure: (T.(context: DownloadTaskContext) -> Unit)? = null
+): TaskProvider<T> = outputTool(cacheable) { context ->
+    context.tracker.enableTracking()
+    configure?.invoke(this, context)
 }
 
 /**
  * Registers a download task downloading a single file named after [fileName] at [url].
  *
+ * Tracking is enabled by default.
  * Note that the returned task is cacheable.
  */
 public fun DownloadTaskRegistrationScope<*>.url(
     url: Provider<String>,
     fileName: Provider<String> = url.map { it.substringAfterLast('/') },
-    configure: (UrlDownloadTask.() -> Unit)? = null
-): TaskProvider<UrlDownloadTask> = download {
+    configure: (UrlDownloadTask.(context: DownloadTaskContext) -> Unit)? = null
+): TaskProvider<UrlDownloadTask> = download { context ->
     this.url = url
     this.fileName = fileName
-    configure?.invoke(this)
+    configure?.invoke(this, context)
 }
 
 /**
  * Registers a download task downloading a single file named after [fileName] at [url].
  *
+ * Tracking is enabled by default.
  * Note that the returned task is cacheable.
  */
 public fun DownloadTaskRegistrationScope<*>.url(
     url: String,
     fileName: String = url.substringAfterLast('/'),
-    configure: (UrlDownloadTask.() -> Unit)? = null
+    configure: (UrlDownloadTask.(context: DownloadTaskContext) -> Unit)? = null
 ): TaskProvider<UrlDownloadTask> = url(
     url = providers.provider { url },
     fileName = providers.provider { fileName },

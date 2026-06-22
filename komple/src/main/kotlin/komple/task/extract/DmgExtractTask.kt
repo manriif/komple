@@ -3,11 +3,12 @@ package komple.task.extract
 import komple.exec.Bash
 import komple.exec.execOutput
 import komple.exec.invoke
+import komple.task.clearAndGetAsFile
+import komple.task.hasChanged
+import komple.task.singleFile
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.TaskAction
-import org.gradle.process.ExecOperations
 import java.io.File
-import javax.inject.Inject
 
 /**
  * Base for task extracting content from a `.dmg` file.
@@ -19,9 +20,6 @@ import javax.inject.Inject
  */
 public abstract class DmgExtractTask : ExtractTask() {
 
-    @get:Inject
-    protected abstract val execOperations: ExecOperations
-
     /**
      * Extracts files from DMG [mountPoint] unto [outputDirectory].
      */
@@ -31,9 +29,17 @@ public abstract class DmgExtractTask : ExtractTask() {
     )
 
     @TaskAction
-    public fun extract() {
-        val context = context.get()
-        val dmgPath = context.downloadDirectory.singleFile
+    internal fun extract() {
+        val tracker = tracker.get()
+
+        if (!tracker.hasChanged()) {
+            didWork = false
+            return logger.lifecycle("Skipping DMG extraction")
+        }
+
+        val inputDirectory = inputDirectory.get().asFile
+        val outputDirectory = fileOperations.clearAndGetAsFile(outputDirectory)
+        val dmgPath = inputDirectory.singleFile.absolutePath
 
         val mountPoint = execOperations.execOutput(
             Bash("hdiutil", "attach", dmgPath, "-nobrowse", "-plist") {
@@ -51,7 +57,7 @@ public abstract class DmgExtractTask : ExtractTask() {
         try {
             fileOperations.extractContent(
                 File(mountPoint),
-                context.outputDirectory.asFile
+                outputDirectory
             )
         } finally {
             execOperations.exec {

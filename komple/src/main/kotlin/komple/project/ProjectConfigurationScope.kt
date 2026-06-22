@@ -1,9 +1,10 @@
 package komple.project
 
+import komple.exec.ExecEnvironment
 import komple.exec.HasExecEnvironment
 import komple.exec.KompleExecTask
 import komple.platform.HasHost
-import komple.task.TaskContext
+import komple.task.TaskStateTracker
 import komple.tool.extension.ExtensionScope
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
@@ -33,6 +34,11 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     public val installDirectory: Provider<Directory>
 
     /**
+     * Execution environment for which tool environment configuration is applied to.
+     */
+    override val execEnvironment: ExecEnvironment
+
+    /**
      * Returns a directory where to store generated files.
      */
     public fun generatedDirectory(): Provider<Directory>
@@ -52,7 +58,7 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
     ): E
 
     /**
-     * Creates a task of type [T], named after the project name postfixed by [postfix].
+     * Creates a task of type [T], named after the project name  and [postfix] appended.
      *
      * The returned task can be configured inside [configure].
      */
@@ -61,7 +67,7 @@ public interface ProjectConfigurationScope<Extension : KompleToolExtension> :
         postfix: String,
         type: KClass<T>,
         cacheable: Boolean = false,
-        configure: (T.(context: TaskContext) -> Unit)? = null
+        configure: (T.(tracker: TaskStateTracker) -> Unit)? = null
     ): TaskProvider<T>
 }
 
@@ -88,7 +94,7 @@ public inline fun <reified E : Any> ProjectConfigurationScope<*>.createExtension
 )
 
 /**
- * Creates a task of type [T], named after the project name postfixed by [postfix].
+ * Creates a task of type [T], named after the project name and [postfix] appended.
  *
  * The returned task can be configured inside [configure].
  */
@@ -96,7 +102,7 @@ public inline fun <reified E : Any> ProjectConfigurationScope<*>.createExtension
 public inline fun <reified T : Task> ProjectConfigurationScope<*>.registerTask(
     postfix: String,
     cacheable: Boolean = false,
-    noinline configure: (T.(context: TaskContext) -> Unit)? = null
+    noinline configure: (T.(tracker: TaskStateTracker) -> Unit)? = null
 ): TaskProvider<T> = registerTask(
     postfix = postfix,
     type = T::class,
@@ -105,18 +111,17 @@ public inline fun <reified T : Task> ProjectConfigurationScope<*>.registerTask(
 )
 
 /**
- * Creates a task of type [T], named after the project name postfixed by [postfix].
+ * Creates a task of type [T], named after the project name and [postfix] appended.
  *
- * The returned task can be configured inside [configure].
+ * The [KompleExecTask.execEnvironment] is configured before [configure] is invoked to configure the
+ * task [T].
  */
 @IgnorableReturnValue
 public inline fun <reified T : KompleExecTask> ProjectConfigurationScope<*>.registerExecTask(
     postfix: String,
     cacheable: Boolean = false,
-    noinline configure: (T.(context: TaskContext) -> Unit)? = null
-): TaskProvider<T> {
-    return registerTask<T>(postfix, cacheable) { context ->
-        this.execEnvironment = this@registerExecTask.execEnvironment
-        configure?.invoke(this, context)
-    }
+    noinline configure: (T.(tracker: TaskStateTracker) -> Unit)? = null
+): TaskProvider<T> = registerTask<T>(postfix, cacheable) { context ->
+    this.execEnvironment = this@registerExecTask.execEnvironment
+    configure?.invoke(this, context)
 }

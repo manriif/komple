@@ -88,15 +88,19 @@ internal abstract class ZigDownloadTask : DownloadTask() {
 
     @TaskAction
     fun download() {
-        val outputDirectory = context.get().outputDirectory
+        val outputDirectory = outputDirectory.get().asFile
         val tarballFileName = archiveFileName.get()
         val signatureFileName = "$tarballFileName.minisig"
-        val tarballFile = outputDirectory.file(tarballFileName).asFile
-        val signatureFile = outputDirectory.file(signatureFileName).asFile
+        val tarballFile = outputDirectory.resolve(tarballFileName)
+        val signatureFile = outputDirectory.resolve(signatureFileName)
 
         if (checkDownloadedTarball(tarballFile, signatureFile)) {
-            didWork = true
+            didWork = false
             return logger.lifecycle("Reusing cached zig download")
+        }
+
+        fileOperations.delete {
+            delete(outputDirectory)
         }
 
         val client = HttpClient.newHttpClient()
@@ -123,7 +127,6 @@ internal abstract class ZigDownloadTask : DownloadTask() {
                 }
 
                 if (checkDownloadedTarball(tarballFile, signatureFile)) {
-                    didWork = true
                     return logger.lifecycle("Successfully downloaded zig from ($mirror)")
                 }
             } catch (cause: Throwable) {
@@ -132,6 +135,5 @@ internal abstract class ZigDownloadTask : DownloadTask() {
         }
 
         logger.error("Failed to download zig from all mirrors and from the official download url")
-        didWork = false
     }
 }

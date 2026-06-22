@@ -7,7 +7,7 @@ import komple.gradle.kmp.registerGenerateCInteropDefTask
 import komple.gradle.kmp.toPlatform
 import komple.gradle.project.KompleProjectExtension
 import komple.gradle.project.projectGeneratedOutputDir
-import komple.gradle.project.projectTaskName
+import komple.gradle.project.projectDerivedName
 import komple.gradle.project.registerProjectTask
 import komple.gradle.util.camelCased
 import komple.gradle.util.dashCased
@@ -50,20 +50,20 @@ public abstract class CProjectExtension @Inject internal constructor(
         factory: CCompileTaskFactory<Task>,
         compilation: CCompilation,
     ): TaskProvider<out Task> {
-        val taskName = projectTaskName(
+        val taskName = projectDerivedName(
             projectName = cProject.name,
             postfix = "generate${compilation.libraryType.name}" +
                     "Library${compilation.platform.altName.pascalCased()}"
         )
 
-        return tasks.registerProjectTask(taskName, factory.klass, true) { context ->
+        return tasks.registerProjectTask(taskName, factory.klass, true) { tracker ->
             description = "Generate a ${compilation.libraryType.name.lowercase()} library for " +
                     "platform ${compilation.platform.name}"
 
-            this.context = context
+            this.tracker = tracker
             this.cProject = kProject
             this.compilations.add(compilation)
-            this.execEnvironment = factory.execEnvironment
+            this.execEnvironment = factory.execEnvironmentProvider.get()
 
             factory.configure?.invoke(this)
         }

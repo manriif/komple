@@ -16,36 +16,27 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
     context: KompleToolConfigContext<Extension>,
     private val extractTask: TaskProvider<*>
 ) : InstallTaskRegistrationScope<Extension>,
-    DefaultTaskRegistrationScope<Extension>(context) {
+    DefaultTaskRegistrationScope<Extension, InstallTaskContext>(context) {
+
+    override val taskPostfix: String
+        get() = TASK_TOOL_INSTALL_POSTFIX
 
     override fun <T : Task> register(
         klass: KClass<T>,
         cacheable: Boolean,
         configure: T.(context: InstallTaskContext) -> Unit
-    ): TaskProvider<T> = registerTask(TASK_TOOL_INSTALL_POSTFIX, klass, cacheable) { context ->
+    ): TaskProvider<T> = registerToolTask(klass, cacheable) { tracker ->
         description = "Install the $toolName tool."
 
-        val installContext = DefaultInstallTaskContext(
-            context = context,
-            extractDirectory = extractTask.outputDir(project.layout),
-            execEnvironment = this@DefaultInstallTaskRegistrationScope.context.execEnvironment,
-            outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolNameCompat)
+        configure(
+            DefaultInstallTaskContext(
+                tracker = tracker,
+                outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolNameCompat),
+                inputDirectory = extractTask.outputDirectory(project.layout),
+                execEnvironmentProvider = context.execEnvironmentProvider
+            )
         )
-
-        configureTask(
-            context = installContext,
-            configurator = configure,
-            deleteFirst = true
-        )
-
-        if (inputs.files.isEmpty) {
-            logger.warn("Task $name did not registered an input directory, using extract one")
-            inputs.dir(installContext.extractDirectory.directory)
-        }
     }
 
     override fun skip(): TaskProvider<*> = extractTask
-
-    override fun unsupported(): TaskProvider<*> =
-        registerUnsupportedTask(TASK_TOOL_INSTALL_POSTFIX)
 }

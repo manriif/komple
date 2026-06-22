@@ -1,7 +1,7 @@
 package komple.project.c
 
 import komple.exec.KompleExecTask
-import komple.task.TaskContext
+import komple.task.TaskStateTracker
 import komple.task.whenChanged
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -23,8 +23,8 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
     @get:Inject
     protected abstract val workerExecutor: WorkerExecutor
 
-    @get:Nested
-    public abstract val context: Property<TaskContext>
+    @get:Internal
+    public abstract val tracker: Property<TaskStateTracker>
 
     @get:Nested
     public abstract val cProject: Property<CProject>
@@ -38,7 +38,7 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
     protected abstract fun P.configure()
 
     @TaskAction
-    internal fun compile(): Unit = context.get().whenChanged {
+    internal fun compile(): Unit = tracker.get().whenChanged {
         val compilations = compilations.get()
 
         if (compilations.isEmpty()) {

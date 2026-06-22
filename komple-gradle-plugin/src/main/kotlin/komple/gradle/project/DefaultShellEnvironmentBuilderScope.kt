@@ -1,8 +1,8 @@
 package komple.gradle.project
 
 import komple.exec.Command
-import komple.exec.ExecEnvironment
-import komple.exec.ExecEnvironmentBuilderScope
+import komple.exec.ShellEnvironment
+import komple.exec.ShellEnvironmentBuilderScope
 import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
@@ -14,13 +14,13 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
 /**
- * Default implementation of [ExecEnvironmentBuilderScope].
+ * Default implementation of [ShellEnvironmentBuilderScope].
  */
-internal class DefaultExecEnvironmentBuilderScope<Extension : KompleToolExtension>(
+internal class DefaultShellEnvironmentBuilderScope<Extension : KompleToolExtension>(
     private val context: KompleToolConfigContext<Extension>,
-    private val environment: ExecEnvironment,
+    private val environment: ShellEnvironment,
     override val installDirectory: Provider<Directory>
-) : ExecEnvironmentBuilderScope<Extension>,
+) : ShellEnvironmentBuilderScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {
 

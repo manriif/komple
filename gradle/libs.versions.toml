@@ -16,7 +16,7 @@ gradle-pluginPublish = "2.0.0"
 kotlin = "2.4.0"
 lz4java = "1.11.0"
 minisign4j = "1.0.0"
-vanniktech-mavenPublish = "0.36.0"
+vanniktech-mavenPublish = "0.37.0"
 
 [plugins]
 

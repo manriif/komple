@@ -2,30 +2,31 @@ package komple.gradle.task
 
 import komple.gradle.util.append
 import komple.gradle.util.xxHash64
-import komple.task.TaskContext
+import komple.task.TaskStateTracker
 import net.jpountz.xxhash.StreamingXXHash64
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskInputs
 import org.gradle.kotlin.dsl.property
 import java.io.File
+import java.io.Serializable
 
 /**
- * Default implementation of [TaskContext].
+ * Default implementation of [TaskStateTracker].
+ * Tracking is disabled by default.
  */
-internal class DefaultTaskContext(
+internal class DefaultTaskStateTracker(
     private val checksumDirectory: Directory,
     private val logger: Logger,
     objects: ObjectFactory
-) : TaskContext {
+) : TaskStateTracker {
 
-    @get:Internal
+    override var isInputTrackingEnabled: Boolean = false
+    override var isOutputTrackingEnabled: Boolean = false
+
     val inputs = objects.property<TaskInputs>()
-
-    @get:Internal
     val outputFiles = objects.property<FileCollection>()
 
     /**
@@ -39,7 +40,7 @@ internal class DefaultTaskContext(
     private inline fun computeChecksum(block: StreamingXXHash64.() -> Unit): String? = try {
         xxHash64(block)
     } catch (exception: Throwable) {
-        logger.lifecycle("Failed to compute checksum", exception)
+        logger.warn("Failed to compute checksum", exception)
         null
     }
 
@@ -49,17 +50,19 @@ internal class DefaultTaskContext(
     private fun StreamingXXHash64.appendInputValue(value: Any?): Unit = when (value) {
         null -> append("null")
         is String -> append(value)
+        is Enum<*> -> append(value.name)
+        is Long, is Int, is Short, is Byte, is Double, is Float -> append(value.toString())
         is File -> append(value)
         is FileCollection -> value.forEach(::append)
         is Collection<*> -> value.forEach { appendInputValue(it) }
+
         is Map<*, *> -> value.forEach { (key, value) ->
             appendInputValue(key)
             appendInputValue(value)
         }
 
-        is Enum<*> -> append(value.name)
-        is Long, is Int, is Short, is Byte, is Double, is Float -> append(value.toString())
-        else -> error("Unsupported value type: ${value::class}")
+        is Serializable -> append(value)
+        else -> logger.info("Unsupported input type: ${value::class}")
     }
 
     /**
@@ -148,17 +151,22 @@ internal class DefaultTaskContext(
     }
 
     override fun hasInputsChanged(): Boolean =
-        checksumChanged(CHECKSUM_INPUTS, ::computeInputsChecksum)
+        !isInputTrackingEnabled || checksumChanged(CHECKSUM_INPUTS, ::computeInputsChecksum)
 
     override fun hasOutputsChanged(): Boolean =
-        checksumChanged(CHECKSUM_OUTPUTS, ::computeOutputsChecksum)
+        !isOutputTrackingEnabled || checksumChanged(CHECKSUM_OUTPUTS, ::computeOutputsChecksum)
 
     /**
      * Computes the checksums of inputs and output files and writes them to the corresponding files.
      */
     fun updateChecksums() {
-        updateChecksum(CHECKSUM_INPUTS, ::computeInputsChecksum)
-        updateChecksum(CHECKSUM_OUTPUTS, ::computeOutputsChecksum)
+        if (isInputTrackingEnabled) {
+            updateChecksum(CHECKSUM_INPUTS, ::computeInputsChecksum)
+        }
+
+        if (isOutputTrackingEnabled) {
+            updateChecksum(CHECKSUM_OUTPUTS, ::computeOutputsChecksum)
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////

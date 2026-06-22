@@ -1,13 +1,14 @@
 package komple.gradle.tool
 
+import komple.exec.ShellEnvironment
 import komple.gradle.deps.DependencyGraph
 import komple.gradle.exec.DefaultExecEnvironment
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
-import komple.gradle.project.DefaultExecEnvironmentBuilderScope
 import komple.gradle.project.DefaultProjectConfigurationScope
+import komple.gradle.project.DefaultShellEnvironmentBuilderScope
 import komple.gradle.project.KompleProjectExtension
 import komple.gradle.tool.task.DefaultDownloadTaskRegistrationScope
 import komple.gradle.tool.task.DefaultExtractTaskRegistrationScope
@@ -48,7 +49,7 @@ internal fun Project.configureTools(extension: KompleRootProjectExtension) {
             val dependencies = dependencyGraph.getDependencies(this)
 
             dependencies.forEach { dependency ->
-                execEnvironment += dependency.execEnvironment
+                addEnvironment(dependency.shellEnvironment)
 
                 installTaskProvider.configure {
                     dependsOn(dependency.installTaskProvider)
@@ -76,27 +77,35 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
 
     val objects = project.objects
 
-    val execEnvironment = objects.newInstance<DefaultExecEnvironment>(toolName).apply {
+    // Environment that can be used during tool installation only
+    val installExecEnvironment = objects.newInstance<DefaultExecEnvironment>(toolName).apply {
         commandInterpreter = rootExtension.commandInterpreter
     }
 
-    val context = KompleToolConfigContext(project, toolName, extension, execEnvironment)
+    val context = KompleToolConfigContext(project, toolName, extension) {
+        installExecEnvironment
+    }
+
     val installTaskProvider = createInstallTaskProvider(context)
 
     val installDirectory = project.layout
         .dir(installTaskProvider.map { it.outputs.files.singleFile })
 
+    val shellEnvironment = objects.newInstance<ShellEnvironment>()
+
     if (supportHost(CurrentHost)) {
-        DefaultExecEnvironmentBuilderScope(context, execEnvironment, installDirectory)
+        DefaultShellEnvironmentBuilderScope(context, shellEnvironment, installDirectory)
             .use { it.configureEnvironment() }
     }
 
     val tool = DefaultKompleTool(
+        objects = objects,
         configurator = this,
         extension = context.extension,
         toolName = context.toolName,
         dependencyGraph = dependencyGraph,
-        execEnvironment = execEnvironment,
+        installExecEnvironment = installExecEnvironment,
+        shellEnvironment = shellEnvironment,
         installTaskProvider = installTaskProvider,
         installDirectory = installDirectory
     )
@@ -142,13 +151,14 @@ internal fun <Ext : KompleToolExtension> DefaultKompleTool<Ext>.configureProject
     projectExtension: KompleProjectExtension,
     projectConfigurator: ProjectConfigurator
 ) {
-    val context = KompleToolConfigContext(project, toolName, extension, execEnvironment)
+    val context =
+        KompleToolConfigContext(project, toolName, extension, usageExecEnvironmentProvider)
 
     val scope = DefaultProjectConfigurationScope(
         context = context,
         projectExtension = projectExtension,
         configurator = projectConfigurator,
-        installDirectory = installDirectory
+        installDirectory = installDirectory,
     )
 
     configurator.run {
