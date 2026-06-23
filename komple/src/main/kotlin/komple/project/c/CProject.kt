@@ -140,5 +140,5 @@ public interface CProject : KompleProject {
  */
 public fun CProject.allCompilerOptions(platform: Platform): Provider<List<String>> =
     compilerOptions(platform)
-        .zip(definitions(platform), List<String>::plus)
         .zip(optimization(platform), List<String>::plus)
+        .zip(definitions(platform), List<String>::plus)

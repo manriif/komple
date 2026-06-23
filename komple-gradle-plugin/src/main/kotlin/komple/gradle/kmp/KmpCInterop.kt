@@ -5,6 +5,7 @@ import komple.gradle.project.projectDerivedName
 import komple.gradle.project.registerProjectTask
 import komple.gradle.util.pascalCased
 import komple.platform.Platform
+import komple.project.c.allCompilerOptions
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
@@ -67,7 +68,7 @@ private fun DefaultCProject.createDefContent(
         content += "\nheaderFilter = ${files.joinToString(" ") { it.name }}"
     }
 
-    compilerOptions(platform).get().takeUnless { it.isEmpty() }?.let { options ->
+    allCompilerOptions(platform).get().takeUnless { it.isEmpty() }?.let { options ->
         content += "\ncompilerOpts = ${options.joinToString(" ")}"
     }
 
