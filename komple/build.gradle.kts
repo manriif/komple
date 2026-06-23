@@ -5,4 +5,5 @@ plugins {
 
 dependencies {
     compileOnly(libs.kotlin.gradlePlugin)
+    implementation(libs.xz)
 }

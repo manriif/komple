@@ -12,6 +12,12 @@ import java.io.File
 @CacheableTask
 public abstract class UnzipExtractTask : UnarchiveExtractTask() {
 
-    override fun ArchiveOperations.createTree(inputDirectory: File): FileTree =
-        zipTree(inputDirectory.singleFile)
+    /**
+     * Returns the archive file.
+     * Default to the single file present in [inputDirectory].
+     */
+    protected open fun getZipFile(inputDirectory: File): File = inputDirectory.singleFile
+
+    final override fun ArchiveOperations.createTree(inputDirectory: File): FileTree =
+        zipTree(getZipFile(inputDirectory))
 }

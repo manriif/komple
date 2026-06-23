@@ -38,6 +38,6 @@ internal class DefaultShellEnvironmentBuilderScope<Extension : KompleToolExtensi
         valueProvider: Provider<String>
     ) = environment.notClosed { variables.put(name, valueProvider) }
 
-    override fun commandLine(commandProvider: Provider<Command>) =
+    override fun command(commandProvider: Provider<Command>) =
         environment.notClosed { commands.add(commandProvider) }
 }

@@ -10,6 +10,7 @@ import komple.task.extract.ExtractCommandProvider
 import komple.task.extract.ExtractTask
 import komple.task.extract.UnarchiveExtractTask
 import komple.task.extract.UntarGzipExtractTask
+import komple.task.extract.UntarXzExtractTask
 import komple.task.extract.UnzipExtractTask
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Task
@@ -103,23 +104,6 @@ public inline fun <reified T : UnarchiveExtractTask> ExtractTaskRegistrationScop
 }
 
 /**
- * Registers a task that unzip downloaded file.
- *
- * The returned task assumes that a single file has been downloaded and that downloaded file is a
- * valid `.zip`.
- *
- * Tracking is enabled by default.
- * Note that the returned task is cacheable.
- */
-public fun ExtractTaskRegistrationScope<*>.unzip(
-    enclosedContent: Boolean = false,
-    configure: (UnzipExtractTask.(context: ExtractTaskContext) -> Unit)? = null
-): TaskProvider<UnzipExtractTask> = unarchive(
-    enclosedContent = enclosedContent,
-    configure = configure
-)
-
-/**
  * Registers a task that untar downloaded file.
  *
  * The returned task assumes that a single file has been downloaded and that downloaded file is a
@@ -132,6 +116,40 @@ public fun ExtractTaskRegistrationScope<*>.untarGzip(
     enclosedContent: Boolean = false,
     configure: (UntarGzipExtractTask.(context: ExtractTaskContext) -> Unit)? = null
 ): TaskProvider<UntarGzipExtractTask> = unarchive(
+    enclosedContent = enclosedContent,
+    configure = configure
+)
+
+/**
+ * Registers a task that untar downloaded file.
+ *
+ * The returned task assumes that a single file has been downloaded and that downloaded file is a
+ * valid `.tar.xz`.
+ *
+ * Tracking is enabled by default.
+ * Note that the returned task is cacheable.
+ */
+public fun ExtractTaskRegistrationScope<*>.untarXz(
+    enclosedContent: Boolean = false,
+    configure: (UntarXzExtractTask.(context: ExtractTaskContext) -> Unit)? = null
+): TaskProvider<UntarXzExtractTask> = unarchive(
+    enclosedContent = enclosedContent,
+    configure = configure
+)
+
+/**
+ * Registers a task that unzip downloaded file.
+ *
+ * The returned task assumes that a single file has been downloaded and that downloaded file is a
+ * valid `.zip`.
+ *
+ * Tracking is enabled by default.
+ * Note that the returned task is cacheable.
+ */
+public fun ExtractTaskRegistrationScope<*>.unzip(
+    enclosedContent: Boolean = false,
+    configure: (UnzipExtractTask.(context: ExtractTaskContext) -> Unit)? = null
+): TaskProvider<UnzipExtractTask> = unarchive(
     enclosedContent = enclosedContent,
     configure = configure
 )

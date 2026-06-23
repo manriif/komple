@@ -13,11 +13,14 @@ import komple.tool.extension.createExtension
 import komple.tool.extension.kompleProperty
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
-import komple.tool.task.command
 import komple.tool.task.download
 import komple.tool.task.unarchive
 import komple.tool.zig.compile.ZigCCompileTask
 import komple.tool.zig.compile.ZigCompilationParams
+import komple.tool.zig.tasks.ZigDownloadTask
+import komple.tool.zig.tasks.ZigUntarXzExtractTask
+import komple.tool.zig.tasks.ZigUnzipExtractTask
+import komple.tool.zig.tasks.configure
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 import javax.inject.Inject
@@ -61,20 +64,16 @@ public abstract class ZigConfigurator @Inject constructor(name: String) :
         return download<ZigDownloadTask>(false) {
             version = extension.version
             publicKey = extension.publicKey
-            archiveFileName = extension.archiveFileName
+            extension.configure(this)
         }
     }
 
     override fun ExtractTaskRegistrationScope<ZigExtension>.registerExtractTask(): TaskProvider<*> {
         return when (host.operatingSystem) {
-            // TODO this assumes that tar is installed, maybe create a new Komple tool for tar
-            MacOS, Linux -> command<ZigUntarXzExtractTask> {
-                archiveFileName = extension.archiveFileName
-            }
-
-            Windows -> unarchive<ZigUnzipExtractTask>(true) {
-                archiveFileName = extension.archiveFileName
-            }
+            MacOS, Linux -> unarchive<ZigUntarXzExtractTask>(true)
+            Windows -> unarchive<ZigUnzipExtractTask>(true)
+        }.apply {
+            configure { extension.configure(this) }
         }
     }
 

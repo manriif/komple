@@ -1,7 +1,6 @@
 package komple.tool.axcode
 
 import komple.platform.Host
-import komple.platform.OperatingSystem
 import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension

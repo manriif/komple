@@ -9,9 +9,9 @@ import org.gradle.api.provider.Provider
 public interface ShellEnvironmentBuilder {
 
     /**
-     * Registers a command line that will be executed first.
+     * Registers a command that will be executed first.
      */
-    public fun commandLine(commandProvider: Provider<Command>)
+    public fun command(commandProvider: Provider<Command>)
 
     /**
      * Adds [pathProvider] to the environment path variable.

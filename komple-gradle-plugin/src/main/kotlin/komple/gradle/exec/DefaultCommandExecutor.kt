@@ -3,7 +3,7 @@ package komple.gradle.exec
 import komple.exec.Command
 import komple.exec.CommandExecutor
 import komple.exec.CommandInterpreter
-import komple.exec.commandLine
+import komple.exec.command
 import komple.exec.execOutput
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
@@ -41,7 +41,7 @@ internal class DefaultCommandExecutor(
             }
         }
 
-        commandLine(line = command.interpret(parameters.interpreter))
+        command(line = command.interpret(parameters.interpreter))
     }
 
     override fun execute(

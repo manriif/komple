@@ -55,23 +55,21 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
     }
 
     override fun InstallTaskRegistrationScope<EmscriptenExtension>.registerInstallTask(): TaskProvider<*> {
-        return command<EmscriptenInstallTask> {
-            emscriptenVersion = extension.emscriptenVersion
+        val operatingSystem = host.operatingSystem
 
-            emsdkExecutable = when (host.operatingSystem) {
-                MacOS, Linux -> "./emsdk"
-                Windows -> "emsdk.bat"
-            }
+        return command<EmscriptenInstallTask> {
+            this.operatingSystem = operatingSystem
+            this.emscriptenVersion = extension.emscriptenVersion
         }
     }
 
     override fun ShellEnvironmentBuilderScope<EmscriptenExtension>.configureEnvironment() {
-        val (args, envScript) = when (host.operatingSystem) {
-            MacOS, Linux -> arrayOf("source") to "emsdk_env.sh"
-            Windows -> emptyArray<String>() to "emsdk_env.bat"
+        val (envScript, args: Array<String>) = when (host.operatingSystem) {
+            MacOS, Linux -> "emsdk_env.sh" to arrayOf("source")
+            Windows -> "emsdk_env.bat" to emptyArray()
         }
 
-        commandLine(installDirectory.map { directory ->
+        command(installDirectory.map { directory ->
             Command(*args, directory.file(envScript).asFile.absolutePath)
         })
     }

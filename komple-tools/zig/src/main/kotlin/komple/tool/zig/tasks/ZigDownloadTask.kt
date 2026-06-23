@@ -1,4 +1,4 @@
-package komple.tool.zig
+package komple.tool.zig.tasks
 
 import com.falsepattern.minisign.lib.PublicKey
 import com.falsepattern.minisign.lib.Signature
@@ -19,16 +19,13 @@ import java.net.http.HttpResponse
  * [mirrors guidelines](https://ziglang.org/download/community-mirrors/).
  */
 @CacheableTask
-internal abstract class ZigDownloadTask : DownloadTask() {
+internal abstract class ZigDownloadTask : DownloadTask(), ZigTask {
 
     @get:Input
     abstract val version: Property<String>
 
     @get:Input
     abstract val publicKey: Property<String>
-
-    @get:Input
-    abstract val archiveFileName: Property<String>
 
     /**
      * Downloads the community mirror list.

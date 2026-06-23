@@ -5,15 +5,15 @@ import komple.exec.ShellEnvironmentBuilderScope
 import komple.exec.path
 import komple.kompleProperty
 import komple.platform.Host
-import komple.tool.configurator.VersionedKompleToolConfigurator
 import komple.task.integrity.DigestAlgorithm
-import komple.task.singleFile
+import komple.tool.configurator.VersionedKompleToolConfigurator
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.InstallTaskRegistrationScope
 import komple.tool.task.IntegrityTaskRegistrationScope
 import komple.tool.task.checksum
 import komple.tool.task.command
+import komple.tool.task.untarXz
 import komple.tool.task.url
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
@@ -47,27 +47,18 @@ public abstract class WabtConfigurator @Inject constructor(name: String) :
     }
 
     override fun ExtractTaskRegistrationScope<Extension>.registerExtractTask(): TaskProvider<*> {
-        // TODO this assumes that tar is installed, maybe create a new Komple tool for tar
-        return command { inputDirectory, outputDirectory ->
-            Command(
-                "tar",
-                "-xJf",
-                inputDirectory.singleFile,
-                "-C",
-                outputDirectory.absolutePath,
-                "--strip-components=1"
-            )
-        }
+        return untarXz(true)
     }
 
     override fun InstallTaskRegistrationScope<Extension>.registerInstallTask(): TaskProvider<*> {
         return command { outputDirectory ->
-            val buildDirectory = outputDirectory
+            val buildPath = outputDirectory
                 .resolve("build")
                 .apply(File::mkdirs)
+                .absolutePath
 
-            Command("cmake", "-S", ".", "-B", buildDirectory.absolutePath) {
-                then("cmake", "--build", buildDirectory.absolutePath)
+            Command("cmake", "-S", ".", "-B", buildPath) {
+                then("cmake", "--build", buildPath)
             }
         }
     }
