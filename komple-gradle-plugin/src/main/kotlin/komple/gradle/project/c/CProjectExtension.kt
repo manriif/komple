@@ -1,13 +1,12 @@
 package komple.gradle.project.c
 
 import komple.gradle.kmp.CInteropSettings
-import komple.gradle.kmp.DefFileOptions
 import komple.gradle.kmp.DefaultCInteropSettings
-import komple.gradle.kmp.registerGenerateCInteropDefTask
+import komple.gradle.kmp.GenerateCInteropDefTask
 import komple.gradle.kmp.toPlatform
 import komple.gradle.project.KompleProjectExtension
-import komple.gradle.project.projectGeneratedOutputDir
 import komple.gradle.project.projectDerivedName
+import komple.gradle.project.projectGeneratedOutputDir
 import komple.gradle.project.registerProjectTask
 import komple.gradle.util.camelCased
 import komple.gradle.util.dashCased
@@ -24,7 +23,6 @@ import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.newInstance
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import javax.inject.Inject
@@ -104,10 +102,6 @@ public abstract class CProjectExtension @Inject internal constructor(
         val compilation = CCompilationImpl(platform, type, libraryFile)
         val compileTaskProvider = createCompileTaskProvider(factory, compilation)
 
-        compileTaskProvider.configure {
-            outputs.file(libraryFile)
-        }
-
         val implicitLibraryFile = layout
             .file(compileTaskProvider.map { it.outputs.files.singleFile })
 
@@ -132,16 +126,15 @@ public abstract class CProjectExtension @Inject internal constructor(
             }
 
             cinterops.register(cProject.name.camelCased()) {
-                val defFileOptions = project.objects.property<DefFileOptions>()
-
-                val generateCInteropDefTaskProvider = project.registerGenerateCInteropDefTask(
-                    cProject = cProject,
-                    optionsProvider = defFileOptions,
-                    platform = platform,
+                val generateDefTaskProvider = tasks.registerProjectTask<GenerateCInteropDefTask>(
+                    name = projectDerivedName(
+                        projectName = cProject.name,
+                        postfix = "generateCInteropDef${platform.altName.pascalCased()}"
+                    )
                 )
 
                 val settings = project.objects
-                    .newInstance<DefaultCInteropSettings>(this, generateCInteropDefTaskProvider)
+                    .newInstance<DefaultCInteropSettings>(this, generateDefTaskProvider)
 
                 configureInterop?.invoke(settings)
 
@@ -149,24 +142,20 @@ public abstract class CProjectExtension @Inject internal constructor(
                 val defFileName = "${cProject.name.dashCased()}-${platform.altName}.def"
                 val defFileProvider = cInteropDir.map { it.file(defFileName) }
 
-                val defFile = project.objects.fileProperty().apply {
-                    set(defFileProvider)
+                generateDefTaskProvider.configure {
+                    this.cProject = kProject
+                    this.platform = platform
+                    this.excludedFunctions = settings.excludedFunctions
+                    this.noStringConversion = settings.noStringConversion
+                    this.definitionFile = defFileProvider
+                    this.libraryFile = library.libraryFile
                 }
-
-                defFileOptions.set(
-                    DefFileOptions(
-                        excludedFunctions = settings.excludedFunctions,
-                        noStringConversion = settings.noStringConversion,
-                        outputFile = defFile,
-                        libraryFile = library.libraryFile
-                    )
-                )
 
                 project.tasks.named(interopProcessingTaskName).configure {
-                    dependsOn(generateCInteropDefTaskProvider)
+                    dependsOn(generateDefTaskProvider)
                 }
 
-                definitionFile = defFile
+                definitionFile = defFileProvider
                 includeDirs(cProject.includeDirectories)
             }
         }

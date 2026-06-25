@@ -1,9 +1,11 @@
 package komple.task
 
+import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -33,3 +35,21 @@ public fun FileSystemOperations.clearAndGetAsFile(directory: Provider<Directory>
         directory.mkdirs()
     }
 }
+
+/**
+ * Disables caching for the task provided by [provider].
+ */
+public fun noCache(provider: TaskProvider<out Task>): TaskProvider<*> {
+    provider.configure {
+        outputs.cacheIf { false }
+    }
+
+    return provider
+}
+
+/**
+ * Disables caching for the task provided by [provider].
+ */
+public inline fun <R> R.noCache(
+    provider: R.() -> TaskProvider<*>
+): TaskProvider<*> = noCache(provider())

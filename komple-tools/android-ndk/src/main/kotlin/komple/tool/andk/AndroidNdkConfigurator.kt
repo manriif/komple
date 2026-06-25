@@ -7,6 +7,7 @@ import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
 import komple.project.registerCompileTask
+import komple.task.noCache
 import komple.task.integrity.DigestAlgorithm
 import komple.tool.andk.compile.AndroidNdkCCompileTask
 import komple.tool.andk.compile.AndroidNdkCompilationParams
@@ -28,6 +29,9 @@ import javax.inject.Inject
 
 /**
  * Configurator for the Android NDK.
+ *
+ * NDK is huge and contains many files so Gradle level caching is disabled for all its task. Caching
+ * is leveraged to Komple tracker.
  */
 public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     DefaultKompleToolConfigurator<AndroidNdkExtension>(name) {
@@ -67,15 +71,17 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
             Windows -> "windows.zip"
         }
 
-        return url(extension.version.map { version ->
-            val major = version.substringBefore('.')
-            val file = "android-ndk-${major}-$platformFile"
-            "https://dl.google.com/android/repository/$file"
-        })
+        return noCache(
+            url(extension.version.map { version ->
+                val major = version.substringBefore('.')
+                val file = "android-ndk-${major}-$platformFile"
+                "https://dl.google.com/android/repository/$file"
+            })
+        )
     }
 
     override fun IntegrityTaskRegistrationScope<AndroidNdkExtension>.registerIntegrityTask(): TaskProvider<*> {
-        return extension.checksums.run {
+        return extension.checksums.noCache {
             checksum(
                 checksum = when (host.operatingSystem) {
                     Linux -> linux
@@ -88,19 +94,15 @@ public abstract class AndroidNdkConfigurator @Inject constructor(name: String) :
     }
 
     override fun ExtractTaskRegistrationScope<AndroidNdkExtension>.registerExtractTask(): TaskProvider<*> {
-        return when (host.operatingSystem) {
-            Linux, Windows -> unzip(true)
+        return noCache(
+            when (host.operatingSystem) {
+                Linux, Windows -> unzip(true)
 
-            MacOS -> dmg<AndroidNdkDmgExtractTask> {
-                version = extension.version
+                MacOS -> dmg<AndroidNdkDmgExtractTask> {
+                    version = extension.version
+                }
             }
-        }.apply {
-            configure {
-                // NDK is huge and contains many files, skip caching as it has a significant impact
-                // on build time
-                outputs.cacheIf { false }
-            }
-        }
+        )
     }
 
     override fun ShellEnvironmentBuilderScope<AndroidNdkExtension>.configureEnvironment() {

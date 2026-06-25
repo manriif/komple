@@ -42,9 +42,23 @@ internal fun projectDerivedName(projectName: String, postfix: String): String {
 internal fun <T : Task> TaskContainer.registerProjectTask(
     name: String,
     type: KClass<T>,
-    cacheable: Boolean,
-    configure: T.(context: TaskStateTracker) -> Unit
+    cacheable: Boolean = false,
+    configure: (T.(context: TaskStateTracker) -> Unit)? = null
 ): TaskProvider<T> = registerKompleTask(name, type, cacheable) { context ->
     group = KOMPLE_PROJECTS_TASK_GROUP
-    configure(this, context)
+    configure?.invoke(this, context)
 }
+
+/**
+ * Registers a project task and applies default configuration.
+ */
+internal inline fun <reified T : Task> TaskContainer.registerProjectTask(
+    name: String,
+    cacheable: Boolean = false,
+    noinline configure: (T.(context: TaskStateTracker) -> Unit)? = null
+): TaskProvider<T> = registerProjectTask(
+    name = name,
+    type = T::class,
+    cacheable = cacheable,
+    configure = configure
+)

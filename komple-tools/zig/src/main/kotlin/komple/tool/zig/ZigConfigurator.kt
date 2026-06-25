@@ -7,6 +7,7 @@ import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
 import komple.project.registerCompileTask
+import komple.task.noCache
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
@@ -69,12 +70,14 @@ public abstract class ZigConfigurator @Inject constructor(name: String) :
     }
 
     override fun ExtractTaskRegistrationScope<ZigExtension>.registerExtractTask(): TaskProvider<*> {
-        return when (host.operatingSystem) {
-            MacOS, Linux -> unarchive<ZigUntarXzExtractTask>(true)
-            Windows -> unarchive<ZigUnzipExtractTask>(true)
-        }.apply {
-            configure { extension.configure(this) }
-        }
+        return noCache(
+            when (host.operatingSystem) {
+                MacOS, Linux -> unarchive<ZigUntarXzExtractTask>(true)
+                Windows -> unarchive<ZigUnzipExtractTask>(true)
+            }.apply {
+                configure { extension.configure(this) }
+            }
+        )
     }
 
     override fun ShellEnvironmentBuilderScope<ZigExtension>.configureEnvironment() {
