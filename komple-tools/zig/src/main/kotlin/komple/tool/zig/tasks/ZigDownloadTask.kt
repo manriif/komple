@@ -47,6 +47,7 @@ internal abstract class ZigDownloadTask : DownloadTask(), ZigTask {
         mirror: String,
         file: File
     ) {
+        file.parentFile.mkdirs()
         downloadFile(file, "$mirror/${file.name}?source=${KOMPLE_GROUP}")
     }
 
