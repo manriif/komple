@@ -1,8 +1,6 @@
 package komple.gradle.project.c
 
-import komple.platform.Platform
 import komple.project.c.CCompilation
-import komple.project.c.CLibraryType
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
@@ -29,21 +27,3 @@ public interface CLibrary {
      */
     public val libraryFile: Provider<RegularFile>
 }
-
-/**
- * Implementation of [CCompilation].
- */
-internal class CCompilationImpl(
-    override val platform: Platform,
-    override val libraryType: CLibraryType,
-    override val libraryFile: Provider<RegularFile>
-) : CCompilation
-
-/**
- * Implementation of [CLibrary].
- */
-internal class CLibraryImpl(
-    override val compileTaskProvider: TaskProvider<*>,
-    override val libraryFile: Provider<RegularFile>,
-    override val compilation: CCompilation
-) : CLibrary

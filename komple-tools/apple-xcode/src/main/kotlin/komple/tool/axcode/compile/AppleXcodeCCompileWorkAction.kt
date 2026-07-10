@@ -4,6 +4,7 @@ import komple.exec.executeWithOutput
 import komple.platform.OperatingSystem
 import komple.project.c.CCompileWorkAction
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 
 /**
  * Apple Xcode [CCompileWorkAction].
@@ -17,10 +18,17 @@ internal abstract class AppleXcodeCCompileWorkAction :
     private fun xcodeStaticCompilerFlags(
         arch: String,
         sdk: String,
-        flag: String
+        platform: String,
+        version: Provider<String>
     ): Array<String> {
         val sdkPath = commandExecutor.executeWithOutput("xcrun", "--sdk", sdk, "--show-sdk-path")
-        return arrayOf("clang", "-arch", arch, "-isysroot", sdkPath, flag)
+        var target = "$arch-apple-$platform${version.get()}"
+
+        if (sdk.endsWith("simulator")) {
+            target += "-simulator"
+        }
+
+        return arrayOf("xcrun", "clang", "-target", target, "-isysroot", sdkPath)
     }
 
     override fun execute() {
@@ -58,7 +66,8 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             else -> error("Unsupported macOS architecture: $architecture")
                         },
                         sdk = "macosx",
-                        flag = "-mmacosx-version-min=${params.versionMinMacos.get()}"
+                        platform = "macos",
+                        version = params.versionMinMacos
                     )
 
                     is IOS -> xcodeStaticCompilerFlags(
@@ -71,7 +80,8 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             Default -> "iphoneos"
                             Simulator -> "iphonesimulator"
                         },
-                        flag = "-mios-version-min=${params.versionMinIos.get()}"
+                        platform = "ios",
+                        version = params.versionMinIos
                     )
 
                     is TvOS -> xcodeStaticCompilerFlags(
@@ -84,7 +94,8 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             Default -> "appletvos"
                             Simulator -> "appletvsimulator"
                         },
-                        flag = "-mtvos-version-min=${params.versionMinTvos.get()}"
+                        platform = "tvos",
+                        version = params.versionMinTvos
                     )
 
                     is WatchOS -> xcodeStaticCompilerFlags(
@@ -103,7 +114,8 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             Default, Device -> "watchos"
                             Simulator -> "watchsimulator"
                         },
-                        flag = "-mwatchos-version-min=${params.versionMinWatchos.get()}"
+                        platform = "watchos",
+                        version = params.versionMinTvos
                     )
                 }
 

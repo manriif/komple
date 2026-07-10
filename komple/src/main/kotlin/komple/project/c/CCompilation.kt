@@ -12,20 +12,20 @@ import org.gradle.api.tasks.OutputFile
 public interface CCompilation {
 
     /**
-     * Platform to compile to.
+     * File the library should be written to.
      */
-    @get:Input
-    public val platform: Platform
+    @get:OutputFile
+    public val libraryFile: Provider<RegularFile>
 
     /**
      *  Type of library to produce.
      */
     @get:Input
-    public val libraryType: CLibraryType
+    public val libraryType: Provider<CLibraryType>
 
     /**
-     * File the library should be written to.
+     * Platform to compile to.
      */
-    @get:OutputFile
-    public val libraryFile: Provider<RegularFile>
+    @get:Input
+    public val platform: Provider<Platform>
 }

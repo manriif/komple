@@ -64,7 +64,7 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
                 this.libraryFile = compilation.libraryFile.get().asFile
                 this.sourceFiles = cProject.sourceFiles
                 this.includeDirectories = cProject.includeDirectories
-                this.compilerOptions = cProject.allCompilerOptions(compilation.platform)
+                this.compilerOptions = cProject.allCompilerOptions(compilation.platform.get())
                 configure()
             }
         }

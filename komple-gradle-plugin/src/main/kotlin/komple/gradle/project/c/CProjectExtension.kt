@@ -19,6 +19,7 @@ import komple.project.c.CProject
 import komple.task.enableTracking
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
@@ -33,7 +34,8 @@ import javax.inject.Inject
 public abstract class CProjectExtension @Inject internal constructor(
     internal val cProject: DefaultCProject,
     internal val tasks: TaskContainer,
-    internal val layout: ProjectLayout
+    internal val layout: ProjectLayout,
+    internal val objects: ObjectFactory
 ) : KompleProjectExtension {
 
     internal val compileTaskFactories = mutableListOf<CCompileTaskFactory<*>>()
@@ -48,16 +50,17 @@ public abstract class CProjectExtension @Inject internal constructor(
     private fun <Task : CCompileTask<*, *>> createCompileTaskProvider(
         factory: CCompileTaskFactory<Task>,
         compilation: CCompilation,
+        libraryType: CLibraryType,
+        platform: Platform
     ): TaskProvider<out Task> {
         val taskName = projectDerivedName(
             projectName = cProject.name,
-            postfix = "generate${compilation.libraryType.name}" +
-                    "Library${compilation.platform.altName.pascalCased()}"
+            postfix = "generate${libraryType.name}Library${platform.altName.pascalCased()}"
         )
 
         return tasks.registerProjectTask(taskName, factory.klass, true) { tracker ->
-            description = "Generate a ${compilation.libraryType.name.lowercase()} library for " +
-                    "platform ${compilation.platform.name}"
+            description = "Generate a ${libraryType.name.lowercase()} library for " +
+                    "platform ${platform.name}"
 
             this.tracker = tracker
             this.cProject = kProject
@@ -98,9 +101,13 @@ public abstract class CProjectExtension @Inject internal constructor(
             subdirectory = "libraries/${type.name.lowercase()}/${platform.name}"
         )
 
-        val libraryFile = libraryDirectory.zip(libraryFileName, Directory::file)
-        val compilation = CCompilationImpl(platform, type, libraryFile)
-        val compileTaskProvider = createCompileTaskProvider(factory, compilation)
+        val compilation = objects.newInstance<CCompilationImpl>().apply {
+            this.libraryFile = libraryDirectory.zip(libraryFileName, Directory::file)
+            this.libraryType = type
+            this.platform = platform
+        }
+
+        val compileTaskProvider = createCompileTaskProvider(factory, compilation, type, platform)
 
         val implicitLibraryFile = layout
             .file(compileTaskProvider.map { it.outputs.files.singleFile })
