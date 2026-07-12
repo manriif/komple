@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2026 Maanrifa Bacar Ali
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package komple.gradle.task
 
 import komple.gradle.kompleChecksumsDirectory
@@ -32,16 +53,16 @@ private fun Project.checksumFile(taskName: String): Directory {
  */
 public fun <T : Task> T.configureWithContext(configure: T.(context: TaskStateTracker) -> Unit) {
     val checksumDirectory = project.checksumFile(name.dashCased())
-    val context = DefaultTaskStateTracker(checksumDirectory, logger, project.objects)
+    val tracker = DefaultTaskStateTracker(checksumDirectory, logger, project.objects)
 
-    context.disableTracking()
-    configure(this, context)
+    tracker.disableTracking()
+    configure(this, tracker)
 
-    context.inputs = inputs
-    context.outputFiles = outputs.files
+    tracker.inputs = inputs
+    tracker.outputFiles = outputs.files
 
     doLast {
-        context.updateChecksums()
+        tracker.updateChecksums()
     }
 }
 

@@ -1,3 +1,5 @@
+package komple.gradle.project
+
 /**
  * Copyright (C) 2026 Maanrifa Bacar Ali
  *
@@ -19,27 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package komple.tool.andk
-
-import org.gradle.api.provider.Property
-
 /**
- * SHA-1 checksums for Android NDK integrity check.
+ * Exception thrown when no suitable compiler was found for compiling to a particular platform.
  */
-public interface AndroidNdkChecksums {
-
-    /**
-     * Linux host checksum.
-     */
-    public val linux: Property<String>
-
-    /**
-     * MacOS host checksum.
-     */
-    public val macos: Property<String>
-
-    /**
-     * Windows host checksum.
-     */
-    public val windows: Property<String>
-}
+internal class CompilerNotFoundException(message: String, cause: Throwable? = null) :
+    Exception(message, cause)

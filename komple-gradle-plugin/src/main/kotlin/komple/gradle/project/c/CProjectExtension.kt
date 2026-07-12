@@ -1,9 +1,31 @@
+/**
+ * Copyright (C) 2026 Maanrifa Bacar Ali
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package komple.gradle.project.c
 
 import komple.gradle.kmp.CInteropSettings
 import komple.gradle.kmp.DefaultCInteropSettings
 import komple.gradle.kmp.GenerateCInteropDefTask
 import komple.gradle.kmp.toPlatform
+import komple.gradle.project.CompilerNotFoundException
 import komple.gradle.project.KompleProjectExtension
 import komple.gradle.project.projectDerivedName
 import komple.gradle.project.projectGeneratedOutputDir
@@ -80,9 +102,9 @@ public abstract class CProjectExtension @Inject internal constructor(
         platform: Platform
     ): CLibrary {
         val factory = compileTaskFactories.firstOrNull { it.platformFilter(platform) }
-            ?: throw MissingCompilerException(
-                "No compile task could be created for compiling on platform $platform, " +
-                        "registering a tool able to compile for the platform can solve the problem"
+            ?: throw CompilerNotFoundException(
+                "No task could be created for compiling for platform $platform, registering a " +
+                        "tool able to compile for $platform can solve the problem"
             )
 
         val (libraryPrefix, librarySuffix) = platform.operatingSystem.library.run {

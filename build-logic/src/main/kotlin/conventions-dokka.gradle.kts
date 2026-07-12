@@ -19,27 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package komple.tool.andk
+plugins {
+    org.jetbrains.dokka
+}
 
-import org.gradle.api.provider.Property
+dokka {
+    dokkaPublications.html {
+        moduleName = localName
+        includes.from("README.md")
+    }
 
-/**
- * SHA-1 checksums for Android NDK integrity check.
- */
-public interface AndroidNdkChecksums {
-
-    /**
-     * Linux host checksum.
-     */
-    public val linux: Property<String>
-
-    /**
-     * MacOS host checksum.
-     */
-    public val macos: Property<String>
-
-    /**
-     * Windows host checksum.
-     */
-    public val windows: Property<String>
+    pluginsConfiguration.html {
+        footerMessage = "© $projectInceptionYear $projectDevName"
+    }
 }

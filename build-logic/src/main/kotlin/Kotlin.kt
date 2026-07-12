@@ -1,7 +1,7 @@
+import org.gradle.api.tasks.SourceSet
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.assign
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
 /**
  * Common Kotlin configuration for all projects.
@@ -12,7 +12,6 @@ fun KotlinJvmProjectExtension.configureKotlin() {
     compilerOptions {
         freeCompilerArgs.run {
             add("-Xreturn-value-checker=full")
-            add("-Xexplicit-backing-fields")
             add("-Xcontext-parameters")
             add("-Xcontext-sensitive-resolution")
         }
@@ -22,7 +21,7 @@ fun KotlinJvmProjectExtension.configureKotlin() {
         languageVersion = JavaLanguageVersion.of(project.libs.versions.jvm.toolchain.get())
     }
 
-    sourceSets.named(KotlinCompilation.MAIN_COMPILATION_NAME) {
+    sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).configure {
         languageSettings.optIn("komple.KompleInternalApi")
     }
 }
