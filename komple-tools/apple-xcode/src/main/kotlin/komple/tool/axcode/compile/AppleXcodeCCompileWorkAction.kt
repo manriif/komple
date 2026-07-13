@@ -136,7 +136,7 @@ internal abstract class AppleXcodeCCompileWorkAction :
                             Simulator -> "watchsimulator"
                         },
                         platform = "watchos",
-                        version = params.versionMinTvos
+                        version = params.versionMinWatchos
                     )
                 }
 

@@ -49,9 +49,9 @@ private fun Project.checksumFile(taskName: String): Directory {
 }
 
 /**
- * Configures this task and invokes [configure] with a [TaskStateTracker].
+ * Configures this task and invokes [configure], passing it a [TaskStateTracker].
  */
-public fun <T : Task> T.configureWithContext(configure: T.(context: TaskStateTracker) -> Unit) {
+public fun <T : Task> T.track(configure: T.(tracker: TaskStateTracker) -> Unit) {
     val checksumDirectory = project.checksumFile(name.dashCased())
     val tracker = DefaultTaskStateTracker(checksumDirectory, logger, project.objects)
 
@@ -79,5 +79,5 @@ internal fun <T : Task> TaskContainer.registerKompleTask(
         outputs.cacheIf { true }
     }
 
-    configureWithContext(configure)
+    track(configure)
 }
