@@ -1,0 +1,41 @@
+# Version catalog is a central place for you to declare and version dependencies
+# https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
+# https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
+
+[versions]
+
+# Project version
+komple = "0.0.1"
+
+# Jvm toolchain
+jvm-toolchain = "17"
+
+# Libs
+dokka = "2.2.0"
+gradle-pluginPublish = "2.0.0"
+kotlin = "2.4.0"
+lz4java = "1.11.0"
+minisign4j = "1.0.0"
+vanniktech-mavenPublish = "0.37.0"
+xz = "1.12"
+
+[plugins]
+
+conventions-common = { id = "conventions-common", version.ref = "komple" }
+conventions-gradle = { id = "conventions-gradle", version.ref = "komple" }
+conventions-tool = { id = "conventions-tool", version.ref = "komple" }
+
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+gradle-pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradle-pluginPublish" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-mavenPublish" }
+
+[libraries]
+
+dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+gradle-pluginPublish = { module = "com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin", version.ref = "gradle-pluginPublish" }
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+lz4java = { module = "at.yawk.lz4:lz4-java", version.ref = "lz4java" }
+minisign4j = { module = "com.falsepattern:minisign4j", version.ref = "minisign4j" }
+vanniktech-mavenPublish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-mavenPublish" }
+xz = { module = "org.tukaani:xz", version.ref = "xz" }
