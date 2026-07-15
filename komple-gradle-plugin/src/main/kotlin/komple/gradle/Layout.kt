@@ -47,6 +47,12 @@ internal val Gradle.kompleChecksumsDirectory: Directory
     get() = kompleCacheDirectory("checksums")
 
 /**
+ * Returns the directory where the tools can cache content.
+ */
+internal val Gradle.kompleToolsCachesDirectory: Directory
+    get() = kompleCacheDirectory("caches")
+
+/**
  * Returns the directory where the tools are downloaded.
  */
 internal val Gradle.kompleToolsDownloadsDirectory: Directory

@@ -5,6 +5,7 @@
 # Komple
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![API](https://img.shields.io/badge/API-dokka-green)][website]
 
 Komple is a Gradle plugin that downloads, verifies, installs and exposes native development
 tools, such as compilers, SDKs and CLI utilities, directly from your build. There's no need for

@@ -25,8 +25,8 @@ plugins {
 }
 
 mavenPublishing {
-    //publishToMavenCentral()
-    //signAllPublications()
+    publishToMavenCentral()
+    signAllPublications()
 
     coordinates(
         groupId = projectGroup,

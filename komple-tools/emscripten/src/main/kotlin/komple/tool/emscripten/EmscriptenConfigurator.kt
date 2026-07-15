@@ -37,6 +37,7 @@ import komple.tool.task.checksum
 import komple.tool.task.command
 import komple.tool.task.unzip
 import komple.tool.task.url
+import org.gradle.api.file.Directory
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 import javax.inject.Inject
@@ -55,7 +56,7 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
         return createExtension {
             extension.run {
                 version.convention(kompleProperty("emsdk.version"))
-                emscriptenVersion.convention(version)
+                emscriptenVersion.convention(kompleProperty("emsdk.emscriptenVersion"))
                 checksum.convention(kompleProperty("emsdk.checksum"))
             }
         }
@@ -90,8 +91,14 @@ public abstract class EmscriptenConfigurator @Inject constructor(name: String) :
             Windows -> "emsdk_env.bat" to emptyArray()
         }
 
-        command(installDirectory.map { directory ->
-            Command(*args, directory.file(envScript).asFile.absolutePath)
-        })
+        command(
+            cacheDirectory
+                .zip(extension.emscriptenVersion, Directory::dir)
+                .zip(installDirectory) { cacheDir, installDir ->
+                    Command(*args, installDir.file(envScript).asFile.absolutePath) {
+                        then("export", "EM_CACHE=${cacheDir.asFile.absolutePath}")
+                    }
+                }
+        )
     }
 }

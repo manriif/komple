@@ -40,6 +40,7 @@ import org.gradle.api.provider.ProviderFactory
 internal class DefaultShellEnvironmentBuilderScope<Extension : KompleToolExtension>(
     private val context: KompleToolConfigContext<Extension>,
     private val environment: ShellEnvironment,
+    override val cacheDirectory: Provider<Directory>,
     override val installDirectory: Provider<Directory>
 ) : ShellEnvironmentBuilderScope<Extension>,
     HasExtension<Extension> by context,

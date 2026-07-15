@@ -30,6 +30,11 @@ import org.gradle.api.provider.Provider
 public interface InstallTaskContext : OutputToolTaskContext {
 
     /**
+     * Directory where files can be cached.
+     */
+    public val cacheDirectory: Provider<Directory>
+
+    /**
      * Directory containing previous step file(s).
      */
     public val inputDirectory: Provider<Directory>
