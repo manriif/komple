@@ -24,9 +24,7 @@ rootProject.name = "build-logic"
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
         gradlePluginPortal()
-        google()
     }
 
     versionCatalogs {
