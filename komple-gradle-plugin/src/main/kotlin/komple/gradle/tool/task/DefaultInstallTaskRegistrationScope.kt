@@ -27,6 +27,8 @@ import komple.tool.extension.KompleToolExtension
 import komple.tool.task.InstallTaskContext
 import komple.tool.task.InstallTaskRegistrationScope
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import kotlin.reflect.KClass
 
@@ -35,6 +37,7 @@ import kotlin.reflect.KClass
  */
 internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtension>(
     context: KompleToolConfigContext<Extension>,
+    private val cacheDirectory: Provider<Directory>,
     private val extractTask: TaskProvider<*>
 ) : InstallTaskRegistrationScope<Extension>,
     DefaultTaskRegistrationScope<Extension, InstallTaskContext>(context) {
@@ -53,6 +56,7 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
             DefaultInstallTaskContext(
                 tracker = tracker,
                 outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolNameCompat),
+                cacheDirectory = cacheDirectory,
                 inputDirectory = extractTask.outputDirectory(project.layout),
                 execEnvironmentProvider = context.execEnvironmentProvider
             )

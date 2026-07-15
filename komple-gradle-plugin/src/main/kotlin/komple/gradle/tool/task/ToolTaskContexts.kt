@@ -103,6 +103,7 @@ internal class DefaultExtractTaskContext(
 internal class DefaultInstallTaskContext(
     tracker: TaskStateTracker,
     outputDirectory: Directory,
+    override val cacheDirectory: Provider<Directory>,
     override val inputDirectory: Provider<Directory>,
     execEnvironmentProvider: ExecEnvironmentProvider
 ) : InstallTaskContext,

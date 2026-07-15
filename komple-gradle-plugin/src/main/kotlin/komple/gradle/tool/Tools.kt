@@ -25,6 +25,7 @@ import komple.exec.ShellEnvironment
 import komple.gradle.deps.DependencyGraph
 import komple.gradle.exec.DefaultExecEnvironment
 import komple.gradle.extension.KompleRootProjectExtension
+import komple.gradle.kompleToolsCachesDirectory
 import komple.gradle.kompleToolsInstallsDirectory
 import komple.gradle.platform.CurrentHost
 import komple.gradle.platform.UnsupportedHostException
@@ -38,10 +39,13 @@ import komple.gradle.tool.task.DefaultIntegrityTaskRegistrationScope
 import komple.gradle.tool.task.TASK_TOOL_INSTALL_POSTFIX
 import komple.gradle.tool.task.toolTaskName
 import komple.gradle.util.camelCased
+import komple.gradle.util.dashCased
 import komple.project.ProjectConfigurator
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.assign
@@ -107,7 +111,9 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         installExecEnvironment
     }
 
-    val installTaskProvider = createInstallTaskProvider(context)
+    val cacheDirectory = project.gradle.kompleToolsCachesDirectory.dir(toolName.dashCased())
+    val cacheDirectoryProvider = project.providers.provider { cacheDirectory }
+    val installTaskProvider = createInstallTaskProvider(context, cacheDirectoryProvider)
 
     val installDirectory = project.layout
         .dir(installTaskProvider.map { it.outputs.files.singleFile })
@@ -115,8 +121,12 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     val shellEnvironment = objects.newInstance<ShellEnvironment>()
 
     if (supportHost(CurrentHost)) {
-        DefaultShellEnvironmentBuilderScope(context, shellEnvironment, installDirectory)
-            .use { it.configureEnvironment() }
+        DefaultShellEnvironmentBuilderScope(
+            context = context,
+            environment = shellEnvironment,
+            cacheDirectory = cacheDirectoryProvider,
+            installDirectory = installDirectory
+        ).use { it.configureEnvironment() }
     }
 
     val tool = DefaultKompleTool(
@@ -138,10 +148,12 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
  * Creates the task responsible for installing the tool.
  */
 private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstallTaskProvider(
-    context: KompleToolConfigContext<Ext>
+    context: KompleToolConfigContext<Ext>,
+    cacheDirectory: Provider<Directory>
 ): TaskProvider<*> = if (supportHost(CurrentHost)) {
     DefaultInstallTaskRegistrationScope(
         context = context,
+        cacheDirectory = cacheDirectory,
         extractTask = DefaultExtractTaskRegistrationScope(
             context = context,
             integrityTask = DefaultIntegrityTaskRegistrationScope(

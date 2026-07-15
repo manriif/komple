@@ -13,8 +13,8 @@ Applying the plugin registers an `emscripten` tool exposing the below DSL:
 
 - `version` — `emsdk` archive tag to download from `github.com/emscripten-core/emsdk`.
 - `checksum` — SHA-256 checksum of the downloaded archive.
-- `emscriptenVersion` — Emscripten toolchain version passed to `emsdk install`/`emsdk activate`
-  (accepts a version string or `latest`); defaults to `version`.
+- `emscriptenVersion` — Emscripten toolchain version passed to `emsdk install`/`emsdk activate`.
+  Note that it is not recommended to use `latest` as a version as this can break caching.
 
 ```kotlin
 // root build.gradle.kts
@@ -27,7 +27,7 @@ komple {
     emscripten {
         version = "<version>"
         checksum = "<checksum>"
-        emscriptenVersion = "latest"
+        emscriptenVersion = "<emscriptenVersion>"
     }
 }
 ```
