@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import org.gradle.plugin.compatibility.compatibility
+
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
@@ -44,9 +46,15 @@ gradlePlugin {
         create("komple") {
             id = projectGroup
             implementationClass = "komple.gradle.KomplePlugin"
-            displayName = "Komple"
+            displayName = localName
             description = localDescription
             tags = localTags.split(',')
+
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 }

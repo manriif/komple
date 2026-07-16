@@ -1,3 +1,5 @@
+import org.gradle.plugin.compatibility.compatibility
+
 /**
  * Copyright (C) 2026 Maanrifa Bacar Ali
  *
@@ -40,6 +42,12 @@ gradlePlugin {
             displayName = localName
             description = localDescription
             tags = localTags.split(',')
+
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 }
