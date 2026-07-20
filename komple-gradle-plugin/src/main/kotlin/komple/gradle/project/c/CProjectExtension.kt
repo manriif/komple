@@ -86,7 +86,7 @@ public abstract class CProjectExtension @Inject internal constructor(
 
             this.tracker = tracker
             this.cProject = kProject
-            this.compilations.add(compilation)
+            this.compilation = compilation
             this.execEnvironment = factory.execEnvironmentProvider.get()
 
             factory.configure?.invoke(this)

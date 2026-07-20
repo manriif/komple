@@ -31,7 +31,6 @@ import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import java.io.File
 import javax.inject.Inject
-import kotlin.io.path.createTempFile
 
 /**
  * Work action for C compilation.
@@ -50,21 +49,26 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
         compilerFlags: Array<out Any>,
         archiverFlags: Array<out Any>,
     ) {
-        val libraryFile = parameters.libraryFile.get()
         val compilerOptions = parameters.compilerOptions.get().toTypedArray()
+        val libraryFile = parameters.libraryFile.get()
+        val libraryDirectory = libraryFile.parentFile
+
+        if (libraryDirectory.exists()) {
+            libraryDirectory.deleteRecursively()
+        }
+
+        val buildDirectory = libraryDirectory.resolve("build")
+        buildDirectory.mkdirs()
+
+        val sourceWithObjects = parameters.sourceFiles.get().associateWith { file ->
+            buildDirectory.resolve("${file.nameWithoutExtension}.o")
+        }
 
         val includeDirectories = parameters.includeDirectories.get()
             .map { "-I${it.absolutePath}" }
             .toTypedArray()
 
-        val sourceFilesWithObjects = parameters.sourceFiles.get().associateWith { file ->
-            createTempFile(
-                prefix = file.nameWithoutExtension,
-                suffix = libraryFile.extension
-            ).toFile()
-        }
-
-        sourceFilesWithObjects.forEach { (sourceFile, objectFile) ->
+        sourceWithObjects.forEach { (sourceFile, objectFile) ->
             commandExecutor.execute(
                 *compilerFlags,
                 *includeDirectories,
@@ -76,7 +80,7 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
             )
         }
 
-        val objectFiles = sourceFilesWithObjects.values
+        val objectFiles = sourceWithObjects.values
             .map { it.absolutePath }
             .toTypedArray()
 
@@ -89,15 +93,19 @@ public abstract class CCompileWorkAction<Params : CCompileWorkAction.Parameters>
     }
 
     protected fun compileShared(compilerFlags: Array<out Any>) {
-        val libraryFile = parameters.libraryFile.get()
         val compilerOptions = parameters.compilerOptions.get().toTypedArray()
+        val libraryFile = parameters.libraryFile.get()
 
-        val includeDirectories = parameters.includeDirectories.get()
-            .map { "-I${it.absolutePath}" }
-            .toTypedArray()
+        if (libraryFile.exists()) {
+            libraryFile.delete()
+        }
 
         val sourceFiles = parameters.sourceFiles.get()
             .map { it.absolutePath }
+            .toTypedArray()
+
+        val includeDirectories = parameters.includeDirectories.get()
+            .map { "-I${it.absolutePath}" }
             .toTypedArray()
 
         commandExecutor.execute(

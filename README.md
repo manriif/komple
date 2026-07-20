@@ -374,12 +374,6 @@ kotlin {
 
 For Kotlin/Native, the static library currently ends up bundled inside the `.klib`.
 
-> [!WARNING]
-> Kotlin caches the generated static library and doesn't seem to invalidate it. So even when
-> Komple detects a change in the C project (a new preprocessor definition, etc.) and Gradle
-> invalidates the compilation task, you may still need to clear the subproject's build cache
-> (`build/classes` appears to be the culprit).
-
 ## Creating a custom tool
 
 A custom tool is a class implementing

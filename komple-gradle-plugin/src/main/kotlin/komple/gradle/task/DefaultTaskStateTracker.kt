@@ -90,12 +90,12 @@ internal class DefaultTaskStateTracker(
      * Computes the checksum for the inputs.
      */
     private fun computeInputsChecksum(): String? {
-        val inputs = inputs.orNull ?: return null
-        val files = inputs.files.filter(File::exists)
+        val inputs = inputs.orNull ?: return EMPTY_CHECKSUM
         val properties = inputs.properties
+        val files = inputs.files
 
-        if (files.isEmpty && properties.isEmpty()) {
-            return null
+        if (properties.isEmpty() && (files.isEmpty || files.none(File::exists))) {
+            return EMPTY_CHECKSUM
         }
 
         return computeChecksum {
@@ -112,10 +112,10 @@ internal class DefaultTaskStateTracker(
      * Computes the checksum for the output files.
      */
     private fun computeOutputsChecksum(): String? {
-        val files = outputFiles.orNull?.filter(File::exists) ?: return null
+        val files = outputFiles.orNull ?: return EMPTY_CHECKSUM
 
-        if (files.isEmpty) {
-            return null
+        if (files.isEmpty || files.none(File::exists)) {
+            return EMPTY_CHECKSUM
         }
 
         return computeChecksum {
@@ -196,6 +196,7 @@ internal class DefaultTaskStateTracker(
 
     companion object {
 
+        private const val EMPTY_CHECKSUM = "<empty>"
         private const val CHECKSUM_INPUTS = "inputs"
         private const val CHECKSUM_OUTPUTS = "outputs"
     }
