@@ -24,7 +24,6 @@ package komple.project.c
 import komple.exec.KompleExecTask
 import komple.task.TaskStateTracker
 import komple.task.hasChanged
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
@@ -51,11 +50,14 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
     public abstract val cProject: Property<CProject>
 
     @get:Nested
-    public abstract val compilations: ListProperty<CCompilation>
+    public abstract val compilation: Property<CCompilation>
 
     @get:Internal
     protected abstract val workActionClass: KClass<A>
 
+    /**
+     * Adds compiler specific elements to this [CCompileWorkAction].
+     */
     protected abstract fun P.configure()
 
     @TaskAction
@@ -67,27 +69,20 @@ public abstract class CCompileTask<P : CCompileWorkAction.Parameters, A : CCompi
             return logger.lifecycle("Reusing previously compiled libraries")
         }
 
-        val compilations = compilations.get()
-
-        if (compilations.isEmpty()) {
-            return logger.lifecycle("No Library to compile")
-        }
-
+        val compilation = compilation.get()
         val factory = execEnvironment.get().createCommandExecutorFactory()
         val workQueue = workerExecutor.noIsolation()
         val cProject = cProject.get()
 
-        compilations.forEach { compilation ->
-            workQueue.submit(workActionClass) {
-                this.commandExecutorFactory = factory
-                this.platform = compilation.platform
-                this.libraryType = compilation.libraryType
-                this.libraryFile = compilation.libraryFile.get().asFile
-                this.sourceFiles = cProject.sourceFiles
-                this.includeDirectories = cProject.includeDirectories
-                this.compilerOptions = cProject.allCompilerOptions(compilation.platform.get())
-                configure()
-            }
+        workQueue.submit(workActionClass) {
+            this.commandExecutorFactory = factory
+            this.platform = compilation.platform
+            this.libraryType = compilation.libraryType
+            this.libraryFile = compilation.libraryFile.get().asFile
+            this.sourceFiles = cProject.sourceFiles
+            this.includeDirectories = cProject.includeDirectories
+            this.compilerOptions = cProject.allCompilerOptions(compilation.platform.get())
+            configure()
         }
     }
 }
