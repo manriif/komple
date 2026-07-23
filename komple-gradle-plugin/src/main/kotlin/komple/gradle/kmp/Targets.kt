@@ -25,9 +25,10 @@ import komple.platform.Platform
 import org.jetbrains.kotlin.konan.target.KonanTarget
 
 /**
- * Returns the [Platform] representing `this` [KonanTarget].
+ * Returns the [Platform] representing `this` [KonanTarget] or `null` if the target do not have a
+ * [Platform] equivalent.
  */
-internal fun KonanTarget.toPlatform(): Platform = when (this) {
+public fun KonanTarget.toPlatform(): Platform? = when (this) {
     ANDROID_ARM32 -> Platform.androidArm32
     ANDROID_ARM64 -> Platform.androidArm64
     ANDROID_X64 -> Platform.androidX64
@@ -48,5 +49,5 @@ internal fun KonanTarget.toPlatform(): Platform = when (this) {
     WATCHOS_DEVICE_ARM64 -> Platform.watchosDeviceArm64
     WATCHOS_SIMULATOR_ARM64 -> Platform.watchosSimulatorArm64
     WATCHOS_X64 -> Platform.watchosX64
-    LINUX_ARM32_HFP -> error("Unsupported target: $this")
+    LINUX_ARM32_HFP -> null
 }

@@ -22,19 +22,21 @@
 package komple.gradle.tool.task
 
 import komple.gradle.kompleToolsDownloadsDirectory
+import komple.gradle.problem.KompleUnsupportedOperationProblemId
 import komple.gradle.tool.KompleToolConfigContext
 import komple.tool.extension.KompleToolExtension
 import komple.tool.task.DownloadTaskContext
 import komple.tool.task.DownloadTaskRegistrationScope
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.assign
 import kotlin.reflect.KClass
 
 /**
  * Default implementation of [DownloadTaskRegistrationScope].
  */
 internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtension>(
-    context: KompleToolConfigContext<Extension>
+    context: KompleToolConfigContext<Extension>,
 ) : DownloadTaskRegistrationScope<Extension>,
     DefaultTaskRegistrationScope<Extension, DownloadTaskContext>(context) {
 
@@ -52,11 +54,16 @@ internal class DefaultDownloadTaskRegistrationScope<Extension : KompleToolExtens
             DefaultDownloadTaskContext(
                 tracker = tracker,
                 outputDirectory = project.gradle.kompleToolsDownloadsDirectory.dir(toolNameCompat),
-                execEnvironmentProvider = context.execEnvironmentProvider
+                execEnvironmentProvider = context.execEnvironmentProvider,
+                host = context.host,
             )
         )
     }
 
-    override fun skip(): TaskProvider<*> =
-        registerFailureTask(UnsupportedOperationException("No file to download for tool $toolName"))
+    override fun skip(): TaskProvider<*> = registerProblemTask {
+        id = KompleUnsupportedOperationProblemId
+        message = "Unsupported operation"
+        details = "The tool $toolName does not download content"
+        solution = "Do not run this task"
+    }
 }

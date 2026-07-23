@@ -23,7 +23,6 @@ package komple.gradle.project
 
 import komple.exec.ExecEnvironment
 import komple.gradle.extension.DefaultExtensionScope
-import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
@@ -49,13 +48,13 @@ internal class DefaultProjectConfigurationScope<Extension : KompleToolExtension>
     private val context: KompleToolConfigContext<Extension>,
     private val projectExtension: KompleProjectExtension,
     override val configurator: ProjectConfigurator,
-    override val installDirectory: Provider<Directory>,
+    override val installDirectory: Provider<Directory>
 ) : ProjectConfigurationScope<Extension>,
     HasExtension<Extension> by context,
     ClosableScope() {
 
     override val host: Host
-        get() = notClosed { CurrentHost }
+        get() = notClosed { context.host }
 
     override val execEnvironment: ExecEnvironment
         get() = context.execEnvironmentProvider.get()

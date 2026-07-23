@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![API](https://img.shields.io/badge/API-dokka-green)][website]
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.manriif.komple/komple-gradle-plugin?label=MavenCentral&logo=apache-maven)](https://central.sonatype.com/artifact/io.github.manriif.komple/komple-gradle-plugin)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.manriif.komple/komple-gradle-plugin?label=Maven%20Central&logo=apache-maven)](https://central.sonatype.com/artifact/io.github.manriif.komple/komple-gradle-plugin)
 [![Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.manriif.komple?label=Plugin%20Portal&logo=gradle)](https://plugins.gradle.org/plugin/io.github.manriif.komple)
 
 Komple is a Gradle plugin that downloads, verifies, installs and exposes native development

@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+@file:Suppress("UnstableApiUsage")
+
 package komple.gradle.tool
 
 import komple.exec.ShellEnvironment
@@ -27,8 +29,9 @@ import komple.gradle.exec.DefaultExecEnvironment
 import komple.gradle.extension.KompleRootProjectExtension
 import komple.gradle.kompleToolsCachesDirectory
 import komple.gradle.kompleToolsInstallsDirectory
-import komple.gradle.platform.CurrentHost
-import komple.gradle.platform.UnsupportedHostException
+import komple.gradle.platform.configureUnsupportedHost
+import komple.gradle.problem.KompleHostUnsupportedProblemId
+import komple.gradle.problem.ProblemThrowerTask
 import komple.gradle.project.DefaultProjectConfigurationScope
 import komple.gradle.project.DefaultShellEnvironmentBuilderScope
 import komple.gradle.project.KompleProjectExtension
@@ -40,6 +43,7 @@ import komple.gradle.tool.task.TASK_TOOL_INSTALL_POSTFIX
 import komple.gradle.tool.task.toolTaskName
 import komple.gradle.util.camelCased
 import komple.gradle.util.dashCased
+import komple.platform.Host
 import komple.project.ProjectConfigurator
 import komple.tool.configurator.KompleToolConfigurator
 import komple.tool.extension.KompleToolExtension
@@ -50,6 +54,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.newInstance
+import org.gradle.kotlin.dsl.register
 
 /**
  * Configures all tools.
@@ -93,6 +98,15 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
     dependencyGraph: DependencyGraph<RootKompleTool>
 ) {
     val toolName = this.name
+    val objects = project.objects
+    val host = rootExtension.host
+
+    if (!supportHost(host)) {
+        rootExtension.problems.reporter.report(KompleHostUnsupportedProblemId) {
+            details("The tool $toolName does not support running on $host")
+            solution("Run the build on a host that is supported by the tool $toolName")
+        }
+    }
 
     val extension = DefaultExtensionConfigurationScope<Ext>(
         project = project,
@@ -100,27 +114,26 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         toolName = toolName
     ).use { it.configureExtension() }
 
-    val objects = project.objects
-
     // Environment that can be used during tool installation only
     val installExecEnvironment = objects.newInstance<DefaultExecEnvironment>(toolName).apply {
         commandInterpreter = rootExtension.commandInterpreter
     }
 
-    val context = KompleToolConfigContext(project, toolName, extension) {
+    val context = KompleToolConfigContext(project, host, toolName, extension) {
         installExecEnvironment
     }
 
     val cacheDirectory = project.gradle.kompleToolsCachesDirectory.dir(toolName.dashCased())
     val cacheDirectoryProvider = project.providers.provider { cacheDirectory }
-    val installTaskProvider = createInstallTaskProvider(context, cacheDirectoryProvider)
+    val allTaskProviders = registerToolTaskProviders(context, cacheDirectoryProvider)
+    val installTaskProvider = allTaskProviders.last()
 
     val installDirectory = project.layout
         .dir(installTaskProvider.map { it.outputs.files.singleFile })
 
     val shellEnvironment = objects.newInstance<ShellEnvironment>()
 
-    if (supportHost(CurrentHost)) {
+    if (supportHost(host)) {
         DefaultShellEnvironmentBuilderScope(
             context = context,
             environment = shellEnvironment,
@@ -137,6 +150,7 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
         dependencyGraph = dependencyGraph,
         installExecEnvironment = installExecEnvironment,
         shellEnvironment = shellEnvironment,
+        allTaskProviders = allTaskProviders,
         installTaskProvider = installTaskProvider,
         installDirectory = installDirectory
     )
@@ -145,35 +159,43 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.configureToo
 }
 
 /**
- * Creates the task responsible for installing the tool.
+ * Registers and returns the tasks responsible for downloading, checking, extracting to installing
+ * the tool, in that order. All tasks other than installing are optional.
  */
-private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstallTaskProvider(
+private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.registerToolTaskProviders(
     context: KompleToolConfigContext<Ext>,
     cacheDirectory: Provider<Directory>
-): TaskProvider<*> = if (supportHost(CurrentHost)) {
-    DefaultInstallTaskRegistrationScope(
+): List<TaskProvider<*>> = if (supportHost(context.host)) {
+    val download = DefaultDownloadTaskRegistrationScope(context)
+        .use { it.registerDownloadTask() }
+
+    val integrity = DefaultIntegrityTaskRegistrationScope(context, download)
+        .use { it.registerIntegrityTask() }
+
+    val extract = DefaultExtractTaskRegistrationScope(context, integrity)
+        .use { it.registerExtractTask() }
+
+    val install = DefaultInstallTaskRegistrationScope(
         context = context,
         cacheDirectory = cacheDirectory,
-        extractTask = DefaultExtractTaskRegistrationScope(
-            context = context,
-            integrityTask = DefaultIntegrityTaskRegistrationScope(
-                context = context,
-                downloadTask = DefaultDownloadTaskRegistrationScope(context)
-                    .use { it.registerDownloadTask() }
-            ).use { it.registerIntegrityTask() }
-        ).use { it.registerExtractTask() }
+        extractTask = extract
     ).use { it.registerInstallTask() }
+
+    listOf(download, integrity, extract, install)
 } else {
-    val unsupportedMessage = "Host is not supported by tool $name"
-
-    context.project.run {
-        logger.warn(unsupportedMessage)
-
-        tasks.register(toolTaskName(context.toolName, TASK_TOOL_INSTALL_POSTFIX)) {
+    val install = context.project.run {
+        tasks.register<ProblemThrowerTask>(
+            toolTaskName(
+                context.toolName,
+                TASK_TOOL_INSTALL_POSTFIX
+            )
+        ) {
             outputs.dir(gradle.kompleToolsInstallsDirectory.dir(context.toolName))
-            doLast { throw UnsupportedHostException(unsupportedMessage) }
+            configureUnsupportedHost(context.toolName, context.host)
         }
     }
+
+    listOf(install)
 }
 
 /**
@@ -181,11 +203,12 @@ private fun <Ext : KompleToolExtension> KompleToolConfigurator<Ext>.createInstal
  */
 internal fun <Ext : KompleToolExtension> DefaultKompleTool<Ext>.configureProject(
     project: Project,
+    host: Host,
     projectExtension: KompleProjectExtension,
     projectConfigurator: ProjectConfigurator
 ) {
     val context =
-        KompleToolConfigContext(project, toolName, extension, usageExecEnvironmentProvider)
+        KompleToolConfigContext(project, host, toolName, extension, usageExecEnvironmentProvider)
 
     val scope = DefaultProjectConfigurationScope(
         context = context,

@@ -30,6 +30,12 @@ import komple.tool.KompleTool
 public interface RootKompleTool : KompleTool, HasShellEnvironment {
 
     /**
+     * Disables all the tools installation related tasks, from downloading to installation.
+     * This can be use
+     */
+    public fun disableInstallationTasks()
+
+    /**
      * Makes this tool depends on [other].
      *
      * This implies that:

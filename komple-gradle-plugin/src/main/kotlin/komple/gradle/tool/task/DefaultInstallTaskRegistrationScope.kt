@@ -58,7 +58,8 @@ internal class DefaultInstallTaskRegistrationScope<Extension : KompleToolExtensi
                 outputDirectory = project.gradle.kompleToolsInstallsDirectory.dir(toolNameCompat),
                 cacheDirectory = cacheDirectory,
                 inputDirectory = extractTask.outputDirectory(project.layout),
-                execEnvironmentProvider = context.execEnvironmentProvider
+                execEnvironmentProvider = context.execEnvironmentProvider,
+                host = context.host,
             )
         )
     }

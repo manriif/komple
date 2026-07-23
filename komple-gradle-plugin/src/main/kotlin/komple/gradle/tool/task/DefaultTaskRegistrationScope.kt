@@ -21,8 +21,8 @@
  */
 package komple.gradle.tool.task
 
-import komple.gradle.platform.CurrentHost
-import komple.gradle.platform.UnsupportedHostException
+import komple.gradle.platform.configureUnsupportedHost
+import komple.gradle.problem.ProblemThrowerTask
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.gradle.util.dashCased
@@ -30,10 +30,8 @@ import komple.platform.Host
 import komple.task.TaskStateTracker
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
-import komple.tool.task.IntegrityTaskContext
 import komple.tool.task.TaskRegistrationScope
 import komple.tool.task.ToolTaskContext
-import org.gradle.api.DefaultTask
 import org.gradle.api.Task
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskProvider
@@ -43,7 +41,7 @@ import kotlin.reflect.KClass
  * Default base implementation for [TaskRegistrationScope].
  */
 internal abstract class DefaultTaskRegistrationScope<E : KompleToolExtension, C : ToolTaskContext>(
-    protected val context: KompleToolConfigContext<E>
+    protected val context: KompleToolConfigContext<E>,
 ) : TaskRegistrationScope<E, C>,
     HasExtension<E> by context,
     ClosableScope() {
@@ -51,7 +49,7 @@ internal abstract class DefaultTaskRegistrationScope<E : KompleToolExtension, C 
     protected abstract val taskPostfix: String
 
     override val host: Host
-        get() = notClosed { CurrentHost }
+        get() = notClosed { context.host }
 
     override val providers: ProviderFactory
         get() = notClosed { context.project.providers }
@@ -82,20 +80,15 @@ internal abstract class DefaultTaskRegistrationScope<E : KompleToolExtension, C 
     /**
      * Registers a task that always fails when executed.
      */
-    protected fun registerFailureTask(exception: Exception): TaskProvider<*> {
-        return context.project.tasks.registerToolTask(
+    protected fun registerProblemTask(configure: ProblemThrowerTask.() -> Unit): TaskProvider<*> =
+        context.project.tasks.registerToolTask(
             name = toolTaskName,
-            type = DefaultTask::class,
+            type = ProblemThrowerTask::class,
             cacheable = false
         ) {
-            group = null
-
-            doLast {
-                throw exception
-            }
+            configure()
         }
-    }
 
     final override fun unsupported(): TaskProvider<*> =
-        registerFailureTask(UnsupportedHostException("Host is not supported"))
+        registerProblemTask { configureUnsupportedHost(toolName, context.host) }
 }

@@ -24,7 +24,6 @@ package komple.gradle.project
 import komple.exec.Command
 import komple.exec.ShellEnvironment
 import komple.exec.ShellEnvironmentBuilderScope
-import komple.gradle.platform.CurrentHost
 import komple.gradle.tool.KompleToolConfigContext
 import komple.gradle.util.ClosableScope
 import komple.platform.Host
@@ -47,7 +46,7 @@ internal class DefaultShellEnvironmentBuilderScope<Extension : KompleToolExtensi
     ClosableScope() {
 
     override val host: Host
-        get() = notClosed { CurrentHost }
+        get() = notClosed { context.host }
 
     override val providers: ProviderFactory
         get() = notClosed { context.project.providers }

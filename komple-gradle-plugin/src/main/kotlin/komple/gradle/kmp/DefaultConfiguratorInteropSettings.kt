@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.gradle.plugin.CInteropSettings as KmpCInteropSetting
  */
 internal abstract class DefaultCInteropSettings @Inject constructor(
     private val settings: KmpCInteropSettings,
-    override val generateDefFileTaskProvider: TaskProvider<*>
+    override val generateDefFileTaskProvider: TaskProvider<GenerateCInteropDefTask>
 ) : CInteropSettings {
 
     override fun extraOpts(vararg values: Any) {

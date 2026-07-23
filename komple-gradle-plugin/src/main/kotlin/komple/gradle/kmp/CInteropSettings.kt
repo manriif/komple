@@ -32,7 +32,7 @@ public interface CInteropSettings {
     /**
      * Provider of the task responsible to generate the interop def file.
      */
-    public val generateDefFileTaskProvider: TaskProvider<*>
+    public val generateDefFileTaskProvider: TaskProvider<GenerateCInteropDefTask>
 
     /**
      * Include functions of the given names in the generated bindings.
