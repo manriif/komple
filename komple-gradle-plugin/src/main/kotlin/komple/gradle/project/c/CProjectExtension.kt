@@ -23,7 +23,7 @@ package komple.gradle.project.c
 
 import komple.gradle.kmp.CInteropSettings
 import komple.gradle.kmp.DefaultCInteropSettings
-import komple.gradle.kmp.GenerateCInteropDefTask
+import komple.gradle.kmp.GenerateCInteropDefTaskInternal
 import komple.gradle.kmp.toPlatform
 import komple.gradle.project.CompilerNotFoundException
 import komple.gradle.project.KompleProjectExtension
@@ -95,17 +95,29 @@ public abstract class CProjectExtension @Inject internal constructor(
     }
 
     /**
-     * Registers a task that generate a library of type [type] for the provided [platform].
+     * Indicates whether there is a registered compiler able to produces a library for [platform].
      */
-    public fun createLibrary(
+    public fun hasCompiler(platform: Platform): Boolean =
+        compileTaskFactories.any { it.platformFilter(platform) }
+
+    /**
+     * Indicates whether there is a registered compiler able to produces a library for [target].
+     */
+    public fun hasCompiler(target: KotlinNativeTarget): Boolean =
+        target.konanTarget.toPlatform()?.let(::hasCompiler) ?: false
+
+    /**
+     * Registers a task that generate a library of type [type] for the provided [platform].
+     *
+     * If no library could be created for [platform] then `null` is returned and no task is
+     * registered
+     */
+    public fun createLibraryOrNull(
         type: CLibraryType,
         platform: Platform
-    ): CLibrary {
+    ): CLibrary? {
         val factory = compileTaskFactories.firstOrNull { it.platformFilter(platform) }
-            ?: throw CompilerNotFoundException(
-                "No task could be created for compiling for platform $platform, registering a " +
-                        "tool able to compile for $platform can solve the problem"
-            )
+            ?: return null
 
         val (libraryPrefix, librarySuffix) = platform.operatingSystem.library.run {
             when (type) {
@@ -138,16 +150,33 @@ public abstract class CProjectExtension @Inject internal constructor(
     }
 
     /**
-     * Registers a task that generates a library of type [type] for the provided [target].
-     * Note that the `LINUX_ARM32_HFP` target is not supported.
+     * Registers a task that generate a library of type [type] for the provided [platform].
+     *
+     * @throws CompilerNotFoundException if there is no compiler able to produce a library for
+     * [platform].
      */
     public fun createLibrary(
         type: CLibraryType,
+        platform: Platform
+    ): CLibrary = createLibraryOrNull(type, platform) ?: throw CompilerNotFoundException(
+        "No task could be created for compiling for platform $platform, registering a " +
+                "tool able to compile for $platform can solve the problem"
+    )
+
+    /**
+     * Registers a task that generates a library of type [type] for the provided [target].
+     * Note that the `LINUX_ARM32_HFP` target is not supported.
+     *
+     * If no library could be created for [target] then `null` is returned and no task is
+     * registered.
+     */
+    public fun createLibraryOrNull(
+        type: CLibraryType,
         target: KotlinNativeTarget,
         configureInterop: (CInteropSettings.() -> Unit)? = null
-    ): CLibrary {
-        val platform = target.konanTarget.toPlatform()
-        val library = createLibrary(type, platform)
+    ): CLibrary? {
+        val platform = target.konanTarget.toPlatform() ?: return null
+        val library = createLibraryOrNull(type, platform) ?: return null
 
         target.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME) {
             compileTaskProvider.configure {
@@ -155,15 +184,19 @@ public abstract class CProjectExtension @Inject internal constructor(
             }
 
             cinterops.register(cProject.name.camelCased()) {
-                val generateDefTaskProvider = tasks.registerProjectTask<GenerateCInteropDefTask>(
+                val generateDef = tasks.registerProjectTask<GenerateCInteropDefTaskInternal>(
                     name = projectDerivedName(
                         projectName = cProject.name,
                         postfix = "generateCInteropDef${platform.altName.pascalCased()}"
                     )
-                )
+                ) {
+                    this.cProject = kProject
+                    this.platform = platform
+                    this.libraryFile = library.libraryFile
+                }
 
                 val settings = project.objects
-                    .newInstance<DefaultCInteropSettings>(this, generateDefTaskProvider)
+                    .newInstance<DefaultCInteropSettings>(this, generateDef)
 
                 configureInterop?.invoke(settings)
 
@@ -171,17 +204,14 @@ public abstract class CProjectExtension @Inject internal constructor(
                 val defFileName = "${cProject.name.dashCased()}-${platform.altName}.def"
                 val defFileProvider = cInteropDir.map { it.file(defFileName) }
 
-                generateDefTaskProvider.configure {
-                    this.cProject = kProject
-                    this.platform = platform
+                generateDef.configure {
                     this.excludedFunctions = settings.excludedFunctions
                     this.noStringConversion = settings.noStringConversion
                     this.definitionFile = defFileProvider
-                    this.libraryFile = library.libraryFile
                 }
 
                 project.tasks.named(interopProcessingTaskName).configure {
-                    dependsOn(generateDefTaskProvider)
+                    dependsOn(generateDef)
                 }
 
                 definitionFile = defFileProvider
@@ -191,4 +221,22 @@ public abstract class CProjectExtension @Inject internal constructor(
 
         return library
     }
+
+    /**
+     * Registers a task that generates a library of type [type] for the provided [target].
+     * Note that the `LINUX_ARM32_HFP` target is not supported.
+     *
+     * @throws CompilerNotFoundException if there is no compiler able to produce a library for
+     * [target].
+     */
+    public fun createLibrary(
+        type: CLibraryType,
+        target: KotlinNativeTarget,
+        configureInterop: (CInteropSettings.() -> Unit)? = null
+    ): CLibrary = createLibraryOrNull(type, target, configureInterop)
+        ?: throw CompilerNotFoundException(
+            "No task could be created for compiling for target ${target.konanTarget}, " +
+                    "registering a tool able to compile for ${target.konanTarget} can solve " +
+                    "the problem"
+        )
 }

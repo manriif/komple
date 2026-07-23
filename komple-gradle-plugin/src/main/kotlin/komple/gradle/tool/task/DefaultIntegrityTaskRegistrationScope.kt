@@ -49,10 +49,13 @@ internal class DefaultIntegrityTaskRegistrationScope<Extension : KompleToolExten
         description = "Check the $toolName tool's integrity."
         val downloadDirectory = downloadTask.outputDirectory(project.layout)
 
-        configure(DefaultIntegrityTaskContext(
-            inputDirectory = downloadDirectory,
-            execEnvironmentProvider = context.execEnvironmentProvider
-        ))
+        configure(
+            DefaultIntegrityTaskContext(
+                inputDirectory = downloadDirectory,
+                execEnvironmentProvider = context.execEnvironmentProvider,
+                host = context.host,
+            )
+        )
 
         check(outputs.files.isEmpty) {
             "Integrity task must not register outputs file(s)"

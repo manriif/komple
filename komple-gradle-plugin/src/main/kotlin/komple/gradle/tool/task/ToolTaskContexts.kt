@@ -23,7 +23,6 @@ package komple.gradle.tool.task
 
 import komple.exec.ExecEnvironment
 import komple.gradle.exec.ExecEnvironmentProvider
-import komple.gradle.platform.CurrentHost
 import komple.platform.Host
 import komple.task.TaskStateTracker
 import komple.tool.task.DownloadTaskContext
@@ -39,11 +38,9 @@ import org.gradle.api.provider.Provider
  * Base for implementors of [ToolTaskContext].
  */
 internal abstract class DefaultTaskContext(
-    private val execEnvironmentProvider: ExecEnvironmentProvider
+    private val execEnvironmentProvider: ExecEnvironmentProvider,
+    override val host: Host,
 ) : ToolTaskContext {
-
-    override val host: Host
-        get() = CurrentHost
 
     override val execEnvironment: ExecEnvironment
         get() = execEnvironmentProvider.get()
@@ -55,9 +52,10 @@ internal abstract class DefaultTaskContext(
 internal abstract class DefaultOutputTaskContext(
     override val tracker: TaskStateTracker,
     override val outputDirectory: Directory,
-    execEnvironmentProvider: ExecEnvironmentProvider
+    execEnvironmentProvider: ExecEnvironmentProvider,
+    host: Host,
 ) : OutputToolTaskContext,
-    DefaultTaskContext(execEnvironmentProvider)
+    DefaultTaskContext(execEnvironmentProvider, host)
 
 /**
  * Default implementation of [DownloadTaskContext].
@@ -65,12 +63,14 @@ internal abstract class DefaultOutputTaskContext(
 internal class DefaultDownloadTaskContext(
     tracker: TaskStateTracker,
     outputDirectory: Directory,
-    execEnvironmentProvider: ExecEnvironmentProvider
+    execEnvironmentProvider: ExecEnvironmentProvider,
+    host: Host
 ) : DownloadTaskContext,
     DefaultOutputTaskContext(
         tracker = tracker,
         outputDirectory = outputDirectory,
-        execEnvironmentProvider = execEnvironmentProvider
+        execEnvironmentProvider = execEnvironmentProvider,
+        host = host
     )
 
 /**
@@ -78,9 +78,10 @@ internal class DefaultDownloadTaskContext(
  */
 internal class DefaultIntegrityTaskContext(
     override val inputDirectory: Provider<Directory>,
-    execEnvironmentProvider: ExecEnvironmentProvider
+    execEnvironmentProvider: ExecEnvironmentProvider,
+    host: Host
 ) : IntegrityTaskContext,
-    DefaultTaskContext(execEnvironmentProvider)
+    DefaultTaskContext(execEnvironmentProvider, host)
 
 /**
  * Default implementation of [ExtractTaskContext].
@@ -89,12 +90,14 @@ internal class DefaultExtractTaskContext(
     tracker: TaskStateTracker,
     outputDirectory: Directory,
     override val inputDirectory: Provider<Directory>,
-    execEnvironmentProvider: ExecEnvironmentProvider
+    execEnvironmentProvider: ExecEnvironmentProvider,
+    host: Host
 ) : ExtractTaskContext,
     DefaultOutputTaskContext(
         tracker = tracker,
         outputDirectory = outputDirectory,
-        execEnvironmentProvider = execEnvironmentProvider
+        execEnvironmentProvider = execEnvironmentProvider,
+        host = host
     )
 
 /**
@@ -105,10 +108,12 @@ internal class DefaultInstallTaskContext(
     outputDirectory: Directory,
     override val cacheDirectory: Provider<Directory>,
     override val inputDirectory: Provider<Directory>,
-    execEnvironmentProvider: ExecEnvironmentProvider
+    execEnvironmentProvider: ExecEnvironmentProvider,
+    host: Host
 ) : InstallTaskContext,
     DefaultOutputTaskContext(
         tracker = tracker,
         outputDirectory = outputDirectory,
-        execEnvironmentProvider = execEnvironmentProvider
+        execEnvironmentProvider = execEnvironmentProvider,
+        host = host
     )

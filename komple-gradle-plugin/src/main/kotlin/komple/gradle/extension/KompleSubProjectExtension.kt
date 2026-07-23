@@ -26,12 +26,10 @@ import komple.gradle.exec.KompleExecEnvironmentsExtension
 import komple.gradle.project.KompleProjectExtension
 import komple.gradle.project.KompleProjectsExtension
 import komple.gradle.project.ProjectConfiguratorFactory
-import komple.gradle.tool.DefaultKompleTool
 import komple.gradle.tool.KompleToolsExtension
 import komple.gradle.tool.configureProject
 import komple.gradle.util.camelCased
 import komple.tool.KompleTool
-import org.gradle.api.DomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.kotlin.dsl.add
@@ -78,7 +76,7 @@ internal fun Project.configureSubProjectExtension(
     }
 
     root.projectConfiguratorFactories.all {
-        configureProjectFromTools(this, extension.projects.extensions, root.configuredTools)
+        configureProjectFromTools(root, this, extension.projects.extensions)
     }
 
     root.configuredTools.all kTool@{
@@ -87,9 +85,9 @@ internal fun Project.configureSubProjectExtension(
 }
 
 private fun <Extension : KompleProjectExtension> Project.configureProjectFromTools(
+    root: KompleRootProjectExtension,
     factory: ProjectConfiguratorFactory<Extension>,
-    container: ExtensionContainer,
-    tools: DomainObjectCollection<DefaultKompleTool<*>>
+    container: ExtensionContainer
 ) {
     val extension = container.create(
         factory.kProject.name.camelCased(),
@@ -97,9 +95,10 @@ private fun <Extension : KompleProjectExtension> Project.configureProjectFromToo
         factory.kProject
     )
 
-    tools.all {
+    root.configuredTools.all {
         configureProject(
             project = this@configureProjectFromTools,
+            root.host,
             projectExtension = extension,
             projectConfigurator = factory.createConfigurator(extension, this)
         )

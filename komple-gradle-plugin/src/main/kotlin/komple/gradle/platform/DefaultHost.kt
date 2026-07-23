@@ -21,22 +21,28 @@
  */
 package komple.gradle.platform
 
+import komple.gradle.problem.KompleHostUnsupportedProblemId
+import komple.gradle.problem.ProblemThrowerTask
 import komple.platform.Architecture
 import komple.platform.Host
 import komple.platform.OperatingSystem
+import org.gradle.kotlin.dsl.assign
 
 /**
  * Default implementation of [Host].
  */
-private data class DefaultHost(
+internal class DefaultHost(
     override val operatingSystem: OperatingSystem.Host,
     override val architecture: Architecture.Host
-) : Host
+) : Host {
+
+    override fun toString(): String = "${operatingSystem.name} ${architecture.name}"
+}
 
 /**
- * Current host.
+ * Returns the current host.
  */
-internal val CurrentHost: Host = DefaultHost(
+internal fun currentHost() = DefaultHost(
     operatingSystem = org.gradle.internal.os.OperatingSystem.current().run {
         when {
             isMacOsX -> OperatingSystem.MacOS
@@ -51,3 +57,16 @@ internal val CurrentHost: Host = DefaultHost(
         else -> error("Unsupported CPU architecture: $architecture")
     }
 )
+
+/**
+ * Configures this [ProblemThrowerTask].
+ */
+internal fun ProblemThrowerTask.configureUnsupportedHost(
+    toolName: String,
+    host: Host
+) {
+    this.id = KompleHostUnsupportedProblemId
+    this.message = "Host is not supported"
+    this.details = "The tool $toolName does not support running on $host"
+    this.solution = "Run the build on a host that is supported by the tool $toolName"
+}

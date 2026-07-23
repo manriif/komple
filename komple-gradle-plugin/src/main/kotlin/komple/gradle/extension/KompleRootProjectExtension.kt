@@ -26,6 +26,7 @@ import komple.exec.Bash
 import komple.exec.CommandInterpreter
 import komple.exec.ExtendableExecEnvironment
 import komple.gradle.exec.DefaultExecEnvironment
+import komple.gradle.platform.currentHost
 import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.DefaultKompleTool
 import komple.gradle.tool.KompleToolsExtension
@@ -37,6 +38,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.problems.Problems
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.assign
@@ -48,12 +50,14 @@ import kotlin.reflect.KClass
  * Komple extension for the root project.
  * The extension is designed for tools and projects declaration.
  */
-public abstract class KompleRootProjectExtension @Inject constructor(
-    private val objects: ObjectFactory
+public abstract class KompleRootProjectExtension @Inject @Suppress("UnstableApiUsage") constructor(
+    private val objects: ObjectFactory,
+    internal val problems: Problems
 ) : KompleExtension,
     KompleRootExtension {
 
     private val registeredToolClasses = mutableSetOf<KClass<*>>()
+    internal val host = currentHost()
 
     /**
      * The interpreter to use for command execution.

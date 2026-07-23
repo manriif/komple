@@ -54,7 +54,8 @@ internal class DefaultExtractTaskRegistrationScope<Extension : KompleToolExtensi
                 tracker = tracker,
                 outputDirectory = project.gradle.kompleToolsExtractsDirectory.dir(toolNameCompat),
                 inputDirectory = integrityTask.outputDirectory(project.layout),
-                execEnvironmentProvider = context.execEnvironmentProvider
+                execEnvironmentProvider = context.execEnvironmentProvider,
+                host = context.host,
             )
         )
     }

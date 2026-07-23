@@ -22,6 +22,7 @@
 package komple.gradle.tool
 
 import komple.gradle.exec.ExecEnvironmentProvider
+import komple.platform.Host
 import komple.tool.extension.HasExtension
 import komple.tool.extension.KompleToolExtension
 import org.gradle.api.Project
@@ -31,7 +32,8 @@ import org.gradle.api.Project
  */
 internal class KompleToolConfigContext<Extension : KompleToolExtension>(
     val project: Project,
+    val host: Host,
     val toolName: String,
     override val extension: Extension,
-    val execEnvironmentProvider: ExecEnvironmentProvider,
+    val execEnvironmentProvider: ExecEnvironmentProvider
 ) : HasExtension<Extension>

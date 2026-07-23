@@ -49,6 +49,7 @@ internal class DefaultKompleTool<Extension : KompleToolExtension>(
     private val dependencyGraph: DependencyGraph<RootKompleTool>,
     private val installExecEnvironment: DefaultExecEnvironment,
     override val shellEnvironment: ShellEnvironment,
+    private val allTaskProviders: List<TaskProvider<*>>,
     override val installTaskProvider: TaskProvider<*>,
     override val installDirectory: Provider<Directory>
 ) : RootKompleTool {
@@ -60,12 +61,14 @@ internal class DefaultKompleTool<Extension : KompleToolExtension>(
         return toolName
     }
 
-    override fun dependsOn(other: RootKompleTool) {
-        dependencyGraph.addDependency(this, other)
+    override fun disableInstallationTasks() {
+        allTaskProviders.forEach { provider ->
+            provider.configure { enabled = false }
+        }
     }
 
-    override fun toString(): String {
-        return toolName
+    override fun dependsOn(other: RootKompleTool) {
+        dependencyGraph.addDependency(this, other)
     }
 
     /**
@@ -92,4 +95,6 @@ internal class DefaultKompleTool<Extension : KompleToolExtension>(
 
         return execEnvironment
     }
+
+    override fun toString(): String = toolName
 }
