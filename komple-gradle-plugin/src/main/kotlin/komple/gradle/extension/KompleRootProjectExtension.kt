@@ -25,11 +25,13 @@ import komple.KompleRootExtension
 import komple.exec.Bash
 import komple.exec.CommandInterpreter
 import komple.exec.ExtendableExecEnvironment
+import komple.exec.Pwsh
 import komple.gradle.exec.DefaultExecEnvironment
 import komple.gradle.platform.currentHost
 import komple.gradle.project.ProjectConfiguratorFactory
 import komple.gradle.tool.DefaultKompleTool
 import komple.gradle.tool.KompleToolsExtension
+import komple.platform.Host
 import komple.project.KompleProject
 import komple.tool.configurator.KompleToolConfigurator
 import org.gradle.api.DomainObjectSet
@@ -57,7 +59,7 @@ public abstract class KompleRootProjectExtension @Inject @Suppress("UnstableApiU
     KompleRootExtension {
 
     private val registeredToolClasses = mutableSetOf<KClass<*>>()
-    internal val host = currentHost()
+    override val host: Host = currentHost()
 
     /**
      * The interpreter to use for command execution.
@@ -132,7 +134,12 @@ public abstract class KompleRootProjectExtension @Inject @Suppress("UnstableApiU
  * Configures conventions values for [KompleRootProjectExtension].
  */
 internal fun KompleRootProjectExtension.configureConventions() {
-    commandInterpreter.convention(Bash)
+    commandInterpreter.convention(
+        when (host.operatingSystem) {
+            Linux, MacOS -> Bash
+            Windows -> Pwsh
+        }
+    )
 
     extensions.run {
         add<NamedDomainObjectContainer<out ExtendableExecEnvironment>>(
