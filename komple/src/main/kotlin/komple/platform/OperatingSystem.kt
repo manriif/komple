@@ -85,6 +85,8 @@ public sealed interface OperatingSystem : Serializable {
                 get() = "ios"
 
             private fun readResolve(): Any = Default
+
+            override fun toString(): String = "IOS"
         }
     }
 
@@ -104,6 +106,9 @@ public sealed interface OperatingSystem : Serializable {
                 get() = "tvos"
 
             private fun readResolve(): Any = Default
+
+            override fun toString(): String = "TvOS"
+
         }
     }
 
@@ -131,6 +136,8 @@ public sealed interface OperatingSystem : Serializable {
                 get() = "watchos"
 
             private fun readResolve(): Any = Default
+
+            override fun toString(): String = "WatchOS"
         }
     }
 

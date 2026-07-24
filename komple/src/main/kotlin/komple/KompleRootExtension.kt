@@ -21,6 +21,7 @@
  */
 package komple
 
+import komple.platform.Host
 import komple.tool.configurator.KompleToolConfigurator
 import komple.util.getExtensionByName
 import org.gradle.api.NamedDomainObjectProvider
@@ -31,6 +32,11 @@ import kotlin.reflect.KClass
  * Base for Komple root extension.
  */
 public interface KompleRootExtension {
+
+    /**
+     * Current host.
+     */
+    public val host: Host
 
     /**
      * Registers a tool, identified by [name], that is configured by an instance of [klass].

@@ -46,6 +46,20 @@ public val Bash: CommandInterpreter = CommandInterpreter { args ->
 }
 
 /**
+ * Windows CMD [Command] interpreter.
+ */
+public val Cmd: CommandInterpreter = CommandInterpreter { args ->
+    DefaultCommandLine(arrayOf("cmd", "/C", args.joinToString(" ")))
+}
+
+/**
+ * Windows PowerShell [Command] interpreter.
+ */
+public val Pwsh: CommandInterpreter = CommandInterpreter { args ->
+    DefaultCommandLine(arrayOf("pwsh", "-Command", args.joinToString(" ")))
+}
+
+/**
  * Zsh [Command] interpreter.
  */
 public val Zsh: CommandInterpreter = CommandInterpreter { args ->
