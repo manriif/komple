@@ -27,6 +27,7 @@ import komple.project.c.CProject
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -38,6 +39,9 @@ import java.io.File
  */
 @CacheableTask
 public abstract class JextractGenerateBindingsTask internal constructor() : KompleExecTask() {
+
+    @get:Input
+    internal abstract val executable: Property<String>
 
     @get:Nested
     internal abstract val cProject: Property<CProject>
@@ -55,7 +59,7 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
 
         outputDirectory.get().asFile.deleteRecursively()
 
-        val command = CommandBuilder("jextract")
+        val command = CommandBuilder(executable.get())
             .append("--output", outputDirectory.get().asFile.absolutePath)
             .append("--target-package", project.packageName.get())
             .append("--header-class-name", options.headerClassName.get())

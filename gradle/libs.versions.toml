@@ -5,7 +5,7 @@
 [versions]
 
 # Project version
-komple = "0.0.4"
+komple = "0.0.5"
 
 # Jvm toolchain
 jvm-toolchain = "17"
