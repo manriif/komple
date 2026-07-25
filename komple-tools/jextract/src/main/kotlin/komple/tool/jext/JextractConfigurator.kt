@@ -28,6 +28,7 @@ import komple.project.CProjectConfigurator
 import komple.project.ProjectConfigurationScope
 import komple.project.createExtension
 import komple.project.registerExecTask
+import komple.task.integrity.DigestAlgorithm
 import komple.tool.configurator.DefaultKompleToolConfigurator
 import komple.tool.extension.ExtensionConfigurationScope
 import komple.tool.extension.createExtension
@@ -36,7 +37,6 @@ import komple.tool.jext.generator.JextractBindingGenerator
 import komple.tool.jext.generator.JextractBindingGeneratorImpl
 import komple.tool.jext.generator.JextractCommandLineOptions
 import komple.tool.jext.generator.JextractGenerateBindingsTask
-import komple.task.integrity.DigestAlgorithm
 import komple.tool.task.DownloadTaskRegistrationScope
 import komple.tool.task.ExtractTaskRegistrationScope
 import komple.tool.task.IntegrityTaskRegistrationScope
@@ -136,6 +136,8 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
     }
 
     override fun ProjectConfigurationScope<JextractExtension>.configureProject() {
+        val operatingSystem = host.operatingSystem
+
         when (val configurator = configurator) {
             is CProjectConfigurator -> createExtension<JextractCProjectExtension>("jextract") {
                 add(JextractCProjectExtension::bindingGenerators)
@@ -152,6 +154,11 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
                     ) {
                         cProject = configurator.project
                         cliOptions = options
+
+                        executable = when (operatingSystem) {
+                            MacOS, Linux -> "jextract"
+                            Windows -> "jextract.bat"
+                        }
 
                         outputDirectory = generatedDirectory().map { directory ->
                             directory.dir("jextract-${name}")
