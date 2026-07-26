@@ -21,13 +21,14 @@
  */
 package komple.tool.jext.generator
 
-import komple.exec.CommandBuilder
+import komple.exec.Command
 import komple.exec.KompleExecTask
 import komple.project.c.CProject
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -49,6 +50,9 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
     @get:Nested
     internal abstract val cliOptions: Property<JextractCommandLineOptions>
 
+    @get:Internal
+    public abstract val buildDirectory: DirectoryProperty
+
     @get:OutputDirectory
     internal abstract val outputDirectory: DirectoryProperty
 
@@ -56,40 +60,65 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
     public fun generate() {
         val project = cProject.get()
         val options = cliOptions.get()
+        val buildDirectory = buildDirectory.get().asFile
+        val outputDirectory = outputDirectory.get().asFile
 
-        outputDirectory.get().asFile.deleteRecursively()
+        outputDirectory.deleteRecursively()
 
-        val command = CommandBuilder(executable.get())
-            .append("--output", outputDirectory.get().asFile.absolutePath)
-            .append("--target-package", project.packageName.get())
-            .append("--header-class-name", options.headerClassName.get())
-            .appendValues("--include-dir", project.includeDirectories, File::getAbsolutePath)
-            .appendValues("--include-function", options.includeFunctions.get())
-            .appendValues("--include-constant", options.includeConstants.get())
-            .appendValues("--include-struct", options.includeStructs.get())
-            .appendValues("--include-union", options.includeUnions.get())
-            .appendValues("--include-typedef", options.includeTypedefs.get())
-            .appendValues("--include-var", options.includeVars.get())
-            .appendValues("--define-macro", project.definitions.get().entries) { (key, value) ->
+        val args = buildString {
+            appendArg("--output", outputDirectory.absolutePath)
+            appendArg("--target-package", project.packageName.get())
+            appendArg("--header-class-name", options.headerClassName.get())
+            appendValues("--include-dir", project.includeDirectories, File::getAbsolutePath)
+            appendValues("--include-function", options.includeFunctions.get())
+            appendValues("--include-constant", options.includeConstants.get())
+            appendValues("--include-struct", options.includeStructs.get())
+            appendValues("--include-union", options.includeUnions.get())
+            appendValues("--include-typedef", options.includeTypedefs.get())
+            appendValues("--include-var", options.includeVars.get())
+
+            appendValues("--define-macro", project.definitions.get().entries) { (key, value) ->
                 "$key=$value"
             }
-            .append(project.headerFile.get().asFile.absolutePath)
-            .build()
 
-        newCommandExecutor().execute(command)
+            append(project.headerFile.get().asFile.absolutePath)
+        }
+
+        val argsFile = buildDirectory.resolve("args.txt")
+
+        buildDirectory.mkdirs()
+        argsFile.writeText(args)
+
+        newCommandExecutor().execute(
+            command = Command(executable.get(), "@args.txt"),
+            workingDirectory = buildDirectory,
+        )
+    }
+
+    /**
+     * Appends each [args] postfixed by a new line.
+     */
+    private fun StringBuilder.appendArg(vararg args: String) {
+        args.forEach { arg ->
+            if (arg.contains(' ')) {
+                appendLine("\"$arg\"")
+            } else {
+                appendLine(arg)
+            }
+        }
     }
 
     /**
      * Appends each [optionValues] prefixed by [optionName].
      */
-    private inline fun <T : Any> CommandBuilder.appendValues(
+    private inline fun <T : Any> StringBuilder.appendValues(
         optionName: String,
         optionValues: Iterable<T>,
         toString: (T) -> String = Any::toString
-    ): CommandBuilder = apply {
+    ) {
         optionValues.forEach { value ->
-            append(optionName)
-            append(toString(value))
+            appendArg(optionName)
+            appendArg(toString(value))
         }
     }
 }
