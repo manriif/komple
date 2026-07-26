@@ -52,7 +52,10 @@ internal class DefaultCommandExecutor(
         parameters.variables.forEach(::environment)
 
         if (parameters.paths.isNotEmpty()) {
-            val path = parameters.paths.fold(System.getenv(PATH)) { left, right -> "$right:$left" }
+            val path = parameters.paths.fold(System.getenv(PATH)) { left, right ->
+                "$right${File.pathSeparator}$left"
+            }
+
             environment(PATH, path)
         }
 
