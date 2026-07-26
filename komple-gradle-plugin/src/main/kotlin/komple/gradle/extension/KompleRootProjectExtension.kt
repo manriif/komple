@@ -23,9 +23,9 @@ package komple.gradle.extension
 
 import komple.KompleRootExtension
 import komple.exec.Bash
+import komple.exec.Cmd
 import komple.exec.CommandInterpreter
 import komple.exec.ExtendableExecEnvironment
-import komple.exec.Pwsh
 import komple.gradle.exec.DefaultExecEnvironment
 import komple.gradle.platform.currentHost
 import komple.gradle.project.ProjectConfiguratorFactory
@@ -137,7 +137,7 @@ internal fun KompleRootProjectExtension.configureConventions() {
     commandInterpreter.convention(
         when (host.operatingSystem) {
             Linux, MacOS -> Bash
-            Windows -> Pwsh
+            Windows -> Cmd
         }
     )
 
