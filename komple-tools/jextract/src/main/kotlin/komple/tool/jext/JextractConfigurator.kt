@@ -141,7 +141,9 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
         when (val configurator = configurator) {
             is CProjectConfigurator -> createExtension<JextractCProjectExtension>("jextract") {
                 add(JextractCProjectExtension::bindingGenerators)
+
                 val layout = project.layout
+                val baseDirectory = generatedDirectory().map { it.dir(name) }
 
                 extension.extensibleBindingGenerators.registerFactory(
                     JextractBindingGenerator::class.java
@@ -160,9 +162,8 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
                             Windows -> "jextract.bat"
                         }
 
-                        outputDirectory = generatedDirectory().map { directory ->
-                            directory.dir("jextract-${name}")
-                        }
+                        buildDirectory = baseDirectory.map { it.dir("build") }
+                        outputDirectory = baseDirectory.map { it.dir("src/java") }
                     }
 
                     val generateDirectory = layout
