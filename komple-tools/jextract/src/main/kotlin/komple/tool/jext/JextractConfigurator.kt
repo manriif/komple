@@ -141,13 +141,12 @@ public abstract class JextractConfigurator @Inject constructor(name: String) :
         when (val configurator = configurator) {
             is CProjectConfigurator -> createExtension<JextractCProjectExtension>("jextract") {
                 add(JextractCProjectExtension::bindingGenerators)
-
                 val layout = project.layout
-                val baseDirectory = generatedDirectory().map { it.dir(name) }
 
                 extension.extensibleBindingGenerators.registerFactory(
                     JextractBindingGenerator::class.java
                 ) { name ->
+                    val baseDirectory = generatedDirectory().map { it.dir(name) }
                     val options = project.objects.newInstance<JextractCommandLineOptions>()
 
                     val taskProvider = registerExecTask<JextractGenerateBindingsTask>(

@@ -90,7 +90,7 @@ public abstract class JextractGenerateBindingsTask internal constructor() : Komp
         argsFile.writeText(args)
 
         newCommandExecutor().execute(
-            command = Command(executable.get(), "@args.txt"),
+            command = Command(executable.get(), "\"@args.txt\""),
             workingDirectory = buildDirectory,
         )
     }
