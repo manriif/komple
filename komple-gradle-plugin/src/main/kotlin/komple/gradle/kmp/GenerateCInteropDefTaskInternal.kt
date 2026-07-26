@@ -67,7 +67,7 @@ internal abstract class GenerateCInteropDefTaskInternal : GenerateCInteropDefTas
 
         libraryFile?.let { file ->
             content += "\nstaticLibraries = ${file.name}"
-            content += "\nlibraryPaths = ${file.parentFile.absolutePath}"
+            content += "\nlibraryPaths = ${file.parentFile.absoluteFile.invariantSeparatorsPath}"
         }
 
         cProject.headerFilters.takeUnless { it.isEmpty }?.let { files ->
