@@ -39,6 +39,7 @@ import komple.tool.task.download
 import komple.tool.task.unarchive
 import komple.tool.zig.compile.ZigCCompileTask
 import komple.tool.zig.compile.ZigCompilationParams
+import komple.tool.zig.compile.configureConventions
 import komple.tool.zig.tasks.ZigDownloadTask
 import komple.tool.zig.tasks.ZigUntarXzExtractTask
 import komple.tool.zig.tasks.ZigUnzipExtractTask
@@ -62,7 +63,10 @@ public abstract class ZigConfigurator @Inject constructor(name: String) :
             extension.run {
                 version.convention(kompleProperty("zig.version"))
                 publicKey.convention(kompleProperty("zig.signing.pubkey"))
-                add(ZigExtension::compilationParams)
+
+                add(ZigExtension::compilationParams) {
+                    extension.configureConventions(project)
+                }
             }
         }
     }
@@ -108,7 +112,9 @@ public abstract class ZigConfigurator @Inject constructor(name: String) :
     override fun ProjectConfigurationScope<ZigExtension>.configureProject() {
         when (val configurator = configurator) {
             is CProjectConfigurator -> {
-                val cParams = createExtension<ZigCompilationParams>("zig")
+                val cParams = createExtension<ZigCompilationParams>("zig").apply {
+                    configureConventions(extension.compilationParams)
+                }
 
                 configurator.registerCompileTask<ZigCCompileTask>(
                     configure = {

@@ -48,8 +48,6 @@ internal fun AndroidNdkCompilationParams.configureConventions(project: Project) 
 /**
  * Configures convention values for [AndroidNdkCompilationParams].
  */
-internal fun AndroidNdkCompilationParams.configureConventions(
-    parent: AndroidNdkCompilationParams
-) {
+internal fun AndroidNdkCompilationParams.configureConventions(parent: AndroidNdkCompilationParams) {
     minSdk.convention(parent.minSdk)
 }

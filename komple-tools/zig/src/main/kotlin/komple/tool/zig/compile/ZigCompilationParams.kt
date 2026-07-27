@@ -21,6 +21,8 @@
  */
 package komple.tool.zig.compile
 
+import komple.kompleProperty
+import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -31,11 +33,11 @@ import org.gradle.api.tasks.Optional
 public interface ZigCompilationParams {
 
     /**
-     * Minimum Windows version.
+     * Minimum `glibc` version for Linux.
      */
     @get:Input
     @get:Optional
-    public val linuxVersionMin: Property<String>
+    public val linuxGlibcVersionMin: Property<String>
 
     /**
      * Minimum Windows version.
@@ -43,4 +45,20 @@ public interface ZigCompilationParams {
     @get:Input
     @get:Optional
     public val windowsVersionMin: Property<String>
+}
+
+/**
+ * Configures convention values for [ZigCompilationParams].
+ */
+internal fun ZigCompilationParams.configureConventions(project: Project) {
+    linuxGlibcVersionMin.convention(project.kompleProperty("zig.version.linux.glibc"))
+    windowsVersionMin.convention(project.kompleProperty("zig.version.windows"))
+}
+
+/**
+ * Configures convention values for [ZigCompilationParams].
+ */
+internal fun ZigCompilationParams.configureConventions(parent: ZigCompilationParams) {
+    linuxGlibcVersionMin.convention(parent.linuxGlibcVersionMin)
+    windowsVersionMin.convention(parent.windowsVersionMin)
 }

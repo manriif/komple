@@ -32,28 +32,21 @@ internal abstract class ZigCCompileWorkAction :
     CCompileWorkAction<ZigCCompileWorkAction.Parameters>() {
 
     /**
-     * Returns [os].[minVersion]-[abi].
+     * Returns `.[version]`, or an empty string if [version] is unset or blank.
      */
-    private fun versioned(
-        os: String,
-        minVersion: Provider<String>,
-        abi: String = "gnu"
-    ): String {
-        val version = minVersion.orNull
+    private fun versionSuffix(version: Provider<String>): String =
+        version.orNull
             ?.takeIf(String::isNotBlank)
             ?.let { ".$it" }
             .orEmpty()
-
-        return "$os$version-$abi"
-    }
 
     override fun execute() {
         val (operatingSystem, architecture) = parameters.platform.get()
         val params = parameters.params.get()
 
         val osAbi = when (operatingSystem) {
-            Linux -> versioned("linux", params.linuxVersionMin)
-            Windows -> versioned("windows", params.windowsVersionMin)
+            Linux -> "linux-gnu${versionSuffix(params.linuxGlibcVersionMin)}"
+            Windows -> "windows${versionSuffix(params.windowsVersionMin)}-gnu"
             else -> error("Only Linux and Windows are supported but found: $operatingSystem")
         }
 
